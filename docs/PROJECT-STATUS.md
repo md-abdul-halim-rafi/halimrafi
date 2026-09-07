@@ -3,7 +3,7 @@
 Not published. Only `public/` is served, so this file, the brief and the handoff
 never reach the site. Keep it that way.
 
-Last updated: 2026-09-06 (refinement pass)
+Last updated: 2026-09-06 (finishing pass)
 
 ## Missing assets and evidence
 
@@ -21,7 +21,55 @@ The short list. Everything here is blocked on material only Rafi can supply.
 | Any measured readability or latency finding | Turning the coherence hypothesis into a result | Case study, closing section |
 | Mainly Coding: original screens, dates, acquisition record | A second chapter with a real artifact | Homepage record row |
 
-## Refinement pass, 2026-09-06
+## Finishing pass, 2026-09-06
+
+**Assets checked again before starting: still none.** `public/` is empty, there
+is no image, video or PDF anywhere in the project, `site.email` is null and
+`site.profiles` is empty. So item 6 recorded needs rather than adding evidence,
+About is text only with no contact action, and `productArtifact` stays null.
+
+- **Case-study card.** One semantic link with no nested interactive elements, a
+  dark title, a single green action, 24px padding and a 1px shadow that only
+  deepens slightly on hover. It no longer lifts: a card that moves under the
+  cursor makes a list feel unstable while scanning.
+- **Navigation.** The translucent floating pill is gone. A sticky opaque header
+  strip with a hairline under it replaces it, so text passes behind a real edge
+  rather than showing through. Its height is published as `--header-h` and used
+  by `scroll-padding-top` and `:target` scroll-margin.
+- **Playback.** One shared label table drives both demos: Play, Pause, Resume,
+  Play again. Play again rewinds and starts. Reset is separate, returns to the
+  resting frame without starting, and is disabled at rest. Restart is gone.
+  Changing mode or scenario mid-run returns to the resting frame and keeps the
+  selection; the projection is pure so runs cannot mix.
+- **Status chip** distinguishes the resting frame ("Finished answer") from a run
+  that just ended ("Complete"). Labelling both Complete beside a Play button read
+  as a contradiction.
+- **About.** Education, location, origin and company history live in the record
+  and nowhere else. The paragraph that restated all four is gone.
+- **Article** trimmed to 1424 words. The parser and test mechanics moved into the
+  implementation disclosure; the main text keeps a short statement that buffering
+  and markup are separate concerns. "When I would choose differently" merged into
+  the tradeoff, which is what it was.
+
+### Bugs found and fixed in this pass
+
+1. **Deep links did not scroll.** Loading `/work/slug#section` set the hash and
+   left the page at the top: the browser attempts the fragment scroll before
+   layout settles and gives up. In-page hash changes were unaffected, so this
+   only appeared on a shared or reloaded link. `HashScroll` waits for
+   `document.fonts.ready` and then scrolls, honouring scroll-margin.
+2. **Both disclosures were briefly deleted** while merging two sections, because
+   they sat inside the range being replaced. Caught by a DOM probe finding zero
+   `details` elements, and restored.
+
+### Corrected in my own notes
+
+An earlier comment in `globals.css` claimed `overflow-x: clip` on body broke
+anchor scrolling. That was wrong: testing showed hash navigation scrolls with or
+without it, and the real cause was the fragment-on-load case above. The comment
+now says only what is true.
+
+## Earlier refinement pass, 2026-09-06
 
 **The contents rail overlapped the demo by a constant 128px at every width.**
 Both were centred on the viewport, so no stacking order or opaque backing would

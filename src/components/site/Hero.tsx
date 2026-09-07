@@ -41,7 +41,7 @@ export function Hero() {
         <p className="label">YC W24</p>
       </div>
 
-      <div className="relative mx-auto flex min-h-[78svh] max-w-[76rem] flex-col justify-center px-5 py-24 sm:px-8 sm:py-28">
+      <div className="relative mx-auto flex min-h-[70svh] max-w-[76rem] flex-col justify-center px-5 pb-24 pt-16 sm:px-8 sm:pb-28 sm:pt-20">
         <p className="label">
           {site.name} <span className="mx-1.5 opacity-40">/</span> {site.location}
         </p>

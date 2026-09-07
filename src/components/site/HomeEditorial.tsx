@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { CompactComparison } from '@/components/demo/CompactComparison'
 import { SiteFooter } from '@/components/site/Chrome'
 import { Hero } from '@/components/site/Hero'
-import { IslandNav } from '@/components/site/IslandNav'
+import { SiteHeader } from '@/components/site/SiteHeader'
 import { OpeningDriver } from '@/components/site/OpeningDriver'
 import { ProductArtifactView } from '@/components/site/ProductArtifactView'
 import { Reveal } from '@/components/site/Reveal'
@@ -20,7 +20,7 @@ export function HomeEditorial() {
   return (
     <>
       <OpeningDriver />
-      <IslandNav />
+      <SiteHeader />
 
       <Hero />
 
@@ -35,7 +35,7 @@ export function HomeEditorial() {
               <p className="text-[0.8125rem] text-muted">{home.artifact.line}</p>
             </div>
             <div className="px-4 py-5 sm:px-6 sm:py-6">
-              <CompactComparison href={`/work/${home.details[0].slug}`} />
+              <CompactComparison />
             </div>
           </Reveal>
         </section>
@@ -84,28 +84,30 @@ export function HomeEditorial() {
           <ul className="mt-4 space-y-3">
             {home.details.map((detail) => (
               <li key={detail.slug}>
-                <Link
-                  href={`/work/${detail.slug}`}
-                  className="ctl-card group grid gap-x-10 gap-y-4 rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface p-6 sm:p-8 lg:grid-cols-12"
-                >
-                  <div className="lg:col-span-7">
-                    <h4 className="heading text-[1.375rem] leading-snug text-ink-12 transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] group-hover:text-signal">
-                      {detail.title}
-                    </h4>
-                    <p className="mt-3 max-w-[46ch] text-[0.9375rem] leading-[1.65] text-muted">
-                      {detail.blurb}
-                    </p>
-                  </div>
-                  <div className="flex items-end justify-between gap-6 lg:col-span-5 lg:flex-col lg:items-end lg:justify-between">
-                    <p className="label">{detail.kind}</p>
-                    <span className="inline-flex items-center gap-1.5 text-[0.875rem] font-medium text-signal">
-                      <span className="trim-cap">Read the case study</span>
-                      <span className="icon-slot">
-                        <span>
-                          <ArrowRight />
+                {/* One link for the whole card: no nested interactive elements,
+                    so keyboard focus lands once and the focus ring frames the
+                    thing that is actually activated. */}
+                <Link href={`/work/${detail.slug}`} className="card-link group block">
+                  <div className="grid gap-x-10 gap-y-3 p-5 sm:p-6 lg:grid-cols-12">
+                    <div className="lg:col-span-8">
+                      <h4 className="heading text-[1.25rem] leading-snug text-ink-12">
+                        {detail.title}
+                      </h4>
+                      <p className="mt-2 max-w-[52ch] text-[0.9375rem] leading-[1.6] text-muted">
+                        {detail.blurb}
+                      </p>
+                    </div>
+                    <div className="flex items-end justify-between gap-6 lg:col-span-4 lg:flex-col lg:items-end">
+                      <p className="label order-2 lg:order-1">{detail.kind}</p>
+                      <span className="order-1 inline-flex items-center gap-1.5 text-[0.875rem] font-medium text-signal lg:order-2">
+                        <span className="trim-cap">Read the case study</span>
+                        <span className="icon-slot">
+                          <span>
+                            <ArrowRight />
+                          </span>
                         </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
                 </Link>
               </li>

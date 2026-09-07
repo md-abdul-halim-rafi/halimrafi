@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useReplay } from '@/demo/useReplay'
 import type { RevealMode, ScenarioId } from '@/demo/types'
 import { ControlButton } from '@/components/ui/Control'
-import { Pause, Play, Restart } from '@/components/ui/icons'
+import { Pause, Play, Reset } from '@/components/ui/icons'
+import { playLabel, RESET_LABEL } from '@/demo/labels'
 import { useHydrated } from '@/lib/useHydrated'
 import { Reserve, ResponseView } from './ResponseView'
 
@@ -66,9 +67,19 @@ function Segmented<T extends string>({
   )
 }
 
-/** The four states the visitor can be in, made visible rather than inferred. */
-function StatusChip({ state }: { state: 'waiting' | 'playing' | 'paused' | 'complete' }) {
+type DemoState = 'idle' | 'waiting' | 'playing' | 'paused' | 'complete'
+
+/**
+ * The states the visitor can be in, shown rather than inferred.
+ *
+ * `idle` and `complete` both display the finished answer, but they are not the
+ * same thing to a reader: one is the resting frame they have not played yet, the
+ * other is a run that has just ended. Labelling both "Complete" beside a Play
+ * button read as a contradiction.
+ */
+function StatusChip({ state }: { state: DemoState }) {
   const copy = {
+    idle: { text: 'Finished answer', tone: 'text-muted' },
     waiting: { text: 'Waiting on the record', tone: 'text-signal' },
     playing: { text: 'Playing', tone: 'text-ink-12' },
     paused: { text: 'Paused', tone: 'text-ink-12' },
@@ -107,19 +118,22 @@ export function StreamingDemo() {
     (segment) =>
       segment.kind === 'widget' && segment.state.status === 'pending' && segment.state.overdue,
   )
-  const state = waiting
+  const state: DemoState = waiting
     ? 'waiting'
     : replay.status === 'playing'
       ? 'playing'
       : replay.status === 'paused'
         ? 'paused'
-        : 'complete'
+        : replay.status === 'complete'
+          ? 'complete'
+          : 'idle'
 
   const statusText = {
+    idle: 'Showing the finished answer. Press play to watch it arrive.',
     waiting: 'Still waiting on the account record.',
     playing: 'Playing the response.',
     paused: 'Paused.',
-    complete: 'Showing the completed response.',
+    complete: 'Playback complete.',
   }[state]
 
   return (
@@ -157,21 +171,15 @@ export function StreamingDemo() {
               onClick={replay.isPlaying ? replay.pause : replay.play}
               icon={replay.isPlaying ? <Pause /> : <Play />}
             >
-              {replay.isPlaying
-                ? 'Pause'
-                : replay.status === 'paused'
-                  ? 'Resume'
-                  : replay.status === 'complete'
-                    ? 'Play again'
-                    : 'Play'}
+              {playLabel(replay.status)}
             </ControlButton>
             <ControlButton
               variant="quiet"
-              disabled={!ready}
-              onClick={replay.restart}
-              icon={<Restart />}
+              disabled={!ready || replay.atRest}
+              onClick={replay.reset}
+              icon={<Reset />}
             >
-              Restart
+              {RESET_LABEL}
             </ControlButton>
           </div>
         </fieldset>

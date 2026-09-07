@@ -27,10 +27,14 @@ export function keyframesFor(events: DemoEvent[], duration: number): number[] {
 export type Clock = {
   elapsed: number
   status: ClockStatus
+  /** Starts from the beginning when idle or complete; resumes when paused. */
   play: () => void
   pause: () => void
-  restart: () => void
+  /** Returns to the resting frame without starting playback. */
+  reset: () => void
   isPlaying: boolean
+  /** True when the clock sits at its resting frame, so Reset has nothing to do. */
+  atRest: boolean
 }
 
 /**
@@ -125,12 +129,22 @@ export function useKeyframeClock({
     setStatus((current) => (current === 'playing' ? 'paused' : current))
   }, [])
 
-  const restart = useCallback(() => {
-    setElapsed(0)
-    elapsedRef.current = 0
+  const reset = useCallback(() => {
+    setElapsed(restingAt)
+    elapsedRef.current = restingAt
+    // Bumping the epoch retires any in-flight step, so a run cannot resume into
+    // a reset clock.
     setEpoch((n) => n + 1)
-    setStatus('playing')
-  }, [])
+    setStatus('idle')
+  }, [restingAt])
 
-  return { elapsed, status, play, pause, restart, isPlaying: status === 'playing' }
+  return {
+    elapsed,
+    status,
+    play,
+    pause,
+    reset,
+    isPlaying: status === 'playing',
+    atRest: status === 'idle',
+  }
 }

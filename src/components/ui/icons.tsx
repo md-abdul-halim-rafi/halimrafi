@@ -41,7 +41,7 @@ export function Pause({ className }: IconProps) {
   )
 }
 
-export function Restart({ className }: IconProps) {
+export function Reset({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
       <path d="M13 8a5 5 0 1 1-1.6-3.7" />

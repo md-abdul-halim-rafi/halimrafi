@@ -74,6 +74,9 @@
   --card-shadow: 0 1px 2px rgba(18, 22, 27, 0.04), 0 8px 24px -16px rgba(18, 22, 27, 0.16);
 
   /* Type */
+  /* Published so anchors and focus can clear the sticky header. */
+  --header-h: 52px;
+
   --display-size: clamp(2.75rem, 8.4vw, 5.5rem);
   /* The field is decoration; it steps back on narrow screens where the
      headline needs the whole column. */
@@ -138,10 +141,14 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  html,
-  body {
+  /* The horizontal guard lives on the root only. Body does not need it: the
+     root already clips, and one clip container is enough. */
+  html {
     max-width: 100%;
     overflow-x: clip;
+  }
+  body {
+    max-width: 100%;
   }
 
   ::selection {
@@ -159,9 +166,14 @@
     outline-offset: 2px;
     border-radius: 3px;
   }
-  /* Anchor targets clear the floating nav instead of landing under it. */
+  /* Anchors and keyboard focus clear the sticky header instead of landing
+     underneath it. scroll-padding on the scrolling element covers focus moves
+     the browser performs itself, which scroll-margin alone does not. */
+  html {
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+  }
   :target {
-    scroll-margin-top: 6rem;
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
   }
 
   .on-signal:focus-visible {
@@ -401,29 +413,30 @@
     transition-delay: var(--delay-icon);
   }
 
-  /* A card that is itself a link. It lifts on hover and keyboard focus using
-     the same shadow grammar as the pill controls, without the scale, which
-     would blur its text. */
-  .ctl-card {
-    box-shadow: var(--lift-rest);
+  /* A card that is itself a link. A single article link does not need the
+     elevation of a primary control, so the resting state is a hairline on the
+     surface and hover only deepens it. Nothing translates: a card that lifts
+     under the cursor makes the list feel unstable while scanning it. */
+  .card-link {
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    box-shadow: 0 1px 1px rgba(18, 22, 27, 0.02);
     transition:
-      box-shadow var(--dur-shadow-out) var(--ease-in-out-quad),
       border-color var(--dur-icon) var(--ease-out-quint),
-      translate var(--dur-spring) var(--ease-spring);
+      background-color var(--dur-icon) var(--ease-out-quint),
+      box-shadow var(--dur-icon) var(--ease-out-quint);
   }
-  .ctl-card:hover,
-  .ctl-card:focus-visible {
-    translate: 0 -2px;
+  .card-link:hover {
     border-color: var(--hairline-strong);
-    box-shadow: var(--lift-hover);
-    transition:
-      box-shadow 450ms var(--ease-out-quint),
-      border-color var(--dur-icon) var(--ease-out-quint),
-      translate var(--dur-spring) var(--ease-spring);
+    box-shadow: 0 1px 2px rgba(18, 22, 27, 0.05);
   }
-  .ctl-card:active {
-    translate: 0 0;
-    transition-duration: var(--dur-press);
+  .card-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  .card-link:active {
+    background: var(--ink-1);
   }
 
   /* A quiet text link with the same arrival grammar. */
@@ -500,9 +513,5 @@
   .ctl-row:has(.ctl:hover) .ctl {
     translate: 0;
   }
-  .ctl-card:hover,
-  .ctl-card:focus-visible,
-  .ctl-card:active {
-    translate: 0;
-  }
+
 }

@@ -61,7 +61,7 @@ export function Toc({ sections, containerId = 'article' }: { sections: TocSectio
 
   return (
     <div className="hidden xl:block">
-      <nav ref={navRef} aria-label="Contents" className="sticky top-28">
+      <nav ref={navRef} aria-label="Contents" className="sticky top-[calc(var(--header-h)+2rem)]">
         <p className="label mb-3.5">Contents</p>
         <div className="relative">
           <span

@@ -17,8 +17,9 @@ export type Replay = {
   duration: number
   play: () => void
   pause: () => void
-  restart: () => void
+  reset: () => void
   isPlaying: boolean
+  atRest: boolean
 }
 
 /** The full demonstration: one mode at a time, all controls, used in the case study. */

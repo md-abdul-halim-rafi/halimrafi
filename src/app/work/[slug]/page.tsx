@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SiteFooter } from '@/components/site/Chrome'
-import { IslandNav } from '@/components/site/IslandNav'
+import { SiteHeader } from '@/components/site/SiteHeader'
+import { HashScroll } from '@/components/story/HashScroll'
 import { slugify } from '@/components/story/prose'
 import { Toc } from '@/components/story/Toc'
 import { ArrowRight } from '@/components/ui/icons'
@@ -35,7 +36,8 @@ export default async function WorkPage({ params }: Params) {
 
   return (
     <>
-      <IslandNav />
+      <SiteHeader current={'work'} />
+      <HashScroll />
 
       {/*
         One grid runs the whole article, so the opening and the body share a
@@ -51,7 +53,7 @@ export default async function WorkPage({ params }: Params) {
           <Toc sections={sections} />
 
           <div className="prose-column mx-auto w-full max-w-[58rem] min-w-0 xl:mx-0 xl:max-w-none">
-            <header className="max-w-none pb-12 pt-28 sm:pb-14 sm:pt-32">
+            <header className="max-w-none pb-12 pt-16 sm:pb-14 sm:pt-20">
               <p className="label">Case study</p>
               <h1 className="display mt-5 max-w-[15ch] text-[clamp(2.5rem,6.4vw,4.25rem)] leading-[1.0] text-ink-12">
                 {meta.title}

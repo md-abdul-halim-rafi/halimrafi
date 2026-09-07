@@ -6,8 +6,9 @@ import type { DemoEvent, ResponseState, RevealMode, Segment } from './types'
  * Derive the entire visible state of the answer from elapsed time.
  *
  * This is the core of the demo. Because the rendered state is a pure function of
- * (events, elapsed, mode), replaying is just moving `elapsed`. Restart is
- * `elapsed = 0` and pause is "stop advancing it". The same elapsed value always
+ * (events, elapsed, mode), replaying is just moving `elapsed`. Replaying sets
+ * it to zero, resetting returns it to the resting frame, and pausing stops
+ * advancing it. The same elapsed value always
  * produces the same output, which project.test.ts checks by sampling the
  * timeline out of order and after a rewind.
  */

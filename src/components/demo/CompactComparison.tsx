@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import { useMemo } from 'react'
 import { keyframesFor, useKeyframeClock } from '@/demo/clock'
 import { durationOf, eventsFor } from '@/demo/fixtures'
 import { project } from '@/demo/project'
 import { ControlButton } from '@/components/ui/Control'
-import { ArrowRight, Pause, Play, Restart } from '@/components/ui/icons'
+import { Pause, Play, Reset } from '@/components/ui/icons'
+import { playLabel, RESET_LABEL } from '@/demo/labels'
 import { useHydrated } from '@/lib/useHydrated'
 import { Reserve, ResponseView } from './ResponseView'
 
@@ -39,7 +39,7 @@ const PANES = [
   },
 ]
 
-export function CompactComparison({ href }: { href: string }) {
+export function CompactComparison() {
   const events = useMemo(() => eventsFor('normal'), [])
   const keyframes = useMemo(
     () => keyframesFor(events, durationOf(events)).filter((mark) => mark <= COMPARISON_END),
@@ -55,14 +55,6 @@ export function CompactComparison({ href }: { href: string }) {
 
   const ready = useHydrated()
   const playing = clock.isPlaying
-  // After completion the control restarts from zero, so it says so.
-  const label = playing
-    ? 'Pause'
-    : clock.status === 'paused'
-      ? 'Resume'
-      : clock.status === 'complete'
-        ? 'Play again'
-        : 'Play both'
 
   return (
     <figure className="m-0">
@@ -103,30 +95,16 @@ export function CompactComparison({ href }: { href: string }) {
             onClick={playing ? clock.pause : clock.play}
             icon={playing ? <Pause /> : <Play />}
           >
-            {label}
+            {playLabel(clock.status)}
           </ControlButton>
-          {clock.status !== 'idle' ? (
-            <ControlButton
-              variant="quiet"
-              disabled={!ready}
-              onClick={clock.restart}
-              icon={<Restart />}
-            >
-              Restart
-            </ControlButton>
-          ) : (
-            <Link
-              href={href}
-              className="group inline-flex items-center gap-1.5 text-[0.875rem] font-medium text-signal"
-            >
-              <span className="trim-cap">Open the decision</span>
-              <span className="icon-slot">
-                <span>
-                  <ArrowRight />
-                </span>
-              </span>
-            </Link>
-          )}
+          <ControlButton
+            variant="quiet"
+            disabled={!ready || clock.atRest}
+            onClick={clock.reset}
+            icon={<Reset />}
+          >
+            {RESET_LABEL}
+          </ControlButton>
         </div>
       </figcaption>
     </figure>

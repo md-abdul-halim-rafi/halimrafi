@@ -12,8 +12,7 @@ export const meta = {
     'The problem',
     'The decision',
     'An alternative',
-    'When I would choose differently',
-    'The tradeoff, and what is not known',
+    'The tradeoff',
   ],
 }
 
@@ -46,75 +45,19 @@ That is three rules, all of them visible in Considered reveal:
 
 1. A paragraph appears once it is closed, and a list item once its line lands.
    The reader gets whole thoughts instead of a growing edge of text.
-2. Formatting that has opened and not closed is withheld, along with the text
-   after it, so the syntax never reaches the screen.
+2. Markup that has opened and not closed is withheld along with the text after
+   it, so the syntax never reaches the screen. This is a separate pass from the
+   buffering: waiting for whole words would not do it.
 3. The record's slot is created when the tool is called rather than when it
-   answers, and the slot is sized by the record it is waiting for. When the
-   result lands, nothing below it moves. That last part holds here because the
-   fixture is scripted, so the finished record can be measured in advance. A
-   real tool result of unknown size would need either a fixed slot height or a
-   different treatment; this prototype does not solve that case.
+   answers, and it is sized by the record it is waiting for, so the arrival moves
+   nothing below it. That is exact here because the fixture is scripted and the
+   finished record can be measured in advance; a real result of unknown size
+   would need a fixed slot height or a different treatment.
 
 This is a decision rather than a detail because of what is and is not ours to
 choose. We do not choose when the pieces arrive: the model sets its own pace and
 the tool takes as long as it takes. The only thing we choose is when to show what
 has already arrived.
-
-## An alternative
-
-The obvious middle ground is word-level reveal: hold each word until it is
-complete, then show it. It is cheaper than what I built and it fixes the ugliest
-symptom, so it deserves a real answer rather than a dismissal.
-
-Word-level reveal fixes one of the two problems. Holding a word until it is
-complete removes half-words, and it costs almost nothing in added wait.
-
-It does not fix the formatting problem, and it is worth being exact about why.
-Buffering to a word boundary and hiding unclosed markup are separate concerns. A
-bold span can open in one word and close several words later, so a reveal that
-waits for whole words will still show a complete, unclosed `**` sitting in the
-text. Whatever the buffering unit, something has to track which markers are open
-and withhold from the opening marker onward. In this prototype that is a
-separate pass over the accumulated text, not a side effect of the grouping.
-
-It does not solve the reading problem. A line that grows word by word keeps
-moving its own right edge, and the reader's eye has to re-anchor on every arrival.
-You are not reading a sentence, you are watching one being typed. That is fine
-when someone is waiting to see whether anything is happening at all, and it is
-tiring when they are trying to take in an answer.
-
-Paragraph-level reveal gives up the sense of motion to get a block that holds
-still long enough to read normally. In this scripted demo that costs **520
-milliseconds to first visible text**, measured from the start of playback,
-against zero for raw arrival. Both numbers are properties of the fixture rather
-than of any deployed system, and a test reads them straight from it so the text
-here cannot drift away from what the prototype does.
-
-## When I would choose differently
-
-The 520ms above is small because the first paragraph is short. The cost is not
-fixed, it scales with the length of the unit being held, and that is where the
-approach breaks down.
-
-- **Long paragraphs.** Holding a six-sentence paragraph could mean several
-  seconds of nothing on screen. Past roughly a sentence or two of silence, a
-  reader stops reading the pause as care and starts reading it as a failure. The
-  fix is to group at sentence boundaries inside long paragraphs rather than at
-  paragraph boundaries only. The prototype does not do this.
-- **Latency-sensitive questions.** If someone asks a lookup with a short answer,
-  they want to see it start. Raw or word-level wins there, and the grouping is
-  just delay.
-- **Code and tables.** Neither approach works. Partially rendered code is worse
-  than no code, because it reads as complete and is wrong. Those blocks should
-  appear whole or not at all.
-- **Slow or bursty connections.** When chunks arrive in clumps, grouping changes
-  very little, because the clump boundary and the paragraph boundary tend to
-  coincide. The distinction stops earning its complexity.
-
-The honest summary is that this is the right default for answers that are mostly
-prose and mostly a few sentences long, which is what this product produces. It is
-not a general rule about streaming interfaces, and I would not apply it to a
-terminal, a code assistant, or a search box.
 
 <Disclosure summary="Implementation detail">
 
@@ -122,24 +65,87 @@ Two choices carry most of the weight.
 
 **The view is derived from elapsed time.** Rather than appending to a buffer as
 events arrive, the renderer takes the event list, an elapsed value and a mode,
-and computes the entire visible state from them. Playback is then just moving a
-number. Pause stops moving it, restart sets it back to zero, and switching modes
+and computes the entire visible state from them. Playback is then moving a
+number. Pause stops moving it, replaying sets it to zero, and switching modes
 recomputes from the same events, so the two sides of a comparison cannot drift
-apart.
+apart or mix runs.
 
-That gives a property worth stating precisely: the same elapsed value always
-produces the same output. The test suite samples the timeline out of order and
-after a rewind and checks that no text repeats, which covers the cases that
-would show duplication in practice. It is evidence about the current model under
-those samples, not a proof about every possible input.
+The same elapsed value always produces the same output. The tests sample the
+timeline out of order and after a rewind and check that no text repeats, which
+covers the cases that would show duplication in use. That is evidence under
+those samples, not a proof about every input.
+
+**Markup is tracked separately from buffering.** A small pass over the
+accumulated text finds delimiters that have opened and not closed, and withholds
+from the opening marker onward. It handles `**` and backticks, which is what this
+fixture contains. It is not a general parser and does not attempt nesting, links
+or code fences.
 
 **The waiting slot is sized by the thing it is waiting for.** The placeholder
 does not take its height from its own text. The finished record is rendered
-underneath it and made invisible, and the placeholder sits on top, so the space
-held is the space the record will need. The same technique holds the height of
-the whole transcript, which is why the panel does not resize while it plays.
+underneath it and made invisible, so the space held is the space the record will
+need. This is exact here only because the fixture is scripted and that record can
+be measured in advance. A real result of unknown size would need a fixed slot
+height or a different treatment.
+
+The 2.4 second point at which the slot admits it is late is a setting in this
+demo, chosen so the behaviour is visible in a short demonstration.
 
 </Disclosure>
+
+## An alternative
+
+The obvious middle ground is word-level reveal: hold each word until it is
+complete, then show it. It is cheaper than what I built, so it deserves a real
+answer.
+
+Word-level reveal fixes half the problem. Holding a word until it is whole
+removes half-words at almost no cost in wait. It does nothing about formatting,
+because buffering and markup are separate concerns: a bold span can open in one
+word and close several words later, so a reveal that waits for whole words still
+shows a complete, unclosed `**`. Whatever the buffering unit, something has to
+track which markers are open and withhold from the opening marker onward.
+
+What word-level reveal does not fix is reading. A line that grows word by word
+keeps moving its own right edge, and the eye re-anchors on every arrival. That
+suits someone waiting to see whether anything is happening. It works against
+someone trying to take in an answer.
+
+Paragraph-level reveal gives up that sense of motion for a block that holds
+still. In this scripted demo the cost is **520 milliseconds to first visible
+text**, measured from the start of playback, against zero for raw arrival. Those
+are properties of the fixture, not of any deployed system.
+
+The argument for paying it is that a finished sentence is easier to follow than a
+growing one. That is a design hypothesis. Nothing here measures it, and it will
+not hold equally for every reader, connection or kind of content.
+
+## The tradeoff
+
+Considered reveal is slower to first visible text, and that is the price of the
+whole approach. The 520ms above is small only because this fixture's first
+paragraph is short. The cost scales with the length of the unit being held, and
+that is where the approach stops being the right call:
+
+- **Long paragraphs.** Holding a six-sentence paragraph could mean seconds of
+  nothing on screen, and a long enough pause reads as a failure rather than as
+  care. Grouping at sentence boundaries inside long paragraphs would help. This
+  prototype does not do it.
+- **Short lookups.** When someone asks a question with a one-line answer, they
+  want to see it start. The grouping is just delay.
+- **Code and tables.** Neither approach works. Partially rendered code reads as
+  complete and is wrong, so those blocks want all or nothing.
+- **Bursty connections.** When chunks arrive in clumps, the clump boundary and
+  the paragraph boundary tend to coincide and the distinction stops earning its
+  complexity.
+
+So this is a reasonable default for answers that are mostly prose and a few
+sentences long, which is what this product produces. It is not a rule about
+streaming interfaces in general, and I would not apply it to a terminal or a
+code assistant.
+
+What is on this page is a prototype rather than shipped software: a fixed local
+script, no model behind it, and no measurements in it.
 
 <Disclosure summary="How this prototype was checked">
 
@@ -155,25 +161,11 @@ Automated, with `pnpm test`:
 - A late result does not hold back the prose or the provenance line around it,
   and it resolves into its original position.
 - Both modes finish at the same answer.
+- The 520ms figure quoted above is read from the fixture, so the prose cannot
+  drift from the prototype.
 
-By hand in a browser: play, pause, resume, restart during playback, switching
-modes and scenarios repeatedly, keyboard traversal of every control, and the
-completed transcript with JavaScript turned off.
+By hand in a browser: play, pause, resume, replay after completion, reset,
+switching modes and scenarios mid-run, keyboard traversal of every control, and
+the completed transcript with JavaScript turned off.
 
 </Disclosure>
-
-## The tradeoff, and what is not known
-
-Considered reveal is slower to first visible text than raw arrival. That cost is
-real, and it is the price of the entire approach.
-
-The claim on the other side is that a reader follows a finished sentence more
-easily than a growing one. That is a design hypothesis. Nothing here measures it,
-and the honest test would compare comprehension and re-reading across the two
-modes on real answers.
-
-What is on this page is a prototype rather than shipped software. It replays a
-fixed local script, there is no model behind it, and it contains no measurements.
-The 2.4 second point at which the waiting slot admits it is late is a setting
-chosen so the behaviour is visible in a short demonstration, not a figure derived
-from production latency.
