@@ -1,26 +1,508 @@
 @import "tailwindcss";
 
+/* ===========================================================================
+   halimrafi.com
+
+   The identity is an instrument surface: a cool graphite stage, hairline
+   geometry, and technical annotations set in mono. Warm editorial paper was
+   the previous direction; this one suits a site whose whole argument is that
+   decisions can be inspected.
+
+   Everything below is a token. Nothing in a component should invent its own
+   duration, radius, shadow or grey.
+   ========================================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Ink ramp, cool graphite. Low numbers are light. */
+  --ink-1: #fafbfc;
+  --ink-2: #f3f5f7;
+  --ink-3: #eaedf0;
+  --ink-4: #dfe3e8;
+  --ink-6: #c3cad1;
+  --ink-8: #939ca6;
+  --ink-9: #6e7883;
+  --ink-10: #4d5763;
+  --ink-11: #2b333c;
+  --ink-12: #12161b;
+
+  --paper: #fbfbfc;
+  --surface: #ffffff;
+  --sunk: #f2f4f6;
+
+  /* One signal colour. Used for state, never for decoration. */
+  --signal: #0f6b52;
+  --signal-hover: #0c5943;
+  --signal-ink: #ffffff;
+  --signal-wash: #e7f0ed;
+
+  --text: var(--ink-12);
+  --text-muted: var(--ink-9);
+  --text-soft: var(--ink-10);
+
+  --hairline: rgba(18, 22, 27, 0.08);
+  --hairline-strong: rgba(18, 22, 27, 0.16);
+
+  /* The stage gradient behind the opening. Cool at the top, settling to paper. */
+  --stage-top: #e7eaee;
+  --stage-mid: #eff1f4;
+  --stage-bot: var(--paper);
+
+  /* Motion. Quint for arrivals, spring for things that should feel physical,
+     a longer centred curve for departures that would otherwise snap. */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.35, 1.55, 0.65, 1);
+  --ease-in-out-quad: cubic-bezier(0.45, 0, 0.55, 1);
+
+  --dur-press: 130ms;
+  --dur-icon: 220ms;
+  --dur-col: 300ms;
+  --dur-spring: 400ms;
+  --dur-shadow-out: 700ms;
+  --delay-icon: 130ms;
+
+  /* Shape */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 14px;
+  --r-pill: 999px;
+
+  /* Elevation. The rest state is the same geometry at zero alpha so the
+     shadow animates in and out instead of appearing. */
+  --lift-rest: 0 6px 16px -10px rgba(10, 12, 15, 0);
+  --lift-hover: 0 14px 30px -12px rgba(10, 12, 15, 0.28);
+  --ring-hairline: 0 0 0 0.5px rgba(18, 22, 27, 0.1);
+  --card-shadow: 0 1px 2px rgba(18, 22, 27, 0.04), 0 8px 24px -16px rgba(18, 22, 27, 0.16);
+
+  /* Type */
+  --display-size: clamp(2.75rem, 8.4vw, 5.5rem);
+  /* The field is decoration; it steps back on narrow screens where the
+     headline needs the whole column. */
+  --field-strength: 1;
+  --measure-title: 18ch;
+  --measure-read: 38rem;
+  --read-size: 1.0625rem;
+  --read-leading: 1.75;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (max-width: 767px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --field-strength: 0.45;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-soft: var(--text-soft);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-wash: var(--signal-wash);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-6: var(--ink-6);
+  --color-ink-8: var(--ink-8);
+  --color-ink-9: var(--ink-9);
+  --color-ink-10: var(--ink-10);
+  --color-ink-11: var(--ink-11);
+  --color-ink-12: var(--ink-12);
+
+  --font-display: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--signal-wash);
+    color: var(--ink-12);
+  }
+
+  /* :focus-visible already excludes pointer clicks; this keeps the ring off
+     anything that takes focus programmatically too. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  /* Anchor targets clear the floating nav instead of landing under it. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  .on-signal:focus-visible {
+    outline-color: var(--signal-ink);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-6) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--ink-6);
+    border-radius: var(--r-pill);
+  }
+}
+
+@layer utilities {
+  /* Large titles only. Below roughly 28px this face reads narrow, so smaller
+     headings use the grotesque instead. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  /* Every heading under display size. Inter, tightened, never the serif. */
+  .heading {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.021em;
+    color: var(--ink-12);
+  }
+
+  /* Kills the half-leading above and below a line so flex centring lands on
+     the glyphs' true optical centre. Labels sit centred by ink, not by box. */
+  .trim-cap {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .measure {
+    max-width: var(--measure-read);
+  }
+  .measure-title {
+    max-width: var(--measure-title);
+  }
+
+  /* Technical annotation. Mono, uppercase, tracked, quiet. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .stage {
+    background: linear-gradient(
+      180deg,
+      var(--stage-top) 0%,
+      var(--stage-mid) 46%,
+      var(--stage-bot) 100%
+    );
+  }
+
+  /* A hairline that fades out at both ends, so rules never collide with the
+     page edge. Used to separate sections without boxing them. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--hairline-strong) 12%,
+      var(--hairline-strong) 88%,
+      transparent
+    );
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Controls
+
+   One interaction grammar for every control on the site. The icon column
+   opens first, then the icon focuses into the room it made. Neighbours step
+   aside so nothing collides.
+   ------------------------------------------------------------------------ */
+@layer components {
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 38px;
+    padding-inline: 0.875rem;
+    border-radius: var(--r-pill);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: var(--lift-rest);
+    /* The exit ride is longer and centred: quint's front-loaded start made a
+       departing shadow collapse in the first 100ms, which reads as a glitch. */
+    transition:
+      scale var(--dur-spring) var(--ease-spring),
+      translate var(--dur-spring) var(--ease-spring),
+      background-color var(--dur-icon) var(--ease-out-quint),
+      color var(--dur-icon) var(--ease-out-quint),
+      box-shadow var(--dur-shadow-out) var(--ease-in-out-quad);
+  }
+
+  .ctl:hover,
+  .ctl:focus-visible {
+    scale: 1.04;
+    box-shadow: var(--lift-hover);
+    transition:
+      scale var(--dur-spring) var(--ease-spring),
+      translate var(--dur-spring) var(--ease-spring),
+      background-color var(--dur-icon) var(--ease-out-quint),
+      color var(--dur-icon) var(--ease-out-quint),
+      box-shadow 450ms var(--ease-out-quint);
+  }
+
+  .ctl:active {
+    scale: 0.985;
+    transition-duration: var(--dur-press);
+  }
+
+  /* Touch needs a larger target than a mouse. The label and icon stay put; only
+     the hit area grows. */
+  @media (pointer: coarse) {
+    .ctl {
+      height: 44px;
+      padding-inline: 1rem;
+    }
+  }
+
+  .ctl:disabled {
+    scale: 1;
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+  }
+
+  .ctl-primary {
+    background: var(--ink-12);
+    color: var(--ink-1);
+  }
+  .ctl-primary:hover {
+    background: var(--ink-11);
+  }
+
+  .ctl-signal {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+  .ctl-signal:hover {
+    background: var(--signal-hover);
+  }
+
+  .ctl-quiet {
+    background: var(--surface);
+    color: var(--ink-11);
+    box-shadow: var(--ring-hairline), var(--lift-rest);
+  }
+  .ctl-quiet:hover,
+  .ctl-quiet:focus-visible {
+    box-shadow: var(--ring-hairline), var(--lift-hover);
+  }
+
+  /* Make room: when one control expands its neighbours step aside on the same
+     spring, so the row reads as one physical system. */
+  .ctl-row:has(.ctl:nth-child(1):hover) .ctl:nth-child(2) {
+    translate: 6px 0;
+  }
+  .ctl-row:has(.ctl:nth-child(2):hover) .ctl:nth-child(1) {
+    translate: -6px 0;
+  }
+
+  /* The icon's column opens, then the icon arrives into the space. The
+     control keeps its tight resting shape, because a permanently reserved
+     slot reads as a button stuck open around a gap. */
+  .icon-slot {
+    display: grid;
+    grid-template-columns: 0fr;
+    transition: grid-template-columns var(--dur-col) var(--ease-out-quint);
+    pointer-events: none;
+  }
+  .icon-slot > span {
+    display: flex;
+    /* max-content, not auto: with `min-width: 0` alone the grid's intrinsic
+       contribution collapses to zero, so the 1fr track resolves against a
+       zero-width container and the icon never gets its room. The track still
+       collapses at rest because it is sized 0fr; the span simply overflows it
+       and is clipped. */
+    width: max-content;
+    min-width: 0;
+    align-items: center;
+    /* The track still clips, which is what lets it collapse to zero, but the
+       clip box is inflated past the glyph so a half-open column never crops
+       the icon. It hides by going transparent, not by being cut. */
+    overflow: clip;
+    overflow-clip-margin: 14px;
+    margin-left: 0;
+    transition: margin-left var(--dur-col) var(--ease-out-quint);
+  }
+  .icon-slot svg {
+    flex: none;
+    opacity: 0;
+    filter: blur(2px);
+    transform: translateY(3px);
+    transition:
+      opacity var(--dur-icon) var(--ease-out-quint),
+      filter var(--dur-icon) var(--ease-out-quint),
+      transform var(--dur-icon) var(--ease-out-quint);
+  }
+  :is(a, button):is(:hover, :focus-visible) .icon-slot {
+    grid-template-columns: 1fr;
+  }
+  :is(a, button):is(:hover, :focus-visible) .icon-slot > span {
+    margin-left: 5px;
+  }
+  /* The delay lets the track make space first. It lives on the hover state
+     only, so leaving clears the icon immediately instead of smearing it
+     across the label sliding back. */
+  :is(a, button):is(:hover, :focus-visible) .icon-slot svg {
+    opacity: 1;
+    /* `none`, not `blur(0)`: the minifier reduces blur(0) to the invalid
+       `blur()`, which the browser then drops. `none` interpolates from
+       blur(2px) the same way and survives minification. */
+    filter: none;
+    transform: translateY(0);
+    transition-delay: var(--delay-icon);
+  }
+
+  /* A card that is itself a link. It lifts on hover and keyboard focus using
+     the same shadow grammar as the pill controls, without the scale, which
+     would blur its text. */
+  .ctl-card {
+    box-shadow: var(--lift-rest);
+    transition:
+      box-shadow var(--dur-shadow-out) var(--ease-in-out-quad),
+      border-color var(--dur-icon) var(--ease-out-quint),
+      translate var(--dur-spring) var(--ease-spring);
+  }
+  .ctl-card:hover,
+  .ctl-card:focus-visible {
+    translate: 0 -2px;
+    border-color: var(--hairline-strong);
+    box-shadow: var(--lift-hover);
+    transition:
+      box-shadow 450ms var(--ease-out-quint),
+      border-color var(--dur-icon) var(--ease-out-quint),
+      translate var(--dur-spring) var(--ease-spring);
+  }
+  .ctl-card:active {
+    translate: 0 0;
+    transition-duration: var(--dur-press);
+  }
+
+  /* A quiet text link with the same arrival grammar. */
+  .link-quiet {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .link-quiet:hover {
+    color: var(--ink-12);
+  }
+
+  .link-underline {
+    color: var(--signal);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 35%, transparent);
+    transition: text-decoration-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .link-underline:hover {
+    text-decoration-color: var(--signal);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Article
+   ------------------------------------------------------------------------ */
+@layer components {
+  .article-body {
+    font-size: var(--read-size);
+    line-height: var(--read-leading);
+    color: var(--ink-11);
+  }
+
+  /* Left aligned, not centred: the opening and the body then share one edge.
+     Centring each block inside the column is what put the title and the first
+     paragraph on different alignments. */
+  .prose-column > * {
+    max-width: var(--measure-read);
+    margin-inline: 0;
+  }
+  .prose-column > .breakout {
+    max-width: 58rem;
+    width: 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion.
+
+   Last in the file on purpose: any animation declared above is overridden
+   here, and nothing later can reintroduce it. Programmatic smooth scrolling
+   is switched off too.
+   ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ctl:hover,
+  .ctl:focus-visible,
+  .ctl:active {
+    scale: 1;
+  }
+  .ctl-row:has(.ctl:hover) .ctl {
+    translate: 0;
+  }
+  .ctl-card:hover,
+  .ctl-card:focus-visible,
+  .ctl-card:active {
+    translate: 0;
+  }
 }
