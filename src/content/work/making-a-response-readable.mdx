@@ -1,0 +1,179 @@
+export const meta = {
+  slug: 'making-a-response-readable',
+  title: 'Making a response readable',
+  summary:
+    'An answer arrives in pieces. Deciding when to show each piece is a product decision, not a rendering detail.',
+  date: '2026-09-06',
+  status: 'published',
+  role: 'Prototype designed and built for this site',
+  collaborators: [],
+  artifact: { kind: 'simulated-demo', label: 'Interactive prototype using simulated data' },
+  sections: [
+    'The problem',
+    'The decision',
+    'An alternative',
+    'When I would choose differently',
+    'The tradeoff, and what is not known',
+  ],
+}
+
+<Lede>An answer that arrives all at once is easy to read. An answer that arrives in pieces has to be readable at every point in between. None of that is model quality. It is a set of choices about what to show and when, and somebody on the product side has to make them.</Lede>
+
+## The problem
+
+Streaming renders whatever has arrived, the moment it arrives. That is the honest
+default, and it produces three specific failures. All three are visible below if
+you switch the prototype to Raw arrival.
+
+- A sentence assembles a fragment at a time, so the reader is chasing a moving
+  target instead of reading.
+- Formatting crosses chunk boundaries. The stream sends `including their **`
+  while the closing marker is still on its way, and the reader sees the syntax.
+- A tool result has nowhere to go until it arrives. When it lands it inserts
+  itself and pushes everything after it down the page, usually just as the reader
+  reaches the line below.
+
+The third one is the worst, because it punishes the reader for reading.
+
+<Demo />
+
+## The decision
+
+Show text at the size of a readable unit, and hold space for anything that has
+been asked for but has not come back yet.
+
+That is three rules, all of them visible in Considered reveal:
+
+1. A paragraph appears once it is closed, and a list item once its line lands.
+   The reader gets whole thoughts instead of a growing edge of text.
+2. Formatting that has opened and not closed is withheld, along with the text
+   after it, so the syntax never reaches the screen.
+3. The record's slot is created when the tool is called rather than when it
+   answers, and the slot is sized by the record it is waiting for. When the
+   result lands, nothing below it moves. That last part holds here because the
+   fixture is scripted, so the finished record can be measured in advance. A
+   real tool result of unknown size would need either a fixed slot height or a
+   different treatment; this prototype does not solve that case.
+
+This is a decision rather than a detail because of what is and is not ours to
+choose. We do not choose when the pieces arrive: the model sets its own pace and
+the tool takes as long as it takes. The only thing we choose is when to show what
+has already arrived.
+
+## An alternative
+
+The obvious middle ground is word-level reveal: hold each word until it is
+complete, then show it. It is cheaper than what I built and it fixes the ugliest
+symptom, so it deserves a real answer rather than a dismissal.
+
+Word-level reveal fixes one of the two problems. Holding a word until it is
+complete removes half-words, and it costs almost nothing in added wait.
+
+It does not fix the formatting problem, and it is worth being exact about why.
+Buffering to a word boundary and hiding unclosed markup are separate concerns. A
+bold span can open in one word and close several words later, so a reveal that
+waits for whole words will still show a complete, unclosed `**` sitting in the
+text. Whatever the buffering unit, something has to track which markers are open
+and withhold from the opening marker onward. In this prototype that is a
+separate pass over the accumulated text, not a side effect of the grouping.
+
+It does not solve the reading problem. A line that grows word by word keeps
+moving its own right edge, and the reader's eye has to re-anchor on every arrival.
+You are not reading a sentence, you are watching one being typed. That is fine
+when someone is waiting to see whether anything is happening at all, and it is
+tiring when they are trying to take in an answer.
+
+Paragraph-level reveal gives up the sense of motion to get a block that holds
+still long enough to read normally. In this scripted demo that costs **520
+milliseconds to first visible text**, measured from the start of playback,
+against zero for raw arrival. Both numbers are properties of the fixture rather
+than of any deployed system, and a test reads them straight from it so the text
+here cannot drift away from what the prototype does.
+
+## When I would choose differently
+
+The 520ms above is small because the first paragraph is short. The cost is not
+fixed, it scales with the length of the unit being held, and that is where the
+approach breaks down.
+
+- **Long paragraphs.** Holding a six-sentence paragraph could mean several
+  seconds of nothing on screen. Past roughly a sentence or two of silence, a
+  reader stops reading the pause as care and starts reading it as a failure. The
+  fix is to group at sentence boundaries inside long paragraphs rather than at
+  paragraph boundaries only. The prototype does not do this.
+- **Latency-sensitive questions.** If someone asks a lookup with a short answer,
+  they want to see it start. Raw or word-level wins there, and the grouping is
+  just delay.
+- **Code and tables.** Neither approach works. Partially rendered code is worse
+  than no code, because it reads as complete and is wrong. Those blocks should
+  appear whole or not at all.
+- **Slow or bursty connections.** When chunks arrive in clumps, grouping changes
+  very little, because the clump boundary and the paragraph boundary tend to
+  coincide. The distinction stops earning its complexity.
+
+The honest summary is that this is the right default for answers that are mostly
+prose and mostly a few sentences long, which is what this product produces. It is
+not a general rule about streaming interfaces, and I would not apply it to a
+terminal, a code assistant, or a search box.
+
+<Disclosure summary="Implementation detail">
+
+Two choices carry most of the weight.
+
+**The view is derived from elapsed time.** Rather than appending to a buffer as
+events arrive, the renderer takes the event list, an elapsed value and a mode,
+and computes the entire visible state from them. Playback is then just moving a
+number. Pause stops moving it, restart sets it back to zero, and switching modes
+recomputes from the same events, so the two sides of a comparison cannot drift
+apart.
+
+That gives a property worth stating precisely: the same elapsed value always
+produces the same output. The test suite samples the timeline out of order and
+after a rewind and checks that no text repeats, which covers the cases that
+would show duplication in practice. It is evidence about the current model under
+those samples, not a proof about every possible input.
+
+**The waiting slot is sized by the thing it is waiting for.** The placeholder
+does not take its height from its own text. The finished record is rendered
+underneath it and made invisible, and the placeholder sits on top, so the space
+held is the space the record will need. The same technique holds the height of
+the whole transcript, which is why the panel does not resize while it plays.
+
+</Disclosure>
+
+<Disclosure summary="How this prototype was checked">
+
+Automated, with `pnpm test`:
+
+- Both scenarios keep their events in chronological order, and the delayed
+  scenario differs from the normal one by exactly one value.
+- Raw arrival exposes the unclosed bold span while it is open. Considered reveal
+  does not.
+- A paragraph is withheld until it closes, and released once the stream settles.
+- The projection is a pure function of elapsed time, and sampling out of order
+  never duplicates text.
+- A late result does not hold back the prose or the provenance line around it,
+  and it resolves into its original position.
+- Both modes finish at the same answer.
+
+By hand in a browser: play, pause, resume, restart during playback, switching
+modes and scenarios repeatedly, keyboard traversal of every control, and the
+completed transcript with JavaScript turned off.
+
+</Disclosure>
+
+## The tradeoff, and what is not known
+
+Considered reveal is slower to first visible text than raw arrival. That cost is
+real, and it is the price of the entire approach.
+
+The claim on the other side is that a reader follows a finished sentence more
+easily than a growing one. That is a design hypothesis. Nothing here measures it,
+and the honest test would compare comprehension and re-reading across the two
+modes on real answers.
+
+What is on this page is a prototype rather than shipped software. It replays a
+fixed local script, there is no model behind it, and it contains no measurements.
+The 2.4 second point at which the waiting slot admits it is late is a setting
+chosen so the behaviour is visible in a short demonstration, not a figure derived
+from production latency.
