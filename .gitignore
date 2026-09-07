@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent tooling (restore with skills-lock.json, which stays tracked)
+/.agents/
+/.claude/skills/
+/.claude/settings.local.json
