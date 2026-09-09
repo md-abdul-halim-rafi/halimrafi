@@ -1084,3 +1084,30 @@
   }
 
 }
+
+
+/* A product screenshot inside the image viewer.
+   
+   Photographs are fitted whole. A screenshot cannot always be, because fitting
+   a 4074px interface into the space available can leave it smaller than the
+   figure on the page: 359px on a 390px phone against the figure's 342px, and a
+   145px sliver at 400% zoom. "View larger" would then be a control that does
+   nothing.
+
+   So the width is the larger of a legible floor and the width that fits. Where
+   the fit is already comfortable, on any ordinary desktop, the expression
+   resolves to the fit and this behaves exactly as before, with no scrolling.
+   Where it is not, the image is laid out at the floor and the frame around it
+   scrolls, which is how a wide screenshot is read on a phone. The 2px keeps
+   the fitted case a hair inside its container so it cannot round into a
+   scrollbar, and the ratio comes from the asset rather than being written in
+   here.
+
+   Deliberately outside every layer: Tailwind's utilities are in a later layer
+   and would win over this whatever its specificity. */
+.studio-zoom-pan {
+  height: auto;
+  max-height: none;
+  max-width: none;
+  width: max(900px, min(92vw, calc((100dvh - 8rem - 2px) * var(--zoom-ratio, 1.5))));
+}

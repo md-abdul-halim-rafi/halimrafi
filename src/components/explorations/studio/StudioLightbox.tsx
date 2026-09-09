@@ -99,6 +99,7 @@ export function StudioLightbox({
   const reduced = useReducedMotion()
   const asset = assets[index]
   const many = assets.length > 1
+  const product = asset.kind === 'product'
 
   useEffect(() => {
     closeRef.current?.focus()
@@ -228,16 +229,48 @@ export function StudioLightbox({
           </div>
         </div>
 
-        {/* Fitted whole, never cropped or stretched. */}
-        <Image
-          src={asset.src}
-          alt={asset.alt}
-          width={asset.width}
-          height={asset.height}
-          sizes="92vw"
-          className="block max-h-[calc(100dvh-8rem)] w-auto max-w-[92vw] object-contain"
-          priority
-        />
+        {/*
+          Photographs are fitted whole, never cropped or stretched.
+
+          A product screenshot cannot work that way on a small screen. Fitting
+          a 4074px interface inside a 390px phone gives 359px, seventeen more
+          than the figure on the page, and at high zoom it gives a sliver;
+          "View larger" would be a control that does nothing. So a product
+          image is laid out at a legible width below 640px and the frame
+          scrolls, which is how a wide screenshot is read on a phone. Above
+          that width nothing changes: the fit is already over a thousand
+          pixels.
+        */}
+        <div
+          className={
+            product
+              ? 'max-h-[calc(100dvh-8rem)] max-w-[92vw] overflow-auto overscroll-contain'
+              : 'contents'
+          }
+        >
+          <Image
+            src={asset.src}
+            alt={asset.alt}
+            width={asset.width}
+            height={asset.height}
+            /*
+              `sizes` has to describe the width the image is really laid out
+              at, or the browser picks a candidate for the wrong size. A
+              product screenshot is panned at 900px on a narrow or short
+              screen, so claiming 92vw there fetched 750px for a 900px box and
+              the interface came out soft. Both arms err large rather than
+              small: over-claiming costs bytes, under-claiming costs the
+              legibility this control exists for.
+            */
+            sizes={product ? '(max-width: 1200px) 900px, 92vw' : '92vw'}
+            // No sizing utilities on the product branch: the width is one
+            // expression in `.studio-zoom-pan`, and utilities in a later layer
+            // would win over it whatever its specificity.
+            className={product ? 'studio-zoom-pan block' : 'block max-h-[calc(100dvh-8rem)] w-auto max-w-[92vw] object-contain'}
+            style={product ? { ['--zoom-ratio' as string]: String(asset.width / asset.height) } : undefined}
+            priority
+          />
+        </div>
 
         <p className="pt-2.5 text-[0.8125rem] leading-[1.5] text-[color:var(--ink-8)]">
           {asset.caption}

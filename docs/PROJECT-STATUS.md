@@ -1855,3 +1855,116 @@ measurements, a delivery timeline beyond YC W24 and the acquisition, a public
 profile URL, and a favicon. And still Rafi's call: whether to use
 `03-screen-shot.webp`, which shows what changed on an account far better but
 publishes named customer companies, a named contact and deal values.
+
+## Pass: finishing the "View larger" interaction
+
+The composition is untouched. The figure keeps its width, its aspect ratio, its
+caption and its separation from the simulated prototype. What changed is inside
+the viewer.
+
+### Provenance, confirmed again
+
+`public/octolane/octolane-app-home.webp` is a byte-for-byte copy of
+`public/assets/images/01-screen-shot.webp` in Octolane's own website
+repository, published on octolane.com as the image for the "Use Native AI CRM"
+feature tab. 4074x2727, the highest resolution that exists; the viewer opens
+that same file, which a check now asserts by reading the `url` parameter out of
+`currentSrc` rather than trusting the markup.
+
+It is a framed presentation of the application, not a raw screen capture: the
+outermost edge pixels are `rgba(0,0,0,1)`, the corners outside that stroke are
+transparent, and the surface 20px in is `rgba(248,248,248,0.85)`. The interface
+is the product's own, in a demo workspace (the switcher reads Resend, a
+participant is at acme.com). Nothing about individual feature ownership or any
+production outcome is inferred from it anywhere on the page or here.
+
+### The problem that was reproduced
+
+"View larger" barely enlarged anything except on a desktop. The viewer fits an
+image whole inside the viewport less 8rem of chrome, which for a 4074px
+interface gives:
+
+| | figure on the page | enlarged | gain |
+| --- | --- | --- | --- |
+| 1440x900 | 848px | 1153px | usable |
+| 390x844 | 342px | 359px | 5%, effectively nothing |
+| 200% zoom | 640px | 481px | smaller than the figure |
+| 400% zoom | 312px | 145px | a sliver |
+
+Fitting whole is right for a photograph and wrong for a screenshot. So the
+product branch now lays the image out at the larger of a 900px floor and the
+width that fits, and the frame around it scrolls. Where the fit is already
+comfortable the expression resolves to the fit and nothing changes; where it is
+not, the interface can be panned, which is how a wide screenshot is read on a
+phone. Photographs are untouched and still fitted whole.
+
+Two details that mattered:
+
+- The rule sits outside every layer. Tailwind's utilities are in a later layer
+  and won over an earlier attempt regardless of specificity, which is why the
+  first version measured as though nothing had changed.
+- `sizes` had to be corrected. It still claimed `92vw`, so a 900px box on a 2x
+  phone was served a 750px file and the interface came out soft. It now claims
+  `(max-width: 1200px) 900px, 92vw`, and both arms err large: over-claiming
+  costs bytes, under-claiming costs the legibility the control exists for.
+
+After the fix: 900px panned on the phone, at 200% and at 400%; 1150px fitted on
+the desktop, three pixels off the previous 1153 because the expression keeps the
+fitted case 2px inside its container so it cannot round into a scrollbar.
+Served candidates 1920px at 1440x900, 1920px on the 2x phone, 3840px at 4x.
+
+### Verification
+
+`cap/viewer.mjs`, 90 checks at 1440x900, 390x844, 200% zoom and 400% zoom (the
+reflow threshold in WCAG 1.4.10), plus reduced motion. The trigger reached by
+Tab from the top of the page; opened by both Space and Enter; a labelled
+`aria-modal` dialog; focus starting on Close; the original file at the highest
+resolution the layout needs; the enlarged view at least 1.3x the figure; the
+picture either fitted whole or pannable inside a frame that itself fits; a
+visible Close control fully inside the viewport at every width, 65x34; no dead
+next and previous for a one-item sequence; the page locked while open; focus
+never leaving the dialog across nine Tab and Shift+Tab presses; Close activated
+from the keyboard; focus returning to the trigger; scroll position preserved
+exactly, checked from the top of the page and again from 400px down; the page
+unlocked afterwards; and no horizontal overflow open or closed.
+
+`cap/galleryregress.mjs`, 12 checks: the shared viewer still fits a photograph
+whole with nothing to pan, still offers Previous and Next, still reaches all
+five by ArrowRight, and still closes on Escape with focus restored.
+
+Re-run and passing: route audit 90/90, product figure 75/75, composition
+103/103, navigation 96/96, controls 67/67, integrity 31/31. `pnpm lint` clean,
+`tsc --noEmit` clean, 24 tests, build compiled.
+
+### Two assertions of mine that were wrong
+
+The gallery regression check called a portrait photograph too small at 515px
+wide on a 1440px screen. It is height-bound at 772px, which is the whole space
+available; a width threshold is the wrong test for a portrait image. And
+`cap/viewer.mjs` first asserted only that the enlarged image "fits the screen",
+which every one of the four viewports satisfied while three of them were
+showing something no bigger than the figure. Passing that check was how the
+real problem stayed hidden; it now compares against the figure's own width.
+
+### Not performed
+
+No real touch device, so panning was driven by measuring `scrollWidth` against
+`clientWidth` rather than by a finger. 200% and 400% zoom are emulated as a
+halved or quartered viewport at a raised pixel ratio, which reproduces the
+layout but not a real zoom's font boosting. No screen reader. No OS-level
+reduced-motion setting.
+
+One thing I did not add: a visual hint that the enlarged screenshot can be
+panned. On a phone the scrollbar appears only during the gesture, so a visitor
+may not realise there is more to the right. Adding an affordance would be new
+chrome rather than a fix to something reproduced, and it cannot be judged
+without a real device.
+
+### Evidence gap, unchanged
+
+The figure shows the product; it says nothing about what Rafi did. Still wanted:
+a screenshot or a short recording of one real Octolane workflow, with enough
+context to say what he did and what the team did. Still open too: production
+measurements, a delivery timeline beyond YC W24 and the acquisition, a public
+profile URL, a favicon, and whether to use `03-screen-shot.webp` with its named
+customers and deal values.
