@@ -29,6 +29,40 @@ type Common = {
   className?: string
 }
 
+/**
+ * Holds room for the widest label a control will ever carry.
+ *
+ * A playback control changes its own label as it runs, and each label is a
+ * different width, so the button resizes under the reader's cursor and drags
+ * whatever sits beside it sideways. The widest wording is measured in the same
+ * grid cell so the cell is as wide as the widest state from the first paint,
+ * and the visible label is centred in it. Measuring the text rather than
+ * writing a pixel width means it survives a font change.
+ *
+ * The reservation is a CSS `content` string rather than a second copy of the
+ * text in the DOM. A duplicate would land in `textContent`, where a button
+ * reading "Pause" would answer "PauseReplay comparison" to anything reading it
+ * back, tests included. `visibility: hidden` keeps the pseudo-element out of
+ * the accessibility tree while it still takes up its width.
+ */
+function Label({ children, reserve }: { children: ReactNode; reserve?: string }) {
+  if (!reserve) return <span className="trim-cap">{children}</span>
+  return (
+    /* Left-aligned, so the icon and the first character stay together exactly
+       as they do in the widest state. Centring the label inside the reserved
+       cell left the icon stranded at the far edge, which is a different look
+       from the one the button has at rest. */
+    <span className="trim-cap grid justify-items-start">
+      <span className="col-start-1 row-start-1">{children}</span>
+      <span
+        className="ctl-reserve col-start-1 row-start-1"
+        style={{ ['--ctl-reserve' as string]: JSON.stringify(reserve) }}
+        aria-hidden
+      />
+    </span>
+  )
+}
+
 export function ControlLink({
   href,
   children,
@@ -64,8 +98,9 @@ export function ControlButton({
   variant = 'quiet',
   icon,
   className = '',
+  reserve,
   ...props
-}: Common & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: Common & { reserve?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       type="button"
@@ -77,7 +112,7 @@ export function ControlButton({
           {icon}
         </span>
       ) : null}
-      <span className="trim-cap">{children}</span>
+      <Label reserve={reserve}>{children}</Label>
     </button>
   )
 }

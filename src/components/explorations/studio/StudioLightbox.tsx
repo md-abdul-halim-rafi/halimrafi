@@ -175,25 +175,33 @@ export function StudioLightbox({
       />
 
       {/*
-        The frame shrinks to the image, so the label, the close control and the
-        caption sit against the picture's own edges instead of the edges of an
-        oversized box.
+        The frame used to shrink to the picture, which put the label, the
+        controls and the caption against the picture's own edges. That reads
+        well on one image and badly across a sequence: stepping from a portrait
+        to a landscape moved Close 322px and the arrows with it, so the control
+        a reader was aiming at walked out from under the cursor.
+
+        So the frame now spans the overlay and the picture is centred in what
+        is left. The controls sit at a fixed distance from the viewport's own
+        top-right corner and do not move between orientations. Each photograph
+        keeps its own aspect ratio and is never cropped; only the room around
+        it changes.
+
+        The controls stay inside this element because the Tab handler contains
+        focus to whatever is focusable within it.
       */}
       <div
         ref={frameRef}
         role="dialog"
         aria-modal="true"
         aria-label={asset.title}
-        // inline-flex shrinks to the picture without the circular constraint
-        // that `w-fit` plus `max-h-full` created, which was scaling the image
-        // down to a fraction of the space available.
-        className="relative inline-flex flex-col outline-none"
+        className="relative flex h-full w-full flex-col outline-none"
         style={{
           transformOrigin,
           animation: reduced ? 'none' : 'studio-grow 200ms var(--ease-out-quint)',
         }}
       >
-        <div className="flex items-center justify-between gap-6 pb-2.5">
+        <div className="flex shrink-0 items-center justify-between gap-6 pb-2.5">
           <p className="min-w-0 truncate text-[0.8125rem] text-[color:var(--ink-4)]">
             {asset.title}
             {many ? (
@@ -241,11 +249,16 @@ export function StudioLightbox({
           that width nothing changes: the fit is already over a thousand
           pixels.
         */}
+        {/* A photograph is centred by the flex box and always fits. A product
+            screenshot may be wider than the room available, and a flex box
+            that centres its child makes that overflow unreachable rather than
+            scrollable, so it gets a plain scrolling block and centres itself
+            with a margin when it does fit. */}
         <div
           className={
             product
-              ? 'max-h-[calc(100dvh-8rem)] max-w-[92vw] overflow-auto overscroll-contain'
-              : 'contents'
+              ? 'min-h-0 flex-1 overflow-auto overscroll-contain'
+              : 'flex min-h-0 flex-1 items-center justify-center'
           }
         >
           <Image
@@ -266,13 +279,15 @@ export function StudioLightbox({
             // No sizing utilities on the product branch: the width is one
             // expression in `.studio-zoom-pan`, and utilities in a later layer
             // would win over it whatever its specificity.
-            className={product ? 'studio-zoom-pan block' : 'block max-h-[calc(100dvh-8rem)] w-auto max-w-[92vw] object-contain'}
+            className={product ? 'studio-zoom-pan mx-auto block' : 'block max-h-full w-auto max-w-full object-contain'}
             style={product ? { ['--zoom-ratio' as string]: String(asset.width / asset.height) } : undefined}
             priority
           />
         </div>
 
-        <p className="pt-2.5 text-[0.8125rem] leading-[1.5] text-[color:var(--ink-8)]">
+        {/* Centred, so it stays under the picture now that the column is as
+            wide as the overlay rather than as wide as the image. */}
+        <p className="shrink-0 pt-2.5 text-center text-[0.8125rem] leading-[1.5] text-[color:var(--ink-8)]">
           {asset.caption}
         </p>
       </div>

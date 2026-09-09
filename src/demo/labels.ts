@@ -23,6 +23,15 @@ export function playLabel(status: ClockStatus): string {
   }
 }
 
+/**
+ * The widest label `playLabel` can return, for controls that reserve room so
+ * they do not resize as they run. Derived from the table rather than written
+ * out, so a new wording cannot leave the reservation behind.
+ */
+export const WIDEST_PLAY_LABEL = (['playing', 'paused', 'idle'] as ClockStatus[])
+  .map(playLabel)
+  .reduce((a, b) => (b.length > a.length ? b : a))
+
 export const RESET_LABEL = 'Reset'
 
 /** Shown once near each demo. */

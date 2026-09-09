@@ -1968,3 +1968,117 @@ context to say what he did and what the team did. Still open too: production
 measurements, a delivery timeline beyond YC W24 and the acquisition, a public
 profile URL, a favicon, and whether to use `03-screen-shot.webp` with its named
 customers and deal values.
+
+## Pass: two interaction refinements
+
+No 56-second recording reached me. Nothing was attached to the message and the
+longest film in this session is 16.76s, so the two problems were reproduced by
+measurement instead, which is firmer evidence than reading a video. Both were
+exactly as described.
+
+### 1. The comparison control row
+
+Measured, before: the button carried "Replay comparison" at 180px, "Pause" at
+93.1px and "Resume" at 105.7px, so the caption beside it sat at x=500, then
+413.1, then 425.7. **An 87px jump on the first press.** On a phone the caption
+already wrapped to its own line and never moved, which is why the recording
+only shows it on desktop.
+
+The play control now reserves the width of the widest label its own table can
+return. `WIDEST_PLAY_LABEL` in `demo/labels.ts` is derived from `playLabel`
+rather than written out, so new wording cannot leave the reservation behind,
+and `ControlButton` takes an opt-in `reserve` prop. Every other control is
+untouched.
+
+The reservation is a CSS `content` string on a hidden pseudo-element, not a
+second copy of the text in the DOM. A duplicate sized correctly but put the
+ghost into `textContent`, so a button reading "Pause" answered
+"PauseReplay comparison" to anything reading it back, my own settle loops
+included, and one of them exited a run early because it saw "Replay comparison"
+in a button that was still playing. `visibility: hidden` keeps the
+pseudo-element out of the accessibility tree while it still takes its width.
+
+The label is left-aligned in the reserved cell. Centring it stranded the icon
+at the far edge, which is a different look from the resting state.
+
+After: one width, 180px desktop and 184px mobile, across three full runs
+sampled every 70ms; caption at x=500 and x=24 respectively, never moving on
+either axis; the phone still wraps; all three labels still appear; the focus
+ring is unchanged.
+
+### 2. The photography viewer's controls
+
+Measured, before: stepping from a portrait to the one landscape frame moved
+Close's right edge from 977 to 1299 and the arrows with it, **322px**, because
+the frame shrank to the picture and the controls rode along.
+
+The frame now spans the overlay and the picture is centred in what is left, so
+the controls sit at a fixed distance from the viewport's own corners. They stay
+inside the dialog element because the Tab handler contains focus to what is
+focusable within it. The caption is centred, since the column is now as wide as
+the overlay rather than as wide as the picture.
+
+After: Close at (1416, 24) and the arrows at (1301, 24) on desktop, (374, 16)
+and (259, 16) on the phone, identical across all seven steps through the
+sequence. Every photograph keeps its own ratio to within 0.02 (portrait 0.667
+against a natural 0.666, landscape 1.5 against 1.499) and the frames are still
+different sizes, 519x779 beside 1168x779, so nothing was cropped to match.
+
+One thing this exposed: the product screenshot's pan expression had been
+rewritten to measure `100%`, which in a width context is the container's width,
+not the height I meant. The picture came out wider than the screen with the
+overflow unreachable, because a flex box that centres its child does not make
+overflow scrollable. It is back to measuring the viewport height, and the
+product branch is a plain scrolling block that centres itself with a margin
+when it fits.
+
+### 3. The case-study demo, inspected on its own page
+
+Not inferred from the story page's comparison; opened at
+`/explorations/studio/making-a-response-readable` and driven there.
+
+**No clipping found.** Text was checked at rest, every 150ms through a run, and
+at the end, at 1440x900, 390x844 and 200% zoom, by walking up from each text
+element to the nearest ancestor that hides or clips overflow and comparing the
+boxes. Nothing lost on any edge, no horizontal overflow, no console errors.
+All four combinations, Raw arrival and Considered reveal against Normal and
+Delayed tool result, ran to the end with an answer and no unrendered markup.
+
+My first version of that check scanned `document.body.innerText` for `**` and
+failed all twelve combinations. The article quotes `**` in `<code>` to explain
+the problem it is about, and Next's payload carries it in `<script>`; none of
+it was in the demo. Scoped to the demo element, all twelve pass. That is the
+same over-broad-scope mistake I have now made three times in different clothes.
+
+**Found but not changed:** the case study's own control row has the identical
+defect. Its button goes 180px at rest to 93.1px playing to 105.7px paused, and
+the Reset button beside it moves with each change. This pass was scoped to the
+story page's comparison, so it is left alone; the fix is one `reserve` prop on
+that button whenever it is wanted.
+
+### Verification
+
+New: `cap/stable.mjs`, 91 checks. Three full runs per width with the control
+row sampled continuously; the incomplete Markdown still showing on the left and
+the right still waiting, both sides finishing identical; the product viewer and
+the photography viewer both opened from the keyboard at 1440x900 and 390x844,
+each with Close inside the viewport, focus starting on Close, no horizontal
+overflow, focus returned to the right trigger and the scroll position restored
+to the pixel (233 and 1738 on the phone); portrait-to-landscape stepping at
+both widths; and the case-study demo as above.
+
+Re-run and passing: `cap/viewer.mjs` 90/90, `cap/product.mjs` 75/75,
+`cap/galleryregress.mjs` 12/12, route audit 90/90, composition 103/103,
+navigation 96/96, controls 67/67, integrity 31/31. `pnpm lint` clean,
+`tsc --noEmit` clean, 24 unit tests, build compiled.
+
+Shared timing untouched: the fixture, the clock and the preview tests are
+unchanged, and the integrity suite still proves one stream on one clock.
+
+### Not tested
+
+No real touch device, so the phone was emulated at 390x844 with `hasTouch` and
+panning was verified by measuring `scrollWidth` against `clientWidth` rather
+than with a finger. 200% and 400% zoom remain emulated as a reduced viewport at
+a raised pixel ratio. No screen reader. No OS-level reduced-motion setting. And
+I did not review the recording, because it did not arrive.

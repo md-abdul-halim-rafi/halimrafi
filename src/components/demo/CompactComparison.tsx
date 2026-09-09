@@ -9,6 +9,7 @@ import { Pause, Play, Reset } from '@/components/ui/icons'
 import {
   COMPARISON_NOTE,
   playLabel,
+  WIDEST_PLAY_LABEL,
   PROTOTYPE_CAPTION,
   PROTOTYPE_CAPTION_SENTENCE,
   RESET_LABEL,
@@ -118,11 +119,16 @@ export function CompactComparison({
         {preview ? null : <p className="label">{PROTOTYPE_CAPTION}</p>}
 
         <div className="ctl-row flex items-center gap-2.5">
+          {/* The label changes as it runs, and the widest wording is the
+              resting one, so the button holds that width throughout. Without
+              it the button shrank by 87px on the first press and took the
+              caption beside it along. */}
           <ControlButton
             variant="primary"
             disabled={!ready}
             onClick={playing ? clock.pause : clock.play}
             icon={playing ? <Pause /> : <Play />}
+            reserve={WIDEST_PLAY_LABEL}
           >
             {playLabel(clock.status)}
           </ControlButton>

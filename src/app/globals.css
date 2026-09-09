@@ -971,6 +971,14 @@
 
   /* A photograph gets no frame at all: it sits on the paper. Hover lifts its
      tone very slightly instead of drawing a box around it. */
+  /* The width a control reserves for its widest label. Hidden rather than
+     absent, so it takes its space without reaching the accessibility tree or
+     the element's text. */
+  .ctl-reserve::before {
+    content: var(--ctl-reserve, '');
+    visibility: hidden;
+  }
+
   .studio-photo {
     transition: opacity var(--dur-icon) var(--ease-out-quint);
   }
@@ -1109,5 +1117,9 @@
   height: auto;
   max-height: none;
   max-width: none;
-  width: max(900px, min(92vw, calc((100dvh - 8rem - 2px) * var(--zoom-ratio, 1.5))));
+  /* The fitted arm is measured against the height available, which is the
+     viewport less the overlay's padding, the header row and the caption. A
+     percentage here would resolve against the container's width instead and
+     hand back a box wider than the screen with no way to reach the rest. */
+  width: max(900px, min(100%, calc((100dvh - 8rem - 2px) * var(--zoom-ratio, 1.5))));
 }
