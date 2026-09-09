@@ -154,18 +154,6 @@ export const STORY = {
     'Octolane brings together email, meetings, and account records so people can ask what changed.',
   workRole: 'As co-founder and CTO, I lead the engineering team and technical direction.',
 
-  /** The decision, and the comparison that makes it observable. */
-  decisionHeading: 'Making a response readable',
-  decisionQuestion: 'An answer arrives in pieces. When should each piece appear?',
-  decisionCaption: 'Interactive prototype using simulated data.',
-  /**
-   * The takeaway, without a number. Timings belong to the case study, where
-   * they are checked against the fixture and named as demo configuration; a
-   * figure on the homepage would be a claim the reader cannot see the basis
-   * for.
-   */
-  decisionTradeoff:
-    'This prototype waits for a readable unit before showing it. The tradeoff is a short delay before text appears.',
   /**
    * The one piece of real product evidence on this page.
    *
@@ -217,14 +205,6 @@ export const STORY = {
   productZoomAria: 'View larger: Octolane’s home workspace',
   productSourceLabel: 'octolane.com',
   productSourceHref: 'https://www.octolane.com',
-
-  readLabel: 'Read the case study',
-  /**
-   * The article lives under Studio and Studio links to it too, so the entry
-   * point is named in the query. The article reads it to send the reader back
-   * here rather than to Studio, which is not where they came from.
-   */
-  readHref: '/explorations/studio/making-a-response-readable?from=story',
 
   /** Background, and it belongs with the work rather than the photography. */
   previously: 'Previously, I co-founded Mainly Coding, which was acquired by Shikho.',

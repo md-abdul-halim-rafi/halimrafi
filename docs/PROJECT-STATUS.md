@@ -2082,3 +2082,152 @@ panning was verified by measuring `scrollWidth` against `clientWidth` rather
 than with a finger. 200% and 400% zoom remain emulated as a reduced viewport at
 a raised pixel ratio. No screen reader. No OS-level reduced-motion setting. And
 I did not review the recording, because it did not arrive.
+
+## Pass: the comparison section removed, and the evidence review
+
+### The removal
+
+`/explorations/story` now holds three sections: Introduction, Octolane, and the
+photography closing with both contact paths. The streaming comparison section
+is gone in full, heading and question and panel and tradeoff and the
+case-study link with it, on the instruction that this supersedes the original
+brief's requirement to keep it.
+
+The standalone demo is untouched. `CompactComparison`, `StreamingDemo`, the
+fixtures, `labels.ts`, the clock and all 24 unit tests are exactly as they
+were, and the case study at `/explorations/studio/making-a-response-readable`
+still owns a working demo with both modes and both scenarios.
+
+Removed alongside it: the `CompactComparison` and `Link` imports, and the
+`decisionHeading`, `decisionQuestion`, `decisionCaption`, `decisionTradeoff`,
+`readLabel` and `readHref` entries in `STORY`, since nothing rendered them any
+more.
+
+One consequence to know about: **Story no longer links to the case study.** The
+article is still reachable at its own route and from Studio, and its
+`?from=story` arm is still correct for a direct visit, so it is left in place
+and would work again if the link ever comes back. If a link from Story is
+wanted without the panel, it is one line.
+
+Page height fell from 2470px to 1970px at 1440x900, and from 2535px to 1870px
+at 390x844.
+
+Verified: new `cap/shape.mjs`, 32 checks at 1440x900, 390x844 and 200% zoom.
+Three sections in order; no demo mounted and no playback control anywhere; none
+of the seven pieces of comparison text left in the page; no link to the case
+study; the introduction, the Octolane figure with its View larger control, the
+photograph with its gallery, and both mailto paths all intact; no horizontal
+overflow; no console errors. Plus a check on the case study itself that its
+demo still runs to a finished answer with no open markup.
+
+Re-run: route audit 89/89 (down one: the story-to-article link it used to
+follow is gone), `cap/product.mjs` 75/75, `cap/nav.mjs` 75/75, `cap/viewer.mjs`
+90/90, `cap/galleryregress.mjs` 12/12. `pnpm lint` clean, `tsc --noEmit`
+clean, 24 tests, build compiled.
+
+Retired, because what they measured no longer exists on this page:
+`cap/controls.mjs`, `cap/integrity.mjs`, `cap/stable.mjs`'s control-row arm and
+`cap/verify10.mjs`'s comparison arm. The demo's behaviour is still covered by
+the 24 unit tests, by the route audit's mode and scenario runs on the case
+study, and by `cap/stable.mjs`'s case-study arm.
+
+Two of my harnesses referred to the removed section and were re-scoped, not
+deleted: `cap/product.mjs` measured the figure against the comparison's width
+and now measures it against the container it was asked to match, and
+`cap/nav.mjs`'s story-origin arm now asserts the link's absence and tests
+`?from=story` as a direct visit.
+
+## Evidence review: which product flow to feature
+
+Asked for one substantial existing flow, supported by implementation history I
+can actually reach and by Rafi's own contribution, with Ask Octolane completing
+a useful action given priority. This is the answer, with the references.
+
+### Recommendation: the long-horizon agent run behind Ask Octolane
+
+A question typed into Ask Octolane becomes a durable agent run: it is
+dispatched, worked by sub-agents whose progress the reader can watch, judged
+for grounding and convergence before it is allowed to finish, and continued or
+reactivated if it is interrupted. That is Ask Octolane completing a useful
+action rather than answering a question, and it is the flow where Rafi's own
+contribution is clearest in the record.
+
+### His contribution, as the repositories record it
+
+Design first, in his own hand, before the code existed:
+
+- `docs/rfcs/agentic-background-jobs.md`, 225 lines, his commits from
+  2026-05-12.
+- `docs/rfcs/long-horizon-agent-runs.md`, 288 lines, 2026-06-07 — the same week
+  the module below begins.
+- `apps/aiChat/plans/oct-4074-stream-live-usage-continuation-reactivation.md`,
+  154 lines, 2026-08-26, matching the continuation code shipped that day.
+- `apps/aiChat/docs/AI_CHAT_INTERNALS.md`, 14,380 lines, largely his.
+
+The implementation, in `octolane-org/octolane-backend`:
+
+- `apps/aiChat/src/modules/agentRun` — 71 files, 14,403 lines, **100 of 115
+  commits his**, spanning 2026-06-07 to 2026-08-26. The Temporal workflow,
+  worker and activities; `dischargeHandler` and `dischargeContinuation`; the
+  judge (`convergence`, `grounding`, `rubricPrompt`, `runJudge`); sub-agent
+  runs and their output envelope; `railResolver`; `pinnedMemoryExtractor`;
+  `gateItemStatus`. Tests sit beside most services, plus
+  `__integration__/dischargeLoop.contract.test.ts`.
+- Named commits of his, by SHA: `09d3e1ca7` (2026-06-07, discharge handler and
+  queue infrastructure), `335ccd68f` (2026-07-04, Temporal Phase 1 with a
+  crash-resume proof), `25373eabe` (2026-07-05, Phase 2 durable sub-agent
+  discharge), `4d3e698dc` (2026-07-05, workflow loop coverage), `61877252c`
+  (2026-07-08, durable reactivation idempotency and reflect-retry judge),
+  `643093ef4` (2026-07-18, converging futile judge retries).
+- Merged pull requests he authored: **#3731** "Long-horizon v0.4: sub-agent
+  discharge loop + Phase 2 CSV imports", 33 commits, +19,454/-2,820 across 433
+  files, merged 2026-06-10. **#3958** "aiChat: progress rail, sub-agent crash
+  reaper, v7 SSE shim + Temporal pilot", 37 commits, +21,061/-336 across 97
+  files, merged 2026-07-14. **#3985**, merged 2026-07-18. **#4224**
+  (OCT-4074, live usage across continuation and reactivation), merged
+  2026-08-26.
+- The visible half, in `octolane-org/octolane.com`:
+  `src/app/(app)/chat/components/RunProgressRail` — 9 files, 1,364 lines, **13
+  of 19 commits his**, 2026-07-11 to 2026-07-26. This is what a reader would
+  actually see working.
+
+Context, so the above is not read as more than it is: `apps/aiChat` overall is
+773 of 1,227 commits his; the backend repository is 12,960 of 17,828 (73%) and
+`octolane.com` 11,822 of 20,271 (58%). He is still shipping in it — six open
+PRs of his today, including OCT-4122 and OCT-4139.
+
+### What to be careful about when writing this up
+
+- **The two large PRs bundle other work.** #3731 also carries Phase 2 CSV
+  imports and #3958 an SSE shim, so their diff totals are not all this flow.
+  The module-level figure, 100 of 115 commits in `agentRun`, is the honest
+  measure of the flow itself.
+- **The Ask-question overlay is not his.** `AskUserQuestionOverlay` on the
+  front end is 29 commits Yash Sehgal against 13 of his, so the clarifying
+  question interaction should not be described as his work.
+- **Some commits are AI-assisted.** `Claude` appears as an author on 59
+  commits in `apps/aiChat` and 5 in `agentRun`, on his branches. Small, but
+  worth knowing before writing "built by hand" anywhere.
+- The team built the product. The RFCs, the durable execution work and the
+  judge are the parts the history attributes to him specifically.
+
+### What is still missing, precisely
+
+1. **No capture of this flow.** Nothing in the supplied or company assets shows
+   a run completing: no screenshot of the progress rail mid-run, no recording
+   of a question turning into a finished action. The one product image on the
+   site shows the ask box with an unsent request and stops there. **The exact
+   thing wanted: a screenshot or short screen recording of one Ask Octolane run
+   from the typed request through the progress rail to the completed action,
+   with demo data he is willing to publish.**
+2. **The evidence is private.** Every reference above is checkable by anyone
+   with access to the two repositories and by nobody else. To make the claim
+   public he would need either a capture he approves or a public write-up of
+   his own; PR numbers and file paths cannot be verified by a visitor and
+   should not be printed on the site as if they could.
+3. **No production outcomes.** No latency, reliability, adoption or cost
+   figures for this flow, so the write-up can describe what it does and what he
+   built, and must not claim what it achieved.
+
+Nothing was added to any page as a result of this review. The recommendation is
+a recommendation.

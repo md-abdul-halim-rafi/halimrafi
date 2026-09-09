@@ -3,15 +3,19 @@
 import { Fragment } from 'react'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { CompactComparison } from '@/components/demo/CompactComparison'
 import { Switcher } from '@/components/explorations/Switcher'
 import { person, STORY } from '@/explorations/data'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
 /**
- * Story: introduction, current work, one observable decision, a personal
- * closing.
+ * Story: introduction, current work, a personal closing.
+ *
+ * The streaming comparison used to sit between the work and the closing. It was
+ * removed on request; the component, its fixtures and its tests are untouched
+ * and still drive the case study, which keeps its own route. Nothing on this
+ * page links there any more, so the article's `?from=story` arm is currently
+ * unreachable from here. It is left in place, correct for a direct visit and
+ * ready if the link comes back.
  *
  * The progression is the point. The introduction is one tight group rather than
  * three spaced lines. The work is two short paragraphs. Then the decision, and
@@ -173,39 +177,6 @@ export function StoryExploration({
 
             <p className="story-quiet mt-5 max-w-[28rem] text-[0.875rem] leading-[1.6]">
               {STORY.previously}
-            </p>
-          </section>
-
-          {/* The decision, and the thing that makes it observable. The
-              comparison takes the container's full width while the prose stays
-              at its measure, which is the rhythm change. */}
-          <section aria-labelledby="decision" className="pt-14 sm:pt-16">
-            <hr className="story-rule w-14" />
-            <h2
-              id="decision"
-              className="story-display story-ink mt-5 max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
-            >
-              {STORY.decisionHeading}
-            </h2>
-            <p className="story-mid mt-4 max-w-[33rem] text-[1.0625rem] leading-[1.55]">
-              {STORY.decisionQuestion}
-            </p>
-
-            {/* The existing comparison, with its second control and its own
-                caption turned off: one play control, and the caption below is
-                this page's. */}
-            <div className="mt-7">
-              <CompactComparison variant="preview" />
-            </div>
-
-            <p className="story-mid mt-8 max-w-[30rem] text-[0.9375rem] leading-[1.65]">
-              {STORY.decisionTradeoff}
-            </p>
-            <p className="mt-4">
-              <Link href={STORY.readHref} className="story-read">
-                <span>{STORY.readLabel}</span>
-                <span aria-hidden>&rarr;</span>
-              </Link>
             </p>
           </section>
 
