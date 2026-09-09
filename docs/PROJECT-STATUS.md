@@ -2231,3 +2231,174 @@ PRs of his today, including OCT-4122 and OCT-4139.
 
 Nothing was added to any page as a result of this review. The recommendation is
 a recommendation.
+
+## Evidence review, completed: which flow to feature
+
+Written deliverable, not a page change. Nothing was added to any route.
+
+### The three candidates, measured
+
+Ownership is counted by commits touching the path, against Rafi's three git
+identities, in `octolane-org/octolane-backend`.
+
+| Candidate | Path | Size | His share | Active |
+| --- | --- | --- | --- | --- |
+| **Ask Octolane completing an action** | `apps/aiChat/src/modules/agentRun` | 71 files, 14,403 lines | **100 / 115 = 86%** | 2026-06-07 .. 08-26 |
+| Meeting intelligence, capture | `apps/meetingRecorder` | 146 files, 18,298 lines | 140 / 212 = 66% | 2026-02-06 .. 09-08 |
+| Meeting intelligence, summarisation | `apps/aiChat/src/modules/meeting` | 58 files, 9,808 lines | **3 / 62 = 4%** | 2026-05-17 .. 08-13 |
+| Automations | `apps/workflowService` | 169 files, 12,363 lines | 21 / 73 = 28% | 2026-01-30 .. 09-04 |
+
+Adjacent, for context: `apps/mcp` 118/180 (65%), `packages/ai` 145/253 (57%),
+`src/modules/tasks` 36/50 (72%) but only 1,974 lines,
+`apps/aiChat/src/modules/dreamMode` 2/82 (2%).
+
+**Selected: the long-horizon agent run behind Ask Octolane.** It has the
+highest ownership share of any substantial surface, it is the only one with a
+design document in his own hand predating the code, and it is the only
+candidate that is itself a user-visible flow rather than infrastructure.
+
+Meeting intelligence was the closest rival and is worth knowing about, because
+it splits: he owns two thirds of the recorder that captures a meeting, and
+almost none of the AI that summarises it. Featuring "meeting intelligence"
+without that split would attribute the summarisation to him. Automations is a
+team surface at 28% and should not be presented as his.
+
+### The flow
+
+A request typed into Ask Octolane becomes a durable agent run. When the agent
+fans out, the parent discharges its own LLM context, persists its intent as an
+`agent_runs` row and exits. Sub-agents run as independent jobs. When their
+completion criteria are met an orchestrator reactivates the parent in a fresh
+LLM call with their results merged in, and the cycle repeats until the goal is
+reached. Completion is gated by a judge that scores convergence and grounding
+before the run is allowed to finish.
+
+### His contribution
+
+- **The design, before the code.** `docs/rfcs/long-horizon-agent-runs.md`,
+  288 lines, authored `rafi@octolane.com`, dated 2026-06-06, with
+  `docs/rfcs/agentic-background-jobs.md` (225 lines) from 2026-05-12 as the
+  companion. `apps/aiChat/plans/oct-4074-stream-live-usage-continuation-reactivation.md`
+  (154 lines, 2026-08-26). `apps/aiChat/docs/AI_CHAT_INTERNALS.md`, 14,380
+  lines, largely his.
+- **The implementation.** `apps/aiChat/src/modules/agentRun`, 100 of 115
+  commits: the Temporal workflow, worker and activities; `dischargeHandler`
+  and `dischargeContinuation`; the judge (`convergence.ts`, `grounding.ts`,
+  `rubricPrompt.ts`, `runJudge.ts`); `SubAgentRunsService` and
+  `subAgentOutputEnvelope`; `railResolver`; `pinnedMemoryExtractor`;
+  `gateItemStatus`; `AgentRunSourcesService`. Tests sit beside most services,
+  plus `__integration__/dischargeLoop.contract.test.ts`.
+- **The visible half.** `octolane.com`,
+  `src/app/(app)/chat/components/RunProgressRail`, 9 files, 1,364 lines, 13 of
+  19 commits his, 2026-07-11 .. 07-26.
+
+Commits, by SHA, all his: `09d3e1ca7` (2026-06-07, discharge handler,
+chat integration, queue infrastructure) · `335ccd68f` (07-04, Temporal Phase 1
+scaffold with a crash-resume proof) · `25373eabe` (07-05, Phase 2 durable
+sub-agent discharge and the Docker worker) · `4d3e698dc` (07-05, workflow loop
+coverage) · `61877252c` (07-08, durable reactivation idempotency and the
+reflect-retry judge) · `643093ef4` (07-18, converging futile judge retries).
+
+Pull requests, all authored by him, all merged into `dev`:
+
+| PR | Title | Scale | Merged | Reviewed by |
+| --- | --- | --- | --- | --- |
+| #3731 | Long-horizon v0.4: sub-agent discharge loop + Phase 2 CSV imports | 33 commits, +19,454/-2,820, 433 files | 2026-06-10 | coffeewithone, approved |
+| #3958 | aiChat: progress rail, sub-agent crash reaper, v7 SSE shim + Temporal pilot | 37 commits, +21,061/-336, 97 files | 2026-07-14 | coffeewithone, approved |
+| #4224 | OCT-4074: stream live usage during continuation and reactivation cycles | 9 commits, +1,108/-75, 17 files | 2026-08-27 | coffeewithone, approved |
+
+### Collaborators, named
+
+- **One Chowdhury** (`coffeewithone`), co-founder: the approving reviewer on
+  all three pull requests, and two commits inside the module.
+- **Yash Sehgal**: 6 of the 19 commits on the progress rail on the front end.
+- **Raonak** (3 commits), **Tariqul Islam** (2), **Shahriar Shabbir** (1),
+  **Vitor Viesi** (1) inside `agentRun`.
+- **`Claude`** appears as the commit author on 5 commits in `agentRun` and 59
+  across `apps/aiChat`, on his branches. Worth knowing before writing anything
+  that implies every line was typed by hand.
+
+Two caveats on the PR numbers. #3731 also carries Phase 2 CSV imports and
+#3958 an SSE shim and a crash reaper, so their diff totals are not all this
+flow; the module figure, 100 of 115 commits, is the honest measure. And a
+single approving reviewer is a two-founder review culture, not an absence of
+review.
+
+### One engineering decision, and its tradeoff
+
+**Decision D3 in the RFC: replay by default, with pinned memory built but not
+yet injected.**
+
+On every reactivation the parent replays the full conversation rather than a
+summary of it. The `pinned_memory` side index for load-bearing facts is written
+from day one but deliberately not fed into the prompt.
+
+The reasoning, in the RFC's own terms: replay preserves the model's natural
+grounding turn to turn, where summarisation silently drops the identifiers a
+later phase depends on. Building the pinned-memory plumbing immediately means
+that when conversation length eventually forces truncation, pinned memory
+becomes the floor and no architectural change is needed.
+
+The cost is real and stated: every reactivation pays the full history in tokens
+and latency, so the design trades money and time now against correctness, and
+accepts carrying code that does nothing yet. The forcing incident behind the
+whole RFC shows the scale of what it is buying: a 178 KB spreadsheet of 947
+rows against a sub-agent offload budget of 5 x 4,000 characters, a turn that
+burned 442K input tokens and four and a half minutes before falling back.
+
+### Implemented, versus verified as released
+
+This distinction matters and the repository answers only half of it.
+
+**Implemented and deployed as code.** `09d3e1ca7`, `25373eabe` and `61877252c`
+are all ancestors of `origin/ai-chat/main`, the production deploy branch for
+the aiChat service, and prod promotion PRs into that branch continue through
+2026-09-09.
+
+**Not verified as switched on.** Both paths are gated, and the repository
+defaults are off:
+
+- `AI_CHAT_DISCHARGE_ORG_ALLOWLIST` defaults to `""`, commented in
+  `config.ts` as "Empty default = no orgs run discharge = safe rollout".
+- `AI_CHAT_TEMPORAL_ENABLED` defaults to `false`, and
+  `apps/aiChat/.env.example` says "Ships DARK: leave
+  AI_CHAT_TEMPORAL_ENABLED=false and the durable path is a no-op".
+
+Those are repository defaults, not production values. **I cannot see the
+production environment configuration, so I cannot confirm whether any
+organisation has the discharge allowlist populated or Temporal enabled.**
+Until that is confirmed, the honest claim is that the flow is built, reviewed,
+merged and deployed behind a flag, with a documented rollout gate. It is not
+"in production for customers" on the strength of anything I can read.
+
+### The exact captures needed
+
+Five, in one sitting, on a demo workspace he is willing to publish:
+
+1. **The request.** Ask Octolane with a typed request that will genuinely fan
+   out. The existing marketing screenshot already shows this state and could
+   stand in.
+2. **The run working.** The progress rail mid-run, with more than one sub-agent
+   visible: `RunProgressRail` — `DesktopDock`, `RailPanels`, `SubAgentDetail`.
+   This is the frame that shows a run rather than a chat, and nothing in the
+   supplied assets shows it.
+3. **A reactivation.** The moment the parent comes back with sub-agent results
+   merged in, which is the whole point of the design and is invisible in a
+   still of the finished answer.
+4. **The finished answer with its sources**, from `AgentRunSourcesService`.
+5. **The action's effect in the CRM** — the records the run actually changed,
+   so "completing an action" is shown rather than asserted.
+
+A single screen recording of one run, thirty to sixty seconds, would cover 1
+through 4; 5 needs one more frame after it. Since the flag state cannot be
+verified from here, the recording should be captured from whatever environment
+actually has the path enabled, and the write-up should say which.
+
+### Not on the site
+
+Nothing above has been added to any page. Every reference here is checkable by
+someone with access to the two repositories and by nobody else, so PR numbers,
+SHAs and file paths must not appear on the website as if a visitor could verify
+them. What can be written publicly, once a capture exists, is what the flow
+does and what he designed and built; not what it achieved, since no production
+measurements have been supplied.
