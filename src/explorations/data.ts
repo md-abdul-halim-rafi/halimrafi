@@ -169,34 +169,54 @@ export const STORY = {
   /**
    * The one piece of real product evidence on this page.
    *
-   * This is Octolane's own screenshot of the application, published by the
-   * company on octolane.com, where it is the image for the "Use Native AI CRM"
-   * tab. It is actual product interface: the sidebar carries Emails, Messages,
-   * Meetings, Accounts and Contacts, and the box at the top holds a question
-   * asked against them. That is the sentence above this section, on screen.
+   * Source, established by inspecting the file rather than its name: it is
+   * `public/assets/images/01-screen-shot.webp` in Octolane's own website
+   * repository, published on octolane.com as the image for the "Use Native AI
+   * CRM" feature tab. Company material, already public.
+   *
+   * What the file actually is: a framed presentation of the application, not a
+   * raw screen capture. The dark rounded outline is in the pixels themselves,
+   * with transparent corners outside it, and the application background is 85%
+   * opaque, so the interface was composited into a frame. The interface is the
+   * product's own, shown in a demo workspace: the workspace switcher reads
+   * Resend, and a meeting participant is at acme.com. Whether the interior was
+   * captured from a running build or assembled in a design tool cannot be
+   * determined from the file, so neither is claimed.
+   *
+   * Because the outline belongs to the asset, no CSS border is added over it.
    *
    * Three things are deliberately kept apart on this page. This is the product.
    * `productArtifact` in components/site is the company's brand image, and it
    * says so in its own caption. The comparison further down is a simulated
    * prototype built for this site, captioned as such wherever it appears.
    *
-   * The caption describes only what is visible and where the file came from. It
-   * claims no ownership of this screen: the accompanying sentence already says
-   * what Rafi is answerable for, which is the team and the technical direction,
-   * and no supplied material says who designed or built this view.
+   * The caption describes the visible screen and nothing beyond it. The request
+   * in the ask box is typed and unsent: the text cursor is still in the field
+   * and the submit button sits beside it, with no answer anywhere on screen. So
+   * the caption says "ready to send" and stops there, claiming no completed
+   * workflow, no shipped behaviour, and no authorship. The sentence above the
+   * figure carries the only contribution claim the supplied material supports,
+   * which is the team and the technical direction.
    *
-   * Note the company site labels this same file as its Salesforce and HubSpot
-   * screenshots on two other tabs, which the image itself does not show. That
-   * is why the caption names the workspace and the question and nothing else.
+   * One more thing not written: the company site uses this same file for its
+   * Salesforce tab and again for its HubSpot tab, and the image shows neither.
    */
   productSrc: '/octolane/octolane-app-home.webp',
   productWidth: 4074,
   productHeight: 2727,
   productTitle: 'Octolane',
   productAlt:
-    'The Octolane application. A sidebar lists Overview, Actions, Emails, Messages, Meetings, Signals, Accounts, Contacts and Pipelines. The main column holds a question typed into an ask box, reading "Find deals stuck in negotiation for 14+ days and draft a check-in to each champion", above cards for AI Memory and AI Actions and a list of upcoming meetings with their participants.',
-  productCaption:
-    'Octolane, asking one question of a workspace of emails, meetings and records. Screenshot from octolane.com.',
+    'The Octolane application in a dark rounded frame. A sidebar lists Overview, Actions, Emails, Messages, Meetings, Signals, Accounts, Contacts and Pipelines, with Home selected. The main column is headed "Never miss a follow-up" over an ask box holding the typed, unsent request "Find deals stuck in negotiation for 14+ days and draft a check-in to each champion", the text cursor still at its end and a round submit button at its right. Below sit cards for AI Memory and AI Actions and a list of upcoming meetings with their participants.',
+  productCaption: 'Octolane’s home workspace, with a follow-up request ready to send.',
+  productZoomLabel: 'View larger',
+  /**
+   * The button wraps the screenshot, so without this its accessible name would
+   * be the image's whole alt paragraph followed by "View larger". It begins
+   * with the visible words, which is what WCAG's label-in-name asks for.
+   */
+  productZoomAria: 'View larger: Octolane’s home workspace',
+  productSourceLabel: 'octolane.com',
+  productSourceHref: 'https://www.octolane.com',
 
   readLabel: 'Read the case study',
   /**

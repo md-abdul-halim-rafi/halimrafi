@@ -1745,3 +1745,113 @@ Item 1 has moved. There is now one authentic product screenshot on the page.
 The exact thing still wanted, stated plainly: a screenshot or a short recording
 of one real Octolane workflow, with enough context to say what Rafi did and
 what the team did. Nothing on the page stands in for it.
+
+## Pass: refining the product figure
+
+Only the figure changed. The rest of the page is as it was.
+
+### Confirmed source
+
+`public/assets/images/01-screen-shot.webp` in Octolane's own website
+repository, published on octolane.com as the image for the "Use Native AI CRM"
+feature tab. Copied here as `public/octolane/octolane-app-home.webp`, byte for
+byte, 4074x2727, the highest resolution that exists. Company material, already
+public.
+
+**It is a framed presentation of the application, not a raw screen capture.**
+Established by reading the file's own pixels rather than trusting its name: the
+outermost pixels along the left, top and bottom edges are `rgba(0,0,0,1)`, the
+corners just outside that stroke are fully transparent, and 20px in the surface
+is `rgba(248,248,248,0.85)`. So the interface was composited into a dark rounded
+frame with translucency, and the frame belongs to the asset.
+
+The interface inside it is the product's own, shown in a demo workspace: the
+workspace switcher reads Resend and a meeting participant is at acme.com.
+Whether the interior was captured from a running build or assembled in a design
+tool cannot be told from the file, so neither is claimed anywhere.
+
+Two corrections to what I wrote in the previous pass. I said this file "carries
+no named third-party contact", which is true of contacts but left the wrong
+impression: it does name **Resend** as the workspace in the top-left, and it
+shows `one@octolane.com` and `elis@acme.com`. And the heavy black outline is
+not CSS. `.studio-photo` sets only a hover opacity and a focus ring; it draws
+no border. Since the outline is in the asset, the instruction to replace it
+does not apply and no CSS frame was added, which would have put a frame on top
+of a frame.
+
+### What changed
+
+- **Width.** The figure takes the container's full width, 848px at 1440 and
+  640px at the 200% emulation, measured equal to the comparison's figure at
+  every width. Paragraphs are untouched at 528px.
+- **No border added,** for the reason above.
+- **One visible control.** The image and the words "View larger ↗" sit inside
+  the same button, so there is a single tab stop rather than two controls
+  doing one thing, and the visible label is part of the accessible name:
+  `aria-label="View larger: Octolane's home workspace"`, which begins with the
+  words on screen so voice control can address what a sighted user reads. The
+  earlier version had no visible affordance and an `aria-label` that did not
+  match anything on screen.
+- **Caption corrected** to "Octolane's home workspace, with a follow-up request
+  ready to send.", with `octolane.com` beside it as the source. The suggested
+  wording was used because inspection confirms it: the ask box holds the typed
+  request "Find deals stuck in negotiation for 14+ days and draft a check-in to
+  each champion", the text cursor is still at its end, the round submit button
+  sits at its right, and there is no answer anywhere on screen. Nothing has
+  been sent, so the caption stops at "ready to send" and implies no completed
+  workflow. The previous caption said "asking one question of a workspace",
+  which read as though the question had been asked.
+- The alt text now describes the frame, the selected Home tab, the heading, the
+  unsent request, the cursor and the submit button.
+
+The comparison below is untouched and still says it is a simulated prototype.
+
+### Verification
+
+`cap/product.mjs`, now 75 checks at 1440x900, 390x844 and 200% zoom, all
+passing. The figure as wide as the comparison and the paragraphs still at their
+measure; the phone's figure inside its column with no overflow; the visible
+label painted under the image; the accessible name beginning with it; the
+caption at 4.7:1; product and prototype in separate figures. Enlarged view:
+opened from the keyboard with Enter, focus on Close, stepping staying on the
+product, Escape closing it, focus returning to the trigger, scroll restored to
+the pixel, the page unlocked, and no horizontal overflow at either width.
+
+Re-run and passing: route audit 90/90, navigation 96/96, controls 67/67,
+integrity 31/31, composition 103/103 (keyboard order updated for the two new
+stops, which fall in reading order: email, View larger, octolane.com, then the
+comparison). `pnpm lint` clean, `tsc --noEmit` clean, 24 tests, build compiled.
+
+### A measurement mistake I nearly acted on
+
+I measured the enlarged image with `naturalWidth` and read 358px on a phone and
+1324px on a 2x desktop, which looked like the viewer serving a badly
+under-resolved file. I was about to change the shared viewer's `sizes`, which
+would have touched the photography gallery for no reason.
+
+`naturalWidth` is the wrong probe. With a `w`-descriptor srcset the browser
+divides the intrinsic size by the density it computed, so it reports the CSS
+width straight back and every image looks soft. Fetching the optimizer directly
+returned exactly what was asked for: `w=750` gave 750x502, `w=1920` gave
+1920x1285, `w=3840` gave 3840x2570. Reading `w=` out of `currentSrc` instead
+shows the enlarged view is sharp everywhere: 1920 served for 1153 CSS px at 1x,
+3840 for 1153 at 2x, 750 for 359 at 2x, 1080 for 359 at 3x. Nothing was
+changed, and `cap/product.mjs` now measures the served candidate.
+
+### Honest limit on a phone
+
+The enlarged view is 359 CSS px wide because that is the whole width of a
+390px screen; no viewer can exceed it. It is served 750 device pixels there, and
+the page sets `width=device-width, initial-scale=1` with no `user-scalable=no`
+and no `maximum-scale`, so pinch zoom is available and reveals real detail
+rather than blur. Inspecting a 4074px interface on a phone still means zooming.
+
+### Evidence gap, unchanged
+
+The figure shows the product; it says nothing about what Rafi did. Still wanted:
+a screenshot or short recording of one real Octolane workflow, with enough
+context to say what he did and what the team did. Also still open: production
+measurements, a delivery timeline beyond YC W24 and the acquisition, a public
+profile URL, and a favicon. And still Rafi's call: whether to use
+`03-screen-shot.webp`, which shows what changed on an account far better but
+publishes named customer companies, a named contact and deal values.

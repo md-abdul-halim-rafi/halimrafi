@@ -127,31 +127,47 @@ export function StoryExploration({
               {STORY.workRole}
             </p>
 
-            {/* The product itself, once. It follows the two sentences it
-                illustrates rather than opening the section, so the
-                introduction above is still the first thing the page gives
-                the reader. It opens into a larger view because the interface
-                is dense and a screenshot at this width cannot be read in
-                detail. */}
+            {/* The product itself, once.
+                
+                It takes the container's full width, the same as the comparison
+                below, so the two figures on this page are measured alike while
+                every paragraph stays at its reading width.
+
+                No border is drawn on it. The dark rounded outline is part of
+                the asset: its own edge pixels are black and the corners
+                outside it are transparent, so a CSS frame would sit on top of
+                a frame.
+
+                One control, not two. The image and the words under it are
+                inside the same button, so there is a single tab stop and the
+                visible label is the accessible name. The viewer it opens
+                handles Escape, focus restoration and scroll on its own. */}
             <figure className="m-0 mt-7">
               <button
                 type="button"
                 onClick={(event) => lightbox.show([productAsset], 0, event.currentTarget)}
                 aria-haspopup="dialog"
-                aria-label={`Open the ${STORY.productTitle} screenshot`}
-                className="studio-photo block w-full max-w-[40rem]"
+                aria-label={STORY.productZoomAria}
+                className="studio-photo block w-full text-left"
               >
                 <Image
                   src={STORY.productSrc}
                   alt={STORY.productAlt}
                   width={STORY.productWidth}
                   height={STORY.productHeight}
-                  sizes="(min-width: 640px) 40rem, 92vw"
+                  sizes="(min-width: 640px) 58rem, 92vw"
                   className="h-auto w-full"
                 />
+                <span className="story-mono story-quiet mt-3 inline-flex items-center gap-2 text-[0.75rem]">
+                  <span>{STORY.productZoomLabel}</span>
+                  <span aria-hidden>&#8599;</span>
+                </span>
               </button>
-              <figcaption className="story-quiet mt-3 max-w-[34rem] text-[0.8125rem] leading-[1.5]">
-                {STORY.productCaption}
+              <figcaption className="story-quiet mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[0.8125rem] leading-[1.5]">
+                <span>{STORY.productCaption}</span>
+                <a href={STORY.productSourceHref} className="story-gallery">
+                  {STORY.productSourceLabel}
+                </a>
               </figcaption>
             </figure>
 
