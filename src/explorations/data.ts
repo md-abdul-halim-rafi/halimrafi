@@ -166,6 +166,38 @@ export const STORY = {
    */
   decisionTradeoff:
     'This prototype waits for a readable unit before showing it. The tradeoff is a short delay before text appears.',
+  /**
+   * The one piece of real product evidence on this page.
+   *
+   * This is Octolane's own screenshot of the application, published by the
+   * company on octolane.com, where it is the image for the "Use Native AI CRM"
+   * tab. It is actual product interface: the sidebar carries Emails, Messages,
+   * Meetings, Accounts and Contacts, and the box at the top holds a question
+   * asked against them. That is the sentence above this section, on screen.
+   *
+   * Three things are deliberately kept apart on this page. This is the product.
+   * `productArtifact` in components/site is the company's brand image, and it
+   * says so in its own caption. The comparison further down is a simulated
+   * prototype built for this site, captioned as such wherever it appears.
+   *
+   * The caption describes only what is visible and where the file came from. It
+   * claims no ownership of this screen: the accompanying sentence already says
+   * what Rafi is answerable for, which is the team and the technical direction,
+   * and no supplied material says who designed or built this view.
+   *
+   * Note the company site labels this same file as its Salesforce and HubSpot
+   * screenshots on two other tabs, which the image itself does not show. That
+   * is why the caption names the workspace and the question and nothing else.
+   */
+  productSrc: '/octolane/octolane-app-home.webp',
+  productWidth: 4074,
+  productHeight: 2727,
+  productTitle: 'Octolane',
+  productAlt:
+    'The Octolane application. A sidebar lists Overview, Actions, Emails, Messages, Meetings, Signals, Accounts, Contacts and Pipelines. The main column holds a question typed into an ask box, reading "Find deals stuck in negotiation for 14+ days and draft a check-in to each champion", above cards for AI Memory and AI Actions and a list of upcoming meetings with their participants.',
+  productCaption:
+    'Octolane, asking one question of a workspace of emails, meetings and records. Screenshot from octolane.com.',
+
   readLabel: 'Read the case study',
   /**
    * The article lives under Studio and Studio links to it too, so the entry

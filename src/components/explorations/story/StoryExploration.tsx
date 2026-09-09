@@ -70,6 +70,16 @@ export function StoryExploration({
   gallery: StudioAsset[]
 }) {
   const lightbox = useLightbox()
+  const productAsset: StudioAsset = {
+    id: 'octolane-app-home',
+    kind: 'product',
+    src: STORY.productSrc,
+    alt: STORY.productAlt,
+    width: STORY.productWidth,
+    height: STORY.productHeight,
+    title: STORY.productTitle,
+    caption: STORY.productCaption,
+  }
   const shownIndex = Math.max(
     0,
     gallery.findIndex((item) => item.id === photograph?.id),
@@ -116,6 +126,35 @@ export function StoryExploration({
             <p className="story-mid mt-4 max-w-[28rem] text-[0.9375rem] leading-[1.65]">
               {STORY.workRole}
             </p>
+
+            {/* The product itself, once. It follows the two sentences it
+                illustrates rather than opening the section, so the
+                introduction above is still the first thing the page gives
+                the reader. It opens into a larger view because the interface
+                is dense and a screenshot at this width cannot be read in
+                detail. */}
+            <figure className="m-0 mt-7">
+              <button
+                type="button"
+                onClick={(event) => lightbox.show([productAsset], 0, event.currentTarget)}
+                aria-haspopup="dialog"
+                aria-label={`Open the ${STORY.productTitle} screenshot`}
+                className="studio-photo block w-full max-w-[40rem]"
+              >
+                <Image
+                  src={STORY.productSrc}
+                  alt={STORY.productAlt}
+                  width={STORY.productWidth}
+                  height={STORY.productHeight}
+                  sizes="(min-width: 640px) 40rem, 92vw"
+                  className="h-auto w-full"
+                />
+              </button>
+              <figcaption className="story-quiet mt-3 max-w-[34rem] text-[0.8125rem] leading-[1.5]">
+                {STORY.productCaption}
+              </figcaption>
+            </figure>
+
             <p className="story-quiet mt-5 max-w-[28rem] text-[0.875rem] leading-[1.6]">
               {STORY.previously}
             </p>

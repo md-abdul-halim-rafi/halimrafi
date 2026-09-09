@@ -1623,3 +1623,125 @@ One thing not to read as evidence: the stage trace `statefilm.mjs` prints reads
 the control's label immediately after each press, before React has committed
 the re-render, so it reports the previous word. The label transitions are
 established by `cap/controls.mjs`, which reads after the render.
+
+## Pass: one real product screenshot in the work section
+
+### What was looked at, and how it was sorted
+
+Every supplied asset was opened, not listed. In this project `public/` holds
+five photographs and one Octolane file, and that file is the marketing cover.
+The company repo at `~/Desktop/Octolane/octolane.com` holds four candidates,
+which were converted and viewed:
+
+- `01-screen-shot.webp`, 4074x2727. **Actual product UI.** The application's
+  home: a sidebar carrying Overview, Actions, Emails, Messages, Meetings,
+  Signals, Accounts, Contacts and Pipelines, a question typed into the ask box
+  ("Find deals stuck in negotiation for 14+ days and draft a check-in to each
+  champion"), cards for AI Memory and AI Actions, and upcoming meetings with
+  their participants.
+- `03-screen-shot.webp`, 4074x2727. **Actual product UI, and the strongest
+  match for the page's argument**: a "Record updates" panel proposing changes
+  field by field with current and new values, over a popover reading "Why
+  Octolane suggested this" with a confidence, the evidence ("Call recap + email
+  thread") and a detection date. Not used. It names two third-party companies
+  as accounts, names a real person as a contact, and prints deal values. That
+  is a decision about publishing named customers on a personal site, and it is
+  Rafi's to make, not mine.
+- `04-screen-shot.webp`, 4074x2727. **Actual product UI.** Meetings: a
+  recording with playback and a summary being written. Not used; it shows a
+  person's face on camera.
+- `head-of-sales-screenshot.webp`. Reviewed, not chosen.
+
+All four are published by the company on octolane.com, so none is private
+material. `01` was chosen because it is the sentence above it, on screen, and
+because it carries no deal figures and no named third-party contact.
+
+The three kinds are kept apart and each says what it is:
+
+| | What it is | Where it lives |
+| --- | --- | --- |
+| Product UI | Octolane's own screenshot of the application | the work section on Story |
+| Brand artwork | the Revenue Superintelligence cover | `productArtifact`, captioned as a brand image, on the homepage |
+| Simulated prototype | the streaming comparison | the decision section, captioned as simulated wherever it appears |
+
+### What changed on the page
+
+`public/octolane/octolane-app-home.webp` was copied in. `STORY.product*` in
+`src/explorations/data.ts` carries the path, the real dimensions, the alt text
+and one caption; `StoryExploration.tsx` renders it as a figure after the two
+Octolane sentences and before the Mainly Coding note, opening into the viewer
+the page already has, as a one-item sequence so stepping cannot walk from the
+product into the photographs.
+
+The caption is "Octolane, asking one question of a workspace of emails,
+meetings and records. Screenshot from octolane.com." It describes what is
+visible and where the file came from. It claims nothing about who designed or
+built that screen, because no supplied material says. The sentence above it
+still carries the only contribution claim the material supports: the team and
+the technical direction.
+
+Two notes on what was deliberately not written. The company site uses this same
+file as the image for its Salesforce tab and again for its HubSpot tab; the
+image shows neither, so the caption names only the workspace and the question.
+And nothing was said about the records being examples, because that cannot be
+verified from the file.
+
+### A tradeoff to know about
+
+An earlier pass required the comparison heading and the top of its panel to be
+inside a 1440x900 screen. That can no longer hold. The figure adds about 500px
+and only 76px were free, so the heading moved from 717px to 1224px. No image
+size closes that gap. What the first screen shows now is the introduction and
+the product, which is the order this pass asked for; the comparison follows
+within one screen of scrolling and its panel is still whole. The composition
+suite was changed to assert exactly that, and the change is marked in the file
+as a tradeoff rather than a relaxed threshold.
+
+### Verification
+
+Re-run against this code, not carried over: route audit 90/90, navigation
+96/96, controls and playback 67/67, comparison integrity 31/31, story
+composition 103/103 (two assertions rewritten, two added). `pnpm lint` clean,
+`tsc --noEmit` clean, 24 tests passing, `pnpm build` compiled.
+
+New: `cap/product.mjs`, 63 checks at 1440x900, 390x844 and 200% zoom. One
+figure in the work section pointing at the product file; the image loaded and
+served at the real aspect ratio; a supporting width, 640px at desktop and 358px
+on a phone; alt text describing the interface; one caption naming the product
+and the source and claiming nothing about authorship; the caption at 4.7:1;
+a labelled trigger; the product and the prototype in separate figures; the
+figure after the two sentences; no horizontal overflow. The viewer opens on the
+product, the larger view is big enough to be worth opening, focus moves to
+Close, stepping stays on the product, and Escape closes it, returns focus to
+the trigger, restores scroll to the pixel and unlocks the page.
+
+### Another measurement mistake
+
+My new contrast probe returned `NaN:1`. `parse` hands back an alpha as a fourth
+element, and the luminance function summed over all four against a
+three-coefficient array, so every ratio was `undefined`. Fixed by taking only
+the three colour channels. The route audit's own probe was checked and does not
+share this bug: it keeps `{rgb, a}` apart, so the AA figures reported in
+earlier passes stand.
+
+### Private checklist: evidence still missing
+
+Item 1 has moved. There is now one authentic product screenshot on the page.
+
+1. ~~No product artifact.~~ Satisfied for the work section. Still open: whether
+   to use `03-screen-shot.webp`, which demonstrates "what changed on an
+   account" far better but publishes named customer companies, a named contact
+   and deal values.
+2. **No contribution evidence.** Unchanged, and the screenshot does not supply
+   any: it shows the product, not what Rafi did. A specific feature, system or
+   decision he owned, with a record behind it, is still the missing piece.
+3. **No production measurements.** Unchanged.
+4. **No delivery timeline** beyond YC W24 and the acquisition. Unchanged.
+5. **No public profile URL.** Unchanged.
+6. **The prototype is still the only interactive artifact,** and it is
+   simulated. Unchanged.
+7. **No favicon asset.** Unchanged.
+
+The exact thing still wanted, stated plainly: a screenshot or a short recording
+of one real Octolane workflow, with enough context to say what Rafi did and
+what the team did. Nothing on the page stands in for it.

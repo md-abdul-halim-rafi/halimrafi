@@ -13,9 +13,11 @@ export const metadata: Metadata = {
  * Assets are resolved here, on the server: the photograph manifest reads the
  * filesystem and StoryExploration is a client component.
  *
- * No Octolane product artifact has been supplied to this project, so the work
- * section is two paragraphs and no image. The marketing cover is not product
- * evidence and is deliberately absent. Recorded in docs/PROJECT-STATUS.md.
+ * The work section now carries one real product screenshot, Octolane's own
+ * published image of the application, described in STORY.product* and rendered
+ * by the component. The marketing cover is still absent: it is brand artwork,
+ * not product evidence, and it says so in its own caption on the homepage.
+ * What is still missing is recorded in docs/PROJECT-STATUS.md.
  */
 export default function StoryPage() {
   const photographs: StudioAsset[] = availablePhotographs().map((photo) => ({
