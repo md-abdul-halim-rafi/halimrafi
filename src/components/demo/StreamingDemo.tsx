@@ -5,7 +5,7 @@ import { useReplay } from '@/demo/useReplay'
 import type { RevealMode, ScenarioId } from '@/demo/types'
 import { ControlButton } from '@/components/ui/Control'
 import { Pause, Play, Reset } from '@/components/ui/icons'
-import { playLabel, RESET_LABEL } from '@/demo/labels'
+import { COMPARISON_NOTE, playLabel, PROTOTYPE_CAPTION, RESET_LABEL } from '@/demo/labels'
 import { useHydrated } from '@/lib/useHydrated'
 import { Reserve, ResponseView } from './ResponseView'
 
@@ -50,7 +50,11 @@ function Segmented<T extends string>({
               aria-pressed={selected}
               onClick={() => onChange(option.id)}
               className={[
-                'trim-cap rounded-[var(--r-pill)] px-3 py-1.5 text-[0.8125rem]',
+                'trim-cap inline-flex items-center justify-center',
+                // Cap-trimmed text leaves a 21px box, which is under the
+                // minimum target size. Touch pointers get a taller box; the
+                // pointer-fine treatment is unchanged.
+                'rounded-[var(--r-pill)] px-3 py-1.5 text-[0.8125rem] [@media(pointer:coarse)]:min-h-10',
                 'transition-[background-color,color,box-shadow] duration-200 [transition-timing-function:var(--ease-out-quint)]',
                 'disabled:cursor-not-allowed disabled:opacity-45',
                 selected
@@ -73,9 +77,10 @@ type DemoState = 'idle' | 'waiting' | 'playing' | 'paused' | 'complete'
  * The states the visitor can be in, shown rather than inferred.
  *
  * `idle` and `complete` both display the finished answer, but they are not the
- * same thing to a reader: one is the resting frame they have not played yet, the
- * other is a run that has just ended. Labelling both "Complete" beside a Play
- * button read as a contradiction.
+ * the same thing to a reader: one is the resting frame they have not played
+ * yet, the other is a run that has just ended. Both show the finished answer
+ * and both offer the same replay, so both carry the same word. Any difference
+ * here would be a distinction the reader cannot act on.
  */
 function StatusChip({ state }: { state: DemoState }) {
   const copy = {
@@ -83,7 +88,7 @@ function StatusChip({ state }: { state: DemoState }) {
     waiting: { text: 'Waiting on the record', tone: 'text-signal' },
     playing: { text: 'Playing', tone: 'text-ink-12' },
     paused: { text: 'Paused', tone: 'text-ink-12' },
-    complete: { text: 'Complete', tone: 'text-muted' },
+    complete: { text: 'Finished answer', tone: 'text-muted' },
   }[state]
 
   return (
@@ -128,12 +133,16 @@ export function StreamingDemo() {
           ? 'complete'
           : 'idle'
 
+  // Idle and complete are one state to the reader, so they read the same. The
+  // sentence names the control by its actual label rather than saying "play",
+  // which no control here says.
+  const restText = `Showing the finished answer. ${playLabel('idle')} to watch it arrive.`
   const statusText = {
-    idle: 'Showing the finished answer. Press play to watch it arrive.',
+    idle: restText,
     waiting: 'Still waiting on the account record.',
     playing: 'Playing the response.',
     paused: 'Paused.',
-    complete: 'Playback complete.',
+    complete: restText,
   }[state]
 
   return (
@@ -142,7 +151,7 @@ export function StreamingDemo() {
       aria-label="Streaming response demonstration"
     >
       <header className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 border-b border-[color:var(--hairline)] px-4 py-3 sm:px-6">
-        <p className="label">Interactive prototype using simulated data</p>
+        <p className="label">{PROTOTYPE_CAPTION}</p>
         <StatusChip state={state} />
       </header>
 
@@ -185,7 +194,10 @@ export function StreamingDemo() {
         </fieldset>
       </div>
 
-      <p className="px-4 pb-4 text-[0.8125rem] text-muted sm:px-6">{activeMode.hint}</p>
+      <p className="px-4 pb-1 text-[0.8125rem] text-muted sm:px-6">{activeMode.hint}</p>
+      <p className="max-w-[68ch] px-4 pb-4 text-[0.8125rem] leading-[1.55] text-muted sm:px-6">
+        {COMPARISON_NOTE}
+      </p>
 
       {/*
         The transcript holds the height of the finished answer from the start, so

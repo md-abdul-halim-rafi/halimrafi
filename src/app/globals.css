@@ -20,7 +20,7 @@
   --ink-4: #dfe3e8;
   --ink-6: #c3cad1;
   --ink-8: #939ca6;
-  --ink-9: #6e7883;
+  --ink-9: #626b75;
   --ink-10: #4d5763;
   --ink-11: #2b333c;
   --ink-12: #12161b;
@@ -36,6 +36,8 @@
   --signal-wash: #e7f0ed;
 
   --text: var(--ink-12);
+  /* Step 9 is the quiet-text step, and it has to clear 4.5:1 at 11px. Each
+     palette sets its own; see the note beside those values. */
   --text-muted: var(--ink-9);
   --text-soft: var(--ink-10);
 
@@ -82,7 +84,12 @@
      headline needs the whole column. */
   --field-strength: 1;
   --measure-title: 18ch;
+  /* The live site's own value; each exploration palette overrides it. */
+  --demo-caption: var(--text-muted);
+
   --measure-read: 38rem;
+  /* What a figure widens to when it steps out of the reading column. */
+  --measure-wide: 58rem;
   --read-size: 1.0625rem;
   --read-leading: 1.75;
 }
@@ -116,6 +123,10 @@
   --color-ink-10: var(--ink-10);
   --color-ink-11: var(--ink-11);
   --color-ink-12: var(--ink-12);
+
+  /* The caption beside a demo's control. Defined per palette, because the ink
+     that reads as a quiet caption on one paper is invisible on another. */
+  --color-demo-caption: var(--demo-caption);
 
   --font-display: var(--font-serif);
   --font-sans: var(--font-sans);
@@ -480,8 +491,566 @@
     margin-inline: 0;
   }
   .prose-column > .breakout {
-    max-width: 58rem;
+    max-width: var(--measure-wide);
     width: 100%;
+  }
+}
+
+
+/* The article's headings carry a 7rem scroll offset for the live route's
+   floating navigation. The Studio preview has no navigation above the content,
+   so an anchor there only needs to clear the page's own top padding. */
+[data-explore='studio'] article :is(h2, h3) {
+  scroll-margin-top: 2.5rem;
+}
+
+
+@layer components {
+  /* Translated from the Octolane frontend, one decision each. Sources are in
+     the implementation report. */
+
+  /* The reading weight. The reference sets its landing and its essays a
+     50-step under regular, 350, scoped by a class on each page root, because
+     Inter is variable there and 350 is a real weight rather than a synthesised
+     one; the display face is static, so it keeps 400. Inter is loaded variable
+     here too. Verified shipping: the served HTML at octolane.com carries
+     `class="site-type-350 relative w-full"`. */
+  .story-type-350 {
+    font-weight: 350;
+  }
+  .story-type-350 .story-display {
+    font-weight: 400;
+  }
+
+  /* The ink ladder. The reference runs three levels inside one lockup rather
+     than two greys (`--core-silver-a12/a11/a9` in
+     src/app/styles/variables.scss). The top and middle steps are its alphas.
+     Its faintest step, 0.447, measures 3.0:1 on this paper, which is too pale
+     to read at 12.5px, so the bottom step here is 0.608 and everything else
+     moves up with it. Measured over #f6f4f1: 11.4:1, 6.3:1, 4.8:1. */
+  .story-ink {
+    color: rgba(23, 21, 15, 0.875);
+  }
+  .story-mid {
+    color: rgba(23, 21, 15, 0.7);
+  }
+  .story-quiet {
+    color: rgba(23, 21, 15, 0.608);
+  }
+
+  /* The display roles. The reference's `.t-display`: the editorial serif at
+     weight 400, tracking -0.015em, leading 1.04. The measure is set in `ch` in
+     the reference too, so it tracks the clamped font size instead of fighting
+     it. */
+  .story-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+  }
+
+  /* Small controls and the kicker. The reference's `.t-mono-md`: the mono face
+     at 12.5px, uppercase, tracking 0.08em, leading 1.9, and its hero cue moves
+     from muted to full ink over 300ms on the house curve. */
+  .story-mono {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    line-height: 1.9;
+    text-transform: uppercase;
+  }
+  .story-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 40px;
+    /* The reference's cue rests on `--site-muted`, rgba(23, 24, 26, 0.66),
+       and moves to full ink. */
+    color: rgba(23, 21, 15, 0.608);
+    transition: color 300ms var(--ease-out-quint);
+  }
+  .story-control > [aria-hidden] {
+    transition: transform 300ms var(--ease-out-quint);
+  }
+  .story-control:hover {
+    color: rgba(23, 21, 15, 0.875);
+  }
+  .story-control:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .story-control:active {
+    color: var(--signal);
+  }
+  .story-control:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+  .story-control:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The way into the case study. A sentence-case link at reading size, because
+     uppercase mono metadata gave the most important destination on the page the
+     weight of a footnote. */
+  .story-read {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration: underline;
+    text-decoration-color: rgba(23, 21, 15, 0.3);
+    text-underline-offset: 4px;
+    transition:
+      color 300ms var(--ease-out-quint),
+      text-decoration-color 300ms var(--ease-out-quint);
+  }
+  .story-read > [aria-hidden] {
+    transition: transform 300ms var(--ease-out-quint);
+  }
+  .story-read:hover {
+    color: var(--signal);
+    text-decoration-color: var(--signal);
+  }
+  .story-read:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .story-read:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+  .story-read:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The address in the closing, which has to read as a link and not as a
+     label: normal case, underlined, at full ink. */
+  .story-address {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration: underline;
+    text-decoration-color: rgba(23, 21, 15, 0.35);
+    text-underline-offset: 4px;
+    transition:
+      color 300ms var(--ease-out-quint),
+      text-decoration-color 300ms var(--ease-out-quint);
+  }
+  .story-address:hover {
+    color: var(--signal);
+    text-decoration-color: var(--signal);
+  }
+  .story-address:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The gallery link, quiet enough to sit inside a caption. */
+  .story-gallery {
+    color: rgba(23, 21, 15, 0.608);
+    text-decoration: underline;
+    text-decoration-color: rgba(23, 21, 15, 0.28);
+    text-underline-offset: 3px;
+    transition:
+      color 300ms var(--ease-out-quint),
+      text-decoration-color 300ms var(--ease-out-quint);
+  }
+  .story-gallery:hover {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-color: rgba(23, 21, 15, 0.55);
+  }
+  .story-gallery:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  @media (pointer: coarse) {
+    .story-gallery {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+    }
+  }
+
+  /* The section mark. The reference sets a small quiet ornament at 0.32 opacity
+     with 4.4em above it and 1.05em to the heading below, which is what carries
+     the turn from one section to the next. Its ornament is the company's
+     emblem, so this uses the reference's other rule instead: `.rule-dots`, a
+     dotted hairline drawn from a radial gradient on a 3px pitch. */
+  .story-rule {
+    height: 2px;
+    border: none;
+    opacity: 0.32;
+    background-image: radial-gradient(circle, rgba(23, 21, 15, 0.85) 0.55px, transparent 0.7px);
+    background-size: 3px 2px;
+    background-repeat: repeat-x;
+    background-position: left center;
+  }
+}
+
+/* The display line's entrance, word by word.
+   
+   The reference's catalogue entry is a 30px rise clearing a 6px blur over
+   760ms on the house curve, and its hero staggers the words 60ms apart after a
+   0.38s beat. Those numbers are kept.
+   
+   The mechanism is not. The reference holds its entrances at `opacity: 0` in
+   the stylesheet and lets JavaScript add the class that releases them, so a
+   page whose script never runs keeps the text invisible. This inverts it: the
+   words' normal state is visible, and `@starting-style` supplies the state
+   they come FROM. A browser that does not know the at-rule ignores it and
+   renders the words. So does a browser that never gets around to running the
+   transition. Nothing can leave the line hidden.
+   
+   Confirmed the hard way: the preview pane here stalls animations, and an
+   `animation ... both` version of this left the name blank on the page. */
+@layer components {
+  .story-word {
+    display: inline-block;
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition:
+      opacity 760ms var(--ease-out-quint) var(--story-delay, 0s),
+      transform 760ms var(--ease-out-quint) var(--story-delay, 0s),
+      filter 760ms var(--ease-out-quint) var(--story-delay, 0s);
+  }
+
+  @starting-style {
+    .story-word {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(6px);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Exploration palettes
+
+   Each direction gets its own surface and type feel from the same token
+   contract, so the shared components below them need no per-direction code.
+   Scoped to the exploration routes; the live site is untouched.
+--------------------------------------------------------------------------- */
+[data-explore='studio'] {
+  /* Warmer paper and a softer ink: a room rather than an instrument. */
+  --paper: #f7f5f2;
+  --surface: #fffefc;
+  --sunk: #efece7;
+  --ink-12: #1a1714;
+  --ink-11: #33302b;
+  --ink-10: #55504a;
+  --ink-9: #6b665f;
+  --ink-8: #a09a92;
+  --ink-6: #ccc6bd;
+  --ink-4: #e4e0d9;
+  --ink-1: #fbfaf8;
+  --signal: #8a4b2a;
+  --signal-hover: #703c21;
+  --signal-wash: #f2e7df;
+  --hairline: rgba(26, 23, 20, 0.1);
+  --hairline-strong: rgba(26, 23, 20, 0.2);
+}
+
+[data-explore='story'] {
+  /* 4.7:1 on this paper, the same step the page's own captions use. */
+  --demo-caption: rgba(23, 21, 15, 0.608);
+  /* The warm stock the site already uses, with one deliberate difference: a
+     deeper, less orange accent, kept for one job only. Anywhere the accent
+     appears on this page it marks a connection. */
+  --paper: #f6f4f1;
+  --surface: #fffefc;
+  --sunk: #eeebe6;
+  --ink-12: #17150f;
+  --ink-11: #302d26;
+  --ink-10: #524e46;
+  --ink-9: #6a655d;
+  --ink-8: #9d968d;
+  --ink-6: #cac4ba;
+  --ink-4: #e3ded7;
+  --ink-1: #fbfaf8;
+  --signal: #7a3f22;
+  --signal-hover: #63311a;
+  --signal-wash: #f0e4dc;
+  --hairline: rgba(23, 21, 15, 0.1);
+  --hairline-strong: rgba(23, 21, 15, 0.2);
+}
+
+[data-explore='workbench'] {
+  /* Cooler and slightly denser: a tool with a chrome of its own. */
+  --paper: #f1f3f5;
+  --surface: #ffffff;
+  --sunk: #e7eaee;
+  --ink-12: #10141a;
+  --ink-11: #262d36;
+  --ink-10: #454e59;
+  --ink-9: #5d6671;
+  --ink-8: #8f98a3;
+  --ink-6: #bcc3cb;
+  --ink-4: #dbe0e6;
+  --ink-1: #f8fafb;
+  --signal: #1d4ed8;
+  --signal-hover: #1740b4;
+  --signal-wash: #e5ecfb;
+  --hairline: rgba(16, 20, 26, 0.1);
+  --hairline-strong: rgba(16, 20, 26, 0.2);
+  --r-md: 6px;
+  --r-lg: 8px;
+}
+
+[data-explore='editorial'] {
+  /* Print contrast: near-white stock, true black ink, one red accent. */
+  --paper: #fcfcfb;
+  --surface: #ffffff;
+  --sunk: #f2f2f0;
+  --ink-12: #0a0a09;
+  --ink-11: #24241f;
+  --ink-10: #45453e;
+  --ink-9: #6b6b62;
+  --ink-8: #97978d;
+  --ink-6: #c9c9c1;
+  --ink-4: #e6e6e0;
+  --ink-1: #fafaf8;
+  --signal: #a51c1c;
+  --signal-hover: #8a1616;
+  --signal-wash: #f7e8e8;
+  --hairline: rgba(10, 10, 9, 0.11);
+  --hairline-strong: rgba(10, 10, 9, 0.24);
+}
+
+
+@layer components {
+  /* Onward into the article. The arrow steps toward its destination on hover,
+     the mirror of how the way back steps left. */
+  .studio-onward {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    color: var(--ink-12);
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-onward > [aria-hidden] {
+    transition: transform var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-onward:hover {
+    color: var(--signal);
+  }
+  .studio-onward:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .studio-onward:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+  .studio-onward:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The switcher's collapsed state: a small round control, quiet enough to
+     ignore and large enough to hit. */
+  .switcher-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    font-size: 0.625rem;
+    line-height: 1;
+    color: var(--ink-9);
+    transition:
+      color var(--dur-icon) var(--ease-out-quint),
+      background-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .switcher-toggle:hover {
+    background: var(--sunk);
+    color: var(--ink-12);
+  }
+  .switcher-toggle:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  /* A control that has to sit inside a caption without competing with it. */
+  .studio-quiet {
+    color: var(--ink-9);
+    text-decoration: underline;
+    text-decoration-color: var(--ink-6);
+    text-underline-offset: 3px;
+    transition:
+      color var(--dur-icon) var(--ease-out-quint),
+      text-decoration-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-quiet:hover {
+    color: var(--ink-12);
+    text-decoration-color: var(--ink-9);
+  }
+  .studio-quiet:active {
+    color: var(--ink-10);
+  }
+  .studio-quiet:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  @media (pointer: coarse) {
+    .studio-quiet {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+    }
+  }
+
+  /* The product artifact: a hairline frame, because an interface reads as a
+     specimen and wants an edge. No rounding, no shadow, no device mockup. */
+  .studio-product {
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    transition:
+      border-color var(--dur-icon) var(--ease-out-quint),
+      box-shadow var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-product:hover {
+    border-color: var(--hairline-strong);
+    box-shadow: 0 2px 10px -6px rgba(26, 23, 20, 0.18);
+  }
+  .studio-product:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The way back to Studio, in Studio's link voice: the arrow steps left on
+     hover, matching how the icon controls elsewhere move toward their target. */
+  .studio-back {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.875rem;
+    color: var(--ink-10);
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-back:hover {
+    color: var(--ink-12);
+  }
+  .studio-back:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  .studio-back > [aria-hidden] {
+    transition: transform var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-back:hover > [aria-hidden] {
+    transform: translateX(-3px);
+  }
+
+  /* The secondary open control. Styled as a label but given a real hit area,
+     because an 11px line of text is not a touch target. */
+  .studio-open {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding-inline: 0.125rem;
+    text-decoration: underline;
+    text-decoration-color: var(--hairline-strong);
+    text-underline-offset: 4px;
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-open:hover {
+    color: var(--ink-12);
+  }
+  .studio-open:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* A photograph gets no frame at all: it sits on the paper. Hover lifts its
+     tone very slightly instead of drawing a box around it. */
+  .studio-photo {
+    transition: opacity var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-photo:hover {
+    opacity: 0.92;
+  }
+  .studio-photo:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 4px;
+  }
+  .studio-photo:active {
+    opacity: 0.86;
+  }
+}
+
+@layer components {
+  /* While the image viewer is open the switcher gets out of the way. Hidden by
+     visibility, so it also leaves the tab order rather than sitting behind the
+     overlay as an invisible focus stop. */
+  body[data-viewer-open] .exploration-switcher {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 120ms var(--ease-out-quint),
+      visibility 120ms;
+  }
+  .exploration-switcher {
+    transition:
+      opacity 160ms var(--ease-out-quint),
+      visibility 160ms;
+  }
+}
+
+@keyframes studio-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+}
+
+@layer components {
+  /* The expanded view's close control sits on a dark scrim, so it carries its
+     own light surface rather than inheriting the page's. */
+  .studio-close {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding-inline: 0.875rem;
+    border-radius: var(--r-pill);
+    border: 1px solid color-mix(in srgb, var(--ink-1) 26%, transparent);
+    background: color-mix(in srgb, var(--ink-1) 12%, transparent);
+    color: var(--ink-1);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition:
+      background-color var(--dur-icon) var(--ease-out-quint),
+      border-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-close:hover {
+    background: color-mix(in srgb, var(--ink-1) 22%, transparent);
+    border-color: color-mix(in srgb, var(--ink-1) 44%, transparent);
+  }
+  .studio-close:focus-visible {
+    outline: 2px solid var(--ink-1);
+    outline-offset: 2px;
+  }
+  .studio-close:active {
+    background: color-mix(in srgb, var(--ink-1) 30%, transparent);
+  }
+}
+
+@keyframes explore-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes explore-slide {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
   }
 }
 

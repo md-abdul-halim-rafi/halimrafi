@@ -66,6 +66,13 @@ export function useKeyframeClock({
     elapsedRef.current = elapsed
   })
 
+  // Set the instant a control is pressed, not when the effect that owns the
+  // timer next runs. Cancelling the pending step is the job of the effect
+  // cleanup, but cleanups are passive: they run after paint, and a frame that
+  // arrives late would let one more step land after a pause. The scheduled step
+  // checks this first, so pausing stops the clock where the reader stopped it.
+  const runningRef = useRef(false)
+
   // Adjusting during render rather than in an effect avoids showing one frame of
   // the previous selection before the reset lands.
   const [key, setKey] = useState(resetKey)
@@ -73,10 +80,14 @@ export function useKeyframeClock({
     setKey(resetKey)
     setStatus('idle')
     setElapsed(restingAt)
+    // No ref to clear here: this branch runs during render, so the status change
+    // and the effect cleanup that retires the pending step land on the same
+    // commit. The flag only matters when a press has to beat a passive cleanup.
   }
 
   useEffect(() => {
     if (status !== 'playing') return
+    runningRef.current = true
 
     const startedAt = performance.now() - elapsedRef.current
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -88,6 +99,7 @@ export function useKeyframeClock({
       const next = keyframes.find((mark) => mark > now)
 
       if (next === undefined) {
+        runningRef.current = false
         setElapsed(duration)
         setStatus('complete')
         return
@@ -95,7 +107,7 @@ export function useKeyframeClock({
 
       timer = setTimeout(
         () => {
-          if (cancelled) return
+          if (cancelled || !runningRef.current) return
           setElapsed(next)
           schedule()
         },
@@ -126,10 +138,12 @@ export function useKeyframeClock({
   }, [])
 
   const pause = useCallback(() => {
+    runningRef.current = false
     setStatus((current) => (current === 'playing' ? 'paused' : current))
   }, [])
 
   const reset = useCallback(() => {
+    runningRef.current = false
     setElapsed(restingAt)
     elapsedRef.current = restingAt
     // Bumping the epoch retires any in-flight step, so a run cannot resume into

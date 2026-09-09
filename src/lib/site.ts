@@ -22,14 +22,15 @@ export const site = {
   location: 'San Francisco',
 
   /**
-   * Public email address. Left null until an address is explicitly designated
-   * as public. While null, every mail control is omitted from the rendered page.
+   * Public email address, supplied by Rafi for use on this site.
    */
-  email: null as string | null,
+  email: 'mdabdulhalimrafi@gmail.com' as string | null,
 
   /**
-   * Verified public profiles. Only add entries that have been confirmed;
-   * an empty list renders no profile row at all.
+   * Verified public profiles. Only add entries whose exact URL has been
+   * supplied. LinkedIn is intended but its URL has not been given, and a
+   * guessed profile URL is worse than no link, so the row stays empty until
+   * the address arrives.
    */
   profiles: [] as ContactLink[],
 } as const

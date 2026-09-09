@@ -29,7 +29,7 @@ export const proseComponents: MDXComponents = {
     <h3 {...props} className="mt-9 text-[1.0625rem] font-semibold leading-snug text-ink-12" />
   ),
   p: (props) => <p {...props} className="mt-5 article-body" />,
-  ul: (props) => <ul {...props} className="mt-5 space-y-2.5" />,
+  ul: (props) => <ul {...props} className="mt-5 list-disc space-y-2.5 pl-5" />,
   ol: (props) => <ol {...props} className="mt-5 list-decimal space-y-2.5 pl-5" />,
   li: (props) => (
     <li

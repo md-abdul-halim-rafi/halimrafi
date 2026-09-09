@@ -25,6 +25,47 @@ const BASE: DemoEvent[] = [
   { at: 2960, kind: 'done' },
 ]
 
+/**
+ * The homepage preview's own stream: one sentence, one bold span, four chunks.
+ *
+ * The full fixture above is a paragraph, three list items, a tool call and a
+ * record, which is more reading than a homepage should ask for. This holds the
+ * one thing the comparison exists to show, and holds it twice over:
+ *
+ *  - The bold marker opens at 500ms and does not close until 1700ms, so for
+ *    1200ms the raw side has a live `**` on screen and the considered side has
+ *    nothing to show yet. The first schedule ran the whole thing in 1240ms,
+ *    which was too quick to read; every mark was stretched by the same factor,
+ *    on the one clock both sides share. These are demo timings, not a
+ *    measurement of anything.
+ *  - The last chunk closes both the span and the paragraph, which is the moment
+ *    the considered side releases the whole sentence. Before that there is no
+ *    readable unit to release, which is the behaviour the label names.
+ *
+ * The account is fictional, as in the full fixture.
+ */
+const PREVIEW: DemoEvent[] = [
+  { at: 0, kind: 'text', text: 'Two new stakeholders joined the thread, ' },
+  { at: 500, kind: 'text', text: 'including their **' },
+  { at: 1100, kind: 'text', text: 'VP of Operations' },
+  { at: 1700, kind: 'text', text: '**.\n\n' },
+  { at: 1900, kind: 'done' },
+]
+
+export function previewEvents(): DemoEvent[] {
+  return PREVIEW
+}
+
+/** The preview's whole timeline, which is also where it rests. */
+export const PREVIEW_END = 1900
+
+/**
+ * Where the compact comparison ends: after the prose has closed and before the
+ * tool call opens. The comparison is about how prose arrives, so it plays only
+ * that stretch, and this is therefore its finished state as well as its rest.
+ */
+export const COMPARISON_END = 1700
+
 /** How long the reserved widget slot waits before it admits it is late. */
 export const WIDGET_WAIT_LIMIT_MS = 2400
 

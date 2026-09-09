@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SiteFooter } from '@/components/site/Chrome'
 import { SiteHeader } from '@/components/site/SiteHeader'
+import { Photographs } from '@/components/site/Photographs'
 import { ControlLink } from '@/components/ui/Control'
 import { ArrowRight } from '@/components/ui/icons'
 import { hasEmail, hasProfiles, site } from '@/lib/site'
@@ -79,6 +80,8 @@ export default function AboutPage() {
             </div>
           </div>
         ) : null}
+
+        <Photographs />
 
         <p className="mt-12">
           <Link
