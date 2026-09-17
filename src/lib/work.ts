@@ -38,6 +38,8 @@ export type WorkModule = {
 const registry: Record<string, () => Promise<WorkModule>> = {
   'making-a-response-readable': () =>
     import('@/content/work/making-a-response-readable.mdx') as Promise<WorkModule>,
+  'helping-an-agent-finish-longer-tasks': () =>
+    import('@/content/work/helping-an-agent-finish-longer-tasks.mdx') as Promise<WorkModule>,
 }
 
 export const workSlugs = Object.keys(registry)

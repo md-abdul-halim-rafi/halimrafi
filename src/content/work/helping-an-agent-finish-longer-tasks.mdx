@@ -1,0 +1,126 @@
+export const meta = {
+  slug: 'helping-an-agent-finish-longer-tasks',
+  title: 'Helping an agent finish longer tasks',
+  summary:
+    'Some requests need several rounds of work. I designed and built the execution path that lets the agent delegate tasks, save its progress, and resume with the results.',
+  date: '2026-09-16',
+  status: 'published',
+  role: 'Wrote the design, built the execution path, reviewed by my co-founder',
+  collaborators: ['One Chowdhury', 'Yash Sehgal', 'Raonak', 'Tariqul Islam'],
+  artifact: { kind: 'none' },
+  sections: [
+    'The request that failed',
+    'What I did',
+    'Delegating, saving progress, resuming',
+    'One decision, and what it costs',
+    'Where this stands',
+  ],
+}
+
+<Lede>A model call has a fixed amount of context. A request does not. When the work needs more than one call, the agent has to be able to save its progress and pick the work up again.</Lede>
+
+## The request that failed
+
+Someone uploaded a spreadsheet of company rows and asked the agent to create a
+deal for each one. Splitting the file across helpers was the right move, and it
+was the part that broke.
+
+Each helper could only be handed a small amount of text, and only a few could
+be started in one turn, so the total that could be handed out was a fraction of
+the file. Every attempt was rejected for exceeding that limit. The agent fell
+back to working through the file inside the same conversation, and our record
+ends there: it notes the fallback beginning, not whether it finished the job.
+
+The file's size was not the problem in itself. The limit on handing work out
+was far smaller than the work, and everything already done stayed in the
+agent's context and kept growing. Raising either limit moves the ceiling.
+
+## What I did
+
+I wrote the design before the code, as an internal proposal opening with that
+failure, then built it: a durable record of a run, the handing out of work, the
+machinery that resumes a run with results in hand, and the check that decides
+whether a run is finished.
+
+My co-founder One Chowdhury reviewed and approved each change that landed it.
+Yash Sehgal built most of the panel that shows a run working; I built the rest.
+Raonak and Tariqul Islam contributed alongside their own work. The product is
+the team's; this path is mine.
+
+## Delegating, saving progress, resuming
+
+When the agent hands work out, it writes down what it is doing, releases the
+context it was holding, and stops. The helpers run on their own. When they
+finish, the agent starts again in a fresh call with their results folded in,
+and can hand more out from there, until the goal is met.
+
+The helpers are deliberately read only. They gather and report.
+
+<Disclosure summary="What survives between rounds">
+The run is a durable record rather than something held in memory, so a restart
+does not lose it. Each round writes a new message linked to the run, so
+persistence and replay logic stays per message while the reader still sees one
+continuous answer.
+
+Before a run is allowed to finish, a check scores it on two things: whether it
+is converging on the goal rather than looping, and whether its answer is
+grounded in what the helpers actually returned. A run that is going nowhere is
+stopped and says so, rather than spending the remaining budget.
+
+Failure has defined behaviour rather than being left to chance: dead helpers,
+stuck resumes and runaway loops each have a reaper or a cap.
+</Disclosure>
+
+<Disclosure summary="What the helpers can and cannot do">
+Helpers are resolved from the same tool set the main agent uses, and then every
+tool that changes data is removed before the model sees it. The code calls this
+read only by default and ships it strict, with delegating a write left as a
+future possibility rather than a current one.
+
+The main agent keeps its full tool set in every round, so a long run can still
+end in a change to a record. That change is made by the main agent, not by the
+delegated work. What is described here is how the work gets divided and
+resumed, not a system that edits records on its own.
+</Disclosure>
+
+## One decision, and what it costs
+
+When the agent resumes, it replays the conversation rather than a summary of it.
+
+A summary is smaller and cheaper. It also drops things quietly, and what it
+drops is usually the identifier a later step depends on. Replaying keeps the
+agent grounded in what happened, at full price.
+
+That price is real and grows with the run. Where the history must shed weight
+it sheds the bulkiest thing rather than the reasoning: older tool results are
+replaced with short stubs once they pass a size budget. A single result can run
+to a hundred thousand characters, so without that guard a long run can exceed
+the model's own limit and fail outright.
+
+Correct first and cheaper later, rather than cheap now and quietly wrong.
+
+## Where this stands
+
+The work is implemented, merged, and deployed. It sits behind rollout gates
+opened per organisation and off by default, so whether any customer is using it
+is a separate question from whether it is deployed.
+
+<Disclosure summary="How far each of those is established">
+Three separate things.
+
+Implemented and merged: through pull requests reviewed and approved before they
+landed.
+
+Deployed: the service's deploy workflow ran successfully against a revision
+that contains this work, so a successful deployment record identifies it.
+
+Enabled for customers: not established. Two switches stand in front of the path
+and both default off in the repository, and repository defaults are not
+production values. I have no access to the production environment
+configuration, so I am not going to claim it is running for anyone.
+
+There are also no production measurements: no latency, reliability or adoption
+figures. The request described above is one documented incident, written down
+as the reason to start. It is not a benchmark, and there is no before and after
+attached to it, so nothing here claims an improvement it can show.
+</Disclosure>
