@@ -2778,3 +2778,73 @@ contribution. "I introduced the panel" is the part the record supports.
 **Still not established, unchanged:** whether either rollout gate is open for
 any organisation. The gates' defaults live in an example configuration file;
 the real values live in an environment I cannot read.
+
+## Deployment evidence: closed
+
+This has been re-opened three times. Settling it here so it is not re-litigated.
+
+**The record, with identifiers.** Workflow `porter-app-3283-chat.yml`, named
+"Deploy to chat", triggers on pushes to `ai-chat/main` and runs `porter apply`
+against Porter project 9381, cluster 3283, app `chat`, deployment target
+`0434ae77-601e-49b4-87c7-fe498ac523c9`, tagging the image with the revision's
+short SHA. Run `35172914574`, 2026-09-17T02:03, revision
+`ede2c95b1ad06bd01a4153edff206457aaf725ce`, conclusion **success**, with the
+"Deploy stack" step itself at success. That revision's tree carries all 71
+files of `apps/aiChat/src/modules/agentRun`, and `09d3e1ca7`, `335ccd68f`,
+`25373eabe` and `61877252c` are all ancestors of it.
+
+**The front end**, for the progress panel: two GitHub deployments to the
+`Production` environment, `8d33f8460` and `9758900f1`, both with status
+`success`, both containing the panel's first commit `387b672dc`.
+
+**What that establishes.** A production deploy command ran to success for an
+artifact built from a revision that contains this work. That is strictly more
+than a merge and strictly more than branch ancestry, which is the test the word
+"deployed" has to pass, so the article says deployed.
+
+**What it does not establish, and the article says so.** The state of the
+running system. A successful apply is a successful apply; I cannot query the
+cluster, read the serving revision, or watch a request go through it.
+
+**Separately unestablished: customer access.** Two gates,
+`AI_CHAT_TEMPORAL_ENABLED` and `AI_CHAT_DISCHARGE_ORG_ALLOWLIST`, both off in
+`apps/aiChat/.env.example`. That file is an example, not the production
+environment, so its values say what the repository ships and nothing about what
+production runs. The article keeps these as two different questions and claims
+only the first.
+
+**Closed.** Nothing further to check from here without access to the production
+environment or the cluster. If either becomes available, the question worth
+asking is narrow: is the allowlist non-empty for any organisation, and is
+Temporal enabled.
+
+## Mobile verification, 87 checks
+
+Story and the case study at 320x568, 360x800, 390x844 and 430x932. No
+horizontal overflow and nothing painting past the edge on either page at any of
+them. Body copy at 13px or larger with leading at 1.4 or more; the measure
+never exceeds 75 characters and tops out at 46 on the article. Every tap target
+clears 24px; the disclosure summaries measure 55 to 77px.
+
+Disclosures at 390 and 320, by keyboard and by touch: all four open and close
+with Enter, all four open and close by tap, and none introduces overflow while
+open.
+
+Reading position, at both a phone and a desktop width. The reader leaves from
+the case entry at scrollY 877 on the phone and 1178 on the desktop. The way
+back returns them to 875 and 1168, with the heading 156px and 172px from the
+top. The browser's own Back returns them to exactly the same place, since Next
+restores the scroll position for a history navigation. Both routes land within
+a couple of pixels of where the reader was.
+
+Destinations confirmed on both pages, including that the article offers only
+the way back and no other link.
+
+### One assertion of mine was wrong again
+
+I asserted that every section after the introduction shares one top padding,
+and the page returned 40, 56, 56, 80. The 80 is the photography closing, given
+a longer pause on purpose because that is where the subject changes, a decision
+recorded earlier in these notes. The check now expresses the actual rule: the
+two middle sections share a rhythm and the closing is deliberately longer. The
+page was right and the test was encoding a rule nobody had made.
