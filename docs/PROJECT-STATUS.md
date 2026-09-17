@@ -2745,3 +2745,36 @@ it now excludes any paragraph containing a link. And two status checks read
 element, so text that was present read as missing. Reading `textContent`
 fixes it. That is a new one to remember: innerText is a rendering-aware
 projection and disclosures are exactly where it differs.
+
+## Evidence behind "deployed", recorded
+
+Re-checked rather than carried forward, because the word does real work in the
+article.
+
+**Backend, the execution path.** `.github/workflows/porter-app-3283-chat.yml`
+is the production deploy for the aiChat service: it triggers on pushes to
+`ai-chat/main` and runs `porter apply` against Porter project 9381, cluster
+3283, app `chat`, deployment target `0434ae77-601e-49b4-87c7-fe498ac523c9`,
+with `PORTER_TAG` set to the short SHA of the revision being deployed. The run
+for `ede2c95b1` finished with the job at `success` and, specifically, the
+"Deploy stack" step at `success`. All four named commits are ancestors of that
+revision and all 71 files of the module are in its tree.
+
+So the record is: a production deploy command ran to success for an image
+tagged with a revision that contains this work. That is more than a merge and
+more than branch ancestry, which is why the article says deployed. What it does
+not establish is the state of the running system, and the article says so.
+
+**Front end, the progress panel.** `octolane.com` carries two GitHub
+deployments to the `Production` environment, `8d33f8460` (2026-09-15) and
+`9758900f1` (2026-09-14), both with status `success`, and both revisions
+contain the panel's first commit `387b672dc`. So the panel has production
+deployment evidence too.
+
+Even so, "and shipped it" came out of the article. The record shows the work
+reached production; it does not show who released it, and the sentence is about
+contribution. "I introduced the panel" is the part the record supports.
+
+**Still not established, unchanged:** whether either rollout gate is open for
+any organisation. The gates' defaults live in an example configuration file;
+the real values live in an environment I cannot read.

@@ -27,7 +27,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  */
 const ORIGINS = {
   studio: { href: '/explorations/studio', label: 'Back to Studio' },
-  story: { href: '/explorations/story', label: 'Back to Story' },
+  /* Back to where the reader left, which is the case-study entry rather than
+     the top of the page. The fragment is the entry's own heading. */
+  story: { href: '/explorations/story#case', label: 'Back to Story' },
 } as const
 
 function originOf(from: string | string[] | undefined) {

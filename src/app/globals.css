@@ -559,36 +559,22 @@
     line-height: 1.9;
     text-transform: uppercase;
   }
+  /* Shape only. The colour and the underline come from the link role, so the
+     header's contact link answers exactly like the address in the closing. */
   .story-control {
     display: inline-flex;
     align-items: center;
     gap: 0.625rem;
     min-height: 40px;
-    /* The reference's cue rests on `--site-muted`, rgba(23, 24, 26, 0.66),
-       and moves to full ink. */
-    color: rgba(23, 21, 15, 0.608);
-    transition: color 300ms var(--ease-out-quint);
   }
   .story-control > [aria-hidden] {
     transition: transform 300ms var(--ease-out-quint);
   }
-  .story-control:hover {
-    color: var(--signal);
-    text-decoration: underline dotted var(--signal);
-    text-underline-offset: 4px;
-  }
   .story-control:hover > [aria-hidden] {
     transform: translateX(3px);
   }
-  .story-control:active {
-    color: var(--signal);
-  }
   .story-control:active > [aria-hidden] {
     transform: translateX(1px);
-  }
-  .story-control:focus-visible {
-    outline: 2px solid var(--signal);
-    outline-offset: 3px;
   }
 
   /* Links here follow the app's LinkLine component rather than inventing a
@@ -727,6 +713,22 @@
       transform: translateY(30px);
       filter: blur(6px);
     }
+  }
+
+  /* Arriving at a section rather than at the top: the opening is not what the
+     reader came back for, so it is simply there. The attribute is set in a
+     layout effect, before the first paint, and `:target` covers the case the
+     effect cannot. Both are needed. On a cold load of a URL that already has
+     a fragment, `:target` matches from the first style resolution, before any
+     script runs. On a navigation from inside the site the URL moves through
+     the history API and the browser does not re-evaluate `:target`, so the
+     attribute is what catches it. */
+  [data-explore='story']:has(:target) .story-word,
+  [data-jumped] .story-word {
+    transition: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
   }
 }
 

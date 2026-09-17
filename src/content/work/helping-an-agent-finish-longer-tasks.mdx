@@ -43,8 +43,8 @@ the handing out of work, the machinery that resumes a run with results in hand,
 and the check that decides whether a run is finished.
 
 My co-founder One Chowdhury reviewed and approved each of those changes. On the
-front end I introduced the panel that shows a run working and shipped it, and
-Yash Sehgal worked on it alongside me. Raonak and Tariqul Islam contributed to
+front end I introduced the panel that shows a run working, and Yash Sehgal
+worked on it alongside me. Raonak and Tariqul Islam contributed to
 the module alongside their own work. The product is the team's.
 
 ## Delegating, saving progress, resuming
@@ -140,9 +140,11 @@ Three separate things.
 Implemented and merged: through pull requests reviewed and approved before they
 landed.
 
-Deployed: the service's deploy workflow has a successful run against a specific
-revision, and the work is present in that revision. That is a deployment record
-identifying the code, not an inference from a branch name.
+Deployed: the service's production deploy workflow ran for a specific revision
+and its deploy step succeeded, publishing an image tagged with that revision,
+and the work is present in it. That is a deployment record identifying the
+code, not an inference from a branch name. What it does not show is the running
+system, which I cannot observe from here.
 
 Enabled for customers: not established. Two switches stand in front of the
 path. Both default to off in the repository, and a repository default is not a

@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, useLayoutEffect, useRef } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -74,6 +74,25 @@ export function StoryExploration({
   gallery: StudioAsset[]
 }) {
   const lightbox = useLightbox()
+  const root = useRef<HTMLDivElement>(null)
+
+  /*
+   * Arriving at a section rather than at the top.
+   *
+   * `:target` looked like the clean way to detect this and is not: a
+   * client-side navigation updates the URL through the history API, and the
+   * browser does not re-evaluate `:target` for that, so the rule never
+   * matched. A layout effect does, because it runs after the DOM is in place
+   * and before the first paint, which is where the word entrance would
+   * otherwise begin.
+   *
+   * The opening is not what a reader coming back from the article wants to
+   * watch, and animating it off-screen only to have them scroll up to a
+   * settled line is work nobody sees.
+   */
+  useLayoutEffect(() => {
+    if (window.location.hash) root.current?.setAttribute('data-jumped', '')
+  }, [])
   const productAsset: StudioAsset = {
     id: 'octolane-app-home',
     kind: 'product',
@@ -91,11 +110,14 @@ export function StoryExploration({
   const moreIndex = gallery.length > 1 ? (shownIndex + 1) % gallery.length : 0
 
   return (
-    <div data-explore="story" className="story-type-350 min-h-dvh bg-paper">
+    <div ref={root} data-explore="story" className="story-type-350 min-h-dvh bg-paper">
       <div className="mx-auto max-w-[58rem] px-6 pb-28 sm:px-10">
         <header className="flex items-baseline justify-between gap-6 pt-6">
           <p className="story-ink text-[0.8125rem] font-medium">{person.name}</p>
-          <a href={`mailto:${STORY.email}`} className="story-mono story-control">
+          <a
+            href={`mailto:${STORY.email}`}
+            className="story-mono story-control story-link story-link-out"
+          >
             <span>Email</span>
           </a>
         </header>
@@ -240,9 +262,14 @@ export function StoryExploration({
               qualifications and those live in the article. */}
           <section aria-labelledby="case" className="pt-14 sm:pt-16">
             <hr className="story-rule w-14" />
+            {/* The landing target for the way back from the article. The
+                scroll margin keeps the heading clear of the viewport's top
+                edge, with the section's own rule visible above it, so the
+                reader arrives at the entry rather than with it jammed against
+                the edge. */}
             <h2
               id="case"
-              className="story-display story-ink mt-5 max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+              className="story-display story-ink mt-5 max-w-[20ch] scroll-mt-20 text-[clamp(1.75rem,3.4vw,2.25rem)] sm:scroll-mt-24"
             >
               {STORY.caseHeading}
             </h2>
