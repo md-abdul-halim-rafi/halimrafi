@@ -591,30 +591,65 @@
     outline-offset: 3px;
   }
 
-  /* The way into the case study. A sentence-case link at reading size, because
-     uppercase mono metadata gave the most important destination on the page the
-     weight of a footnote. */
+  /* Links here follow the app's LinkLine component rather than inventing a
+     second language for the same thing.
+
+     Its rules: the underline is dotted at rest, not only on hover, one pixel
+     thick and four pixels clear of the text; hover changes the two colours and
+     nothing else, so the dots never switch style under the cursor; the pointer
+     is a pointer. Its colour map keeps the underline quieter than the text it
+     belongs to and firms both on hover.
+
+     Two roles, because the two kinds of link do different things. Something
+     that leaves the site carries the accent at rest, so its colour is itself
+     the signal that you are about to go elsewhere. Something that acts inside
+     the page stays in ink and only firms up. Both are dotted, which is what
+     marks them as links at all. */
+  .story-link {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    transition:
+      color 150ms ease-in-out,
+      text-decoration-color 150ms ease-in-out;
+  }
+  .story-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* Leaves the site. */
+  .story-link-out {
+    color: var(--signal);
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+  .story-link-out:hover {
+    color: var(--signal-hover);
+    text-decoration-color: var(--signal-hover);
+  }
+
+  /* Acts inside the page. */
+  .story-link-in {
+    color: rgba(23, 21, 15, 0.7);
+    text-decoration-color: rgba(23, 21, 15, 0.26);
+  }
+  .story-link-in:hover {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-color: rgba(23, 21, 15, 0.6);
+  }
+
+  /* The way into the case study: an in-page destination, at reading size. */
   .story-read {
     display: inline-flex;
     align-items: baseline;
     gap: 0.5rem;
     min-height: 40px;
     font-size: 0.9375rem;
-    color: rgba(23, 21, 15, 0.875);
-    text-decoration: underline;
-    text-decoration-color: rgba(23, 21, 15, 0.3);
-    text-underline-offset: 4px;
-    transition:
-      color 300ms var(--ease-out-quint),
-      text-decoration-color 300ms var(--ease-out-quint);
   }
   .story-read > [aria-hidden] {
-    transition: transform 300ms var(--ease-out-quint);
-  }
-  .story-read:hover {
-    color: var(--signal);
-    text-decoration-style: dotted;
-    text-decoration-color: var(--signal);
+    transition: transform 150ms ease-in-out;
   }
   .story-read:hover > [aria-hidden] {
     transform: translateX(3px);
@@ -622,13 +657,9 @@
   .story-read:active > [aria-hidden] {
     transform: translateX(1px);
   }
-  .story-read:focus-visible {
-    outline: 2px solid var(--signal);
-    outline-offset: 3px;
-  }
 
-  /* The address in the closing, which has to read as a link and not as a
-     label: normal case, underlined, at full ink. */
+  /* The address in the closing, in mono so it can be read and copied. Mail
+     leaves the site, so it takes the outward colour. */
   .story-address {
     display: inline-flex;
     align-items: center;
@@ -636,50 +667,10 @@
     font-family: var(--font-mono);
     font-size: 0.8125rem;
     letter-spacing: 0.02em;
-    color: rgba(23, 21, 15, 0.875);
-    text-decoration: underline;
-    text-decoration-color: rgba(23, 21, 15, 0.35);
-    text-underline-offset: 4px;
-    transition:
-      color 300ms var(--ease-out-quint),
-      text-decoration-color 300ms var(--ease-out-quint);
-  }
-  .story-address:hover {
-    color: var(--signal);
-    text-decoration-style: dotted;
-    text-decoration-color: var(--signal);
-  }
-  .story-address:focus-visible {
-    outline: 2px solid var(--signal);
-    outline-offset: 3px;
   }
 
-  /* The gallery link, quiet enough to sit inside a caption. */
-  .story-gallery {
-    color: rgba(23, 21, 15, 0.608);
-    text-decoration: underline;
-    text-decoration-color: rgba(23, 21, 15, 0.28);
-    text-underline-offset: 3px;
-    transition:
-      color 300ms var(--ease-out-quint),
-      text-decoration-color 300ms var(--ease-out-quint);
-  }
-  .story-gallery:hover {
-    color: var(--signal);
-    text-decoration-style: dotted;
-    text-decoration-color: var(--signal);
-  }
-  /* `More photographs` is a button, and a button's default cursor is an arrow.
-     It behaves as a link here, so it should feel like one under the pointer. */
-  button.story-gallery {
-    cursor: pointer;
-  }
-  .story-gallery:focus-visible {
-    outline: 2px solid var(--signal);
-    outline-offset: 3px;
-  }
   @media (pointer: coarse) {
-    .story-gallery {
+    .story-link {
       display: inline-flex;
       align-items: center;
       min-height: 40px;

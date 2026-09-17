@@ -115,7 +115,7 @@ export function StoryExploration({
                     href={part.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="story-gallery"
+                    className="story-link story-link-out"
                   >
                     {part.text}
                   </a>
@@ -164,7 +164,7 @@ export function StoryExploration({
                    phone. The negative margin lets the target hang outside the
                    line box, so it stays tappable without setting the row's
                    height. */
-                className="story-gallery text-[0.8125rem] [@media(pointer:coarse)]:-my-2.5"
+                className="story-link story-link-out text-[0.8125rem] [@media(pointer:coarse)]:-my-2.5"
               >
                 {STORY.productSourceLabel}
               </a>
@@ -222,7 +222,7 @@ export function StoryExploration({
                     href={part.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="story-gallery"
+                    className="story-link story-link-out"
                   >
                     {part.text}
                   </a>
@@ -250,7 +250,7 @@ export function StoryExploration({
               {STORY.caseBody}
             </p>
             <p className="mt-5">
-              <Link href={STORY.caseHref} className="story-read">
+              <Link href={STORY.caseHref} className="story-link story-link-in story-read">
                 <span>{STORY.caseLabel}</span>
                 <span aria-hidden>&rarr;</span>
               </Link>
@@ -287,7 +287,7 @@ export function StoryExploration({
                         type="button"
                         onClick={(event) => lightbox.show(gallery, moreIndex, event.currentTarget)}
                         aria-haspopup="dialog"
-                        className="story-gallery"
+                        className="story-link story-link-in"
                       >
                         More photographs
                       </button>
@@ -303,7 +303,7 @@ export function StoryExploration({
                     {/* The address itself, so it can be read and copied. The
                         mono treatment stays, the uppercase does not: an address
                         set in capitals reads as a label. */}
-                    <a href={`mailto:${STORY.email}`} className="story-address">
+                    <a href={`mailto:${STORY.email}`} className="story-link story-link-out story-address">
                       {STORY.email}
                     </a>
                   </p>
