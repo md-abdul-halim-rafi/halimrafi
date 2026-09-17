@@ -5,12 +5,18 @@ import { Switcher } from '@/components/explorations/Switcher'
 import { slugify } from '@/components/story/prose'
 import { loadWork } from '@/lib/work'
 
-export const metadata: Metadata = {
-  title: 'Making a response readable, Studio preview',
-  robots: { index: false, follow: false },
+/**
+ * The title follows the article, so the two case studies do not share one.
+ * Indexing stays off for every slug: these are previews of live articles.
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const entry = await loadWork((await params).slug)
+  return {
+    title: entry ? `${entry.meta.title}, Studio preview` : 'Studio preview',
+    robots: { index: false, follow: false },
+  }
 }
 
-const SLUG = 'making-a-response-readable'
 
 /**
  * Two exploration routes link to this article, and the way back has to return
@@ -29,7 +35,10 @@ function originOf(from: string | string[] | undefined) {
   return key && key in ORIGINS ? ORIGINS[key as keyof typeof ORIGINS] : ORIGINS.studio
 }
 
-type Query = { searchParams: Promise<{ from?: string | string[] }> }
+type Props = {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ from?: string | string[] }>
+}
 
 /**
  * Rendered in the rail on wide screens and under the title on narrow ones, so
@@ -51,7 +60,11 @@ function Credits({ role }: { role: string }) {
 }
 
 /**
- * The article, in Studio's clothes.
+ * Any published case study, in Studio's clothes.
+ *
+ * One route for every slug in the work registry rather than a folder per
+ * article: the shell is identical and the content module is what differs, so a
+ * second copy would only be a place for the two to drift.
  *
  * The content and the demo are the same modules the live article uses, so there
  * is one source for both. What changes is the shell: wrapping everything in
@@ -68,8 +81,8 @@ function Credits({ role }: { role: string }) {
  * The reading measure is narrowed to about 65 characters for this page, and the
  * demo still breaks wider through `.breakout`.
  */
-export default async function StudioArticlePreview({ searchParams }: Query) {
-  const entry = await loadWork(SLUG)
+export default async function StudioArticlePreview({ params, searchParams }: Props) {
+  const entry = await loadWork((await params).slug)
   if (!entry || entry.meta.status !== 'published') notFound()
 
   const origin = originOf((await searchParams).from)
