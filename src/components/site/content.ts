@@ -40,6 +40,13 @@ export const home = {
 
   details: [
     {
+      slug: 'helping-an-agent-finish-longer-tasks',
+      title: 'Helping an agent finish longer tasks',
+      blurb:
+        'Some requests need several rounds of work. I designed and built the execution path that lets Ask Octolane delegate tasks, save progress, and resume with the results.',
+      kind: 'Design and implementation',
+    },
+    {
       slug: 'making-a-response-readable',
       title: 'Making a response readable',
       blurb:
