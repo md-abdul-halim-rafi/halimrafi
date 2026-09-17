@@ -105,7 +105,25 @@ export function StoryExploration({
           {/* One group: the place, the name, the role, at the spacing of a
               lockup rather than three separated lines. */}
           <section aria-label="Introduction" className="pt-10 sm:pt-12">
-            <p className="story-mono story-quiet">{STORY.aside}</p>
+            {/* The batch links out to the company's YC page; the city does
+                not link anywhere. */}
+            <p className="story-mono story-quiet">
+              {STORY.aside.map((part, i) =>
+                part.href ? (
+                  <a
+                    key={i}
+                    href={part.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="story-gallery"
+                  >
+                    {part.text}
+                  </a>
+                ) : (
+                  <Fragment key={i}>{part.text}</Fragment>
+                ),
+              )}
+            </p>
             <h1 className="story-display story-ink mt-3 max-w-[15ch] text-[clamp(3.5rem,8.5vw,5.5rem)]">
               <Words text={STORY.name} />
             </h1>

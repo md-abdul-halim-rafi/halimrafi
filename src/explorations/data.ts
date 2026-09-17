@@ -145,7 +145,14 @@ export const STORY = {
   // Supplied by Rafi, used as written.
   name: 'I’m Rafi.',
   role: 'Co-founder and CTO of Octolane AI.',
-  aside: 'YC W24 · San Francisco',
+  /**
+   * Segments, so the batch can be a link without slicing the string at render
+   * time. Same reason as `previously` below.
+   */
+  aside: [
+    { text: 'YC W24', href: 'https://www.ycombinator.com/companies/octolane-ai' },
+    { text: ' · San Francisco' },
+  ] as ReadonlyArray<{ text: string; href?: string }>,
 
   /** The work, in two short paragraphs: what it helps people do, then the
    *  scope of his responsibility. Nothing that implies he built the features. */

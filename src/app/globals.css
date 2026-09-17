@@ -573,7 +573,9 @@
     transition: transform 300ms var(--ease-out-quint);
   }
   .story-control:hover {
-    color: rgba(23, 21, 15, 0.875);
+    color: var(--signal);
+    text-decoration: underline dotted var(--signal);
+    text-underline-offset: 4px;
   }
   .story-control:hover > [aria-hidden] {
     transform: translateX(3px);
@@ -611,6 +613,7 @@
   }
   .story-read:hover {
     color: var(--signal);
+    text-decoration-style: dotted;
     text-decoration-color: var(--signal);
   }
   .story-read:hover > [aria-hidden] {
@@ -643,6 +646,7 @@
   }
   .story-address:hover {
     color: var(--signal);
+    text-decoration-style: dotted;
     text-decoration-color: var(--signal);
   }
   .story-address:focus-visible {
@@ -661,8 +665,14 @@
       text-decoration-color 300ms var(--ease-out-quint);
   }
   .story-gallery:hover {
-    color: rgba(23, 21, 15, 0.875);
-    text-decoration-color: rgba(23, 21, 15, 0.55);
+    color: var(--signal);
+    text-decoration-style: dotted;
+    text-decoration-color: var(--signal);
+  }
+  /* `More photographs` is a button, and a button's default cursor is an arrow.
+     It behaves as a link here, so it should feel like one under the pointer. */
+  button.story-gallery {
+    cursor: pointer;
   }
   .story-gallery:focus-visible {
     outline: 2px solid var(--signal);
