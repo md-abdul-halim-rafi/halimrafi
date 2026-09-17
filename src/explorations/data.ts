@@ -227,8 +227,22 @@ export const STORY = {
   caseLabel: 'Read the case study',
   caseHref: '/explorations/studio/helping-an-agent-finish-longer-tasks?from=story',
 
-  /** Background, and it belongs with the work rather than the photography. */
-  previously: 'Previously, I co-founded Mainly Coding, which was acquired by Shikho.',
+  /**
+   * Background, and it belongs with the work rather than the photography.
+   *
+   * Held as segments rather than one string with the company names sliced out
+   * of it at render time. Slicing a sentence to place links is the same shape
+   * of mistake that once printed a lead line twice on this site: a wording
+   * change silently breaks the match. Here a change to the sentence is a change
+   * to this array and nothing else.
+   */
+  previously: [
+    { text: 'Previously, I co-founded ' },
+    { text: 'Mainly Coding', href: 'https://www.youtube.com/@MainlyCoding' },
+    { text: ', which was acquired by ' },
+    { text: 'Shikho', href: 'https://shikho.com' },
+    { text: '.' },
+  ] as ReadonlyArray<{ text: string; href?: string }>,
 
   /** The closing, which is only about the photograph. */
   photography: 'Outside software, I’m learning photography.',

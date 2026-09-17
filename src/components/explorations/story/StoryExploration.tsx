@@ -119,12 +119,14 @@ export function StoryExploration({
           <section aria-labelledby="octolane" className="pt-14 sm:pt-16">
             <hr className="story-rule w-14" />
             {/* The company link sits beside the heading rather than under the
-                screenshot. Baseline-aligned so the small link sits on the
-                heading's baseline, and wrapping so a narrow screen drops it to
-                its own line instead of squeezing the heading. The dot is
-                decoration between two things that already read as separate, so
-                it is hidden from assistive technology. */}
-            <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                screenshot, centred on it. Baseline alignment was wrong here:
+                against a 28px heading it drops 13px text to the heading's
+                floor, which reads as misaligned however correct it is
+                typographically. The row wraps so a narrow screen drops the
+                link to its own line instead of squeezing the heading. The dot
+                is decoration between two things that already read as separate,
+                so it is hidden from assistive technology. */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2
                 id="octolane"
                 className="story-display story-ink max-w-[18ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
@@ -138,12 +140,13 @@ export function StoryExploration({
                 href={STORY.productSourceHref}
                 target="_blank"
                 rel="noreferrer"
-                /* On a touch device `.story-gallery` becomes a 40px-tall box
-                   that centres its text, which dropped the link about ten
-                   pixels below the heading's baseline. Aligning its own
-                   contents to the baseline keeps the tap target and puts the
-                   text back on the line. */
-                className="story-gallery items-baseline text-[0.8125rem]"
+                /* The coarse-pointer rule gives this a 40px tap target. Left
+                   alone it would be the tallest thing in the row and would
+                   centre the heading against it, nudging the heading down on a
+                   phone. The negative margin lets the target hang outside the
+                   line box, so it stays tappable without setting the row's
+                   height. */
+                className="story-gallery text-[0.8125rem] [@media(pointer:coarse)]:-my-2.5"
               >
                 {STORY.productSourceLabel}
               </a>
@@ -166,10 +169,11 @@ export function StoryExploration({
                 outside it are transparent, so a CSS frame would sit on top of
                 a frame.
 
-                One control, not two. The image and the words under it are
-                inside the same button, so there is a single tab stop and the
-                visible label is the accessible name. The viewer it opens
-                handles Escape, focus restoration and scroll on its own. */}
+                The image is the control and carries no visible label, so the
+                only cue that it opens is the pointer and the focus ring. Its
+                accessible name still says what pressing it does. The viewer it
+                opens handles Escape, focus restoration and scroll on its
+                own. */}
             <figure className="m-0 mt-7">
               <button
                 type="button"
@@ -186,10 +190,6 @@ export function StoryExploration({
                   sizes="(min-width: 640px) 58rem, 92vw"
                   className="h-auto w-full"
                 />
-                <span className="story-mono story-quiet mt-3 inline-flex items-center gap-2 text-[0.75rem]">
-                  <span>{STORY.productZoomLabel}</span>
-                  <span aria-hidden>&#8599;</span>
-                </span>
               </button>
               <figcaption className="story-quiet mt-2 max-w-[34rem] text-[0.8125rem] leading-[1.5]">
                 {STORY.productCaption}
@@ -197,7 +197,21 @@ export function StoryExploration({
             </figure>
 
             <p className="story-quiet mt-5 max-w-[28rem] text-[0.875rem] leading-[1.6]">
-              {STORY.previously}
+              {STORY.previously.map((part, i) =>
+                part.href ? (
+                  <a
+                    key={i}
+                    href={part.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="story-gallery"
+                  >
+                    {part.text}
+                  </a>
+                ) : (
+                  <Fragment key={i}>{part.text}</Fragment>
+                ),
+              )}
             </p>
           </section>
 
