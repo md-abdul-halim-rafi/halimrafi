@@ -3,19 +3,19 @@
 import { Fragment } from 'react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { Switcher } from '@/components/explorations/Switcher'
 import { person, STORY } from '@/explorations/data'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
 /**
- * Story: introduction, current work, a personal closing.
+ * Story: introduction, current work, one case study, a personal closing.
  *
- * The streaming comparison used to sit between the work and the closing. It was
- * removed on request; the component, its fixtures and its tests are untouched
- * and still drive the case study, which keeps its own route. Nothing on this
- * page links there any more, so the article's `?from=story` arm is currently
- * unreachable from here. It is left in place, correct for a direct visit and
- * ready if the link comes back.
+ * The streaming comparison that used to sit between the work and the closing
+ * was removed on request. Its component, fixtures and tests are untouched and
+ * still drive their own article. What sits there now is text: the case study
+ * about long-running agent work, linked with `?from=story` so the article's
+ * way back returns here.
  *
  * The progression is the point. The introduction is one tight group rather than
  * three spaced lines. The work is two short paragraphs. Then the decision, and
@@ -177,6 +177,30 @@ export function StoryExploration({
 
             <p className="story-quiet mt-5 max-w-[28rem] text-[0.875rem] leading-[1.6]">
               {STORY.previously}
+            </p>
+          </section>
+
+          {/* The case study, between the work and the closing. Heading, one
+              paragraph carrying the problem and the contribution, then a link.
+              No panel and no artifact, because the article has none either,
+              and no rollout status, because saying it accurately takes three
+              qualifications and those live in the article. */}
+          <section aria-labelledby="case" className="pt-14 sm:pt-16">
+            <hr className="story-rule w-14" />
+            <h2
+              id="case"
+              className="story-display story-ink mt-5 max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+            >
+              {STORY.caseHeading}
+            </h2>
+            <p className="story-mid mt-4 max-w-[33rem] text-[1.0625rem] leading-[1.55]">
+              {STORY.caseBody}
+            </p>
+            <p className="mt-5">
+              <Link href={STORY.caseHref} className="story-read">
+                <span>{STORY.caseLabel}</span>
+                <span aria-hidden>&rarr;</span>
+              </Link>
             </p>
           </section>
 

@@ -206,6 +206,22 @@ export const STORY = {
   productSourceLabel: 'octolane.com',
   productSourceHref: 'https://www.octolane.com',
 
+  /**
+   * The case study entry: the problem and the contribution in one paragraph,
+   * then a link.
+   *
+   * Rollout status is deliberately absent. It needs three separate
+   * qualifications to be accurate and they belong in the article's status
+   * section, where there is room to keep them apart. Two sentences on a page
+   * like this cannot carry them without either over-claiming or reading as
+   * hedging.
+   */
+  caseHeading: 'Helping an agent finish longer tasks',
+  caseBody:
+    'Some requests need several rounds of work. I designed and built the execution path that lets Ask Octolane delegate tasks, save progress, and resume with the results.',
+  caseLabel: 'Read the case study',
+  caseHref: '/explorations/studio/helping-an-agent-finish-longer-tasks?from=story',
+
   /** Background, and it belongs with the work rather than the photography. */
   previously: 'Previously, I co-founded Mainly Coding, which was acquired by Shikho.',
 
