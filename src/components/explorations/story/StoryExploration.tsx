@@ -118,12 +118,36 @@ export function StoryExploration({
               what he is answerable for. */}
           <section aria-labelledby="octolane" className="pt-14 sm:pt-16">
             <hr className="story-rule w-14" />
-            <h2
-              id="octolane"
-              className="story-display story-ink mt-5 max-w-[18ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
-            >
-              {STORY.workHeading}
-            </h2>
+            {/* The company link sits beside the heading rather than under the
+                screenshot. Baseline-aligned so the small link sits on the
+                heading's baseline, and wrapping so a narrow screen drops it to
+                its own line instead of squeezing the heading. The dot is
+                decoration between two things that already read as separate, so
+                it is hidden from assistive technology. */}
+            <div className="mt-5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2
+                id="octolane"
+                className="story-display story-ink max-w-[18ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+              >
+                {STORY.workHeading}
+              </h2>
+              <span aria-hidden className="story-quiet text-[0.8125rem]">
+                &middot;
+              </span>
+              <a
+                href={STORY.productSourceHref}
+                target="_blank"
+                rel="noreferrer"
+                /* On a touch device `.story-gallery` becomes a 40px-tall box
+                   that centres its text, which dropped the link about ten
+                   pixels below the heading's baseline. Aligning its own
+                   contents to the baseline keeps the tap target and puts the
+                   text back on the line. */
+                className="story-gallery items-baseline text-[0.8125rem]"
+              >
+                {STORY.productSourceLabel}
+              </a>
+            </div>
             <p className="story-ink mt-6 max-w-[33rem] text-[1.0625rem] leading-[1.55]">
               {STORY.workProduct}
             </p>
@@ -167,11 +191,8 @@ export function StoryExploration({
                   <span aria-hidden>&#8599;</span>
                 </span>
               </button>
-              <figcaption className="story-quiet mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-[0.8125rem] leading-[1.5]">
-                <span>{STORY.productCaption}</span>
-                <a href={STORY.productSourceHref} className="story-gallery">
-                  {STORY.productSourceLabel}
-                </a>
+              <figcaption className="story-quiet mt-2 max-w-[34rem] text-[0.8125rem] leading-[1.5]">
+                {STORY.productCaption}
               </figcaption>
             </figure>
 

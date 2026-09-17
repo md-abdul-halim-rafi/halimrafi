@@ -203,6 +203,11 @@ export const STORY = {
    * with the visible words, which is what WCAG's label-in-name asks for.
    */
   productZoomAria: 'View larger: Octolane’s home workspace',
+  /**
+   * The company's own site, linked beside the section heading rather than
+   * under the screenshot. It opens in a new tab, so it carries `rel` alongside
+   * `target` and does not hand the new tab a handle on this one.
+   */
   productSourceLabel: 'octolane.com',
   productSourceHref: 'https://www.octolane.com',
 
