@@ -2402,3 +2402,102 @@ SHAs and file paths must not appear on the website as if a visitor could verify
 them. What can be written publicly, once a capture exists, is what the flow
 does and what he designed and built; not what it achieved, since no production
 measurements have been supplied.
+
+## Corrections to the evidence notes
+
+Five corrections, each re-checked against the code rather than reasoned from
+the earlier notes. Where a correction changes what may be said publicly, the
+draft follows the corrected version.
+
+### 1. Commit counts are authorship clues, not contribution percentages
+
+The earlier tables printed things like "100 of 115 commits = 86%" in a column
+headed "his share". That reads as a share of the contribution, which a commit
+count cannot measure. Commit counts say who touched a path and how often. They
+say nothing about how much of the thinking, review, debugging or design each
+person did, they reward committing in small increments, and they credit an
+author for merges and mechanical edits alongside substantial work.
+
+Restated: **Rafi is the dominant author of `agentRun` by commit count, and the
+sole author of its design documents.** That is the claim the evidence supports.
+The numbers stay in these notes as the trail behind that sentence, not as a
+percentage of contribution. Nothing derived from them appears on the site.
+
+### 2. Three separate states, not two
+
+The earlier note collapsed deployment and availability. There are three:
+
+1. **Merged.** The commits are on `dev` through pull requests #3731, #3958 and
+   #4224. Verified by reading the merge state.
+2. **Deployed as code.** `09d3e1ca7`, `25373eabe` and `61877252c` are
+   ancestors of `origin/ai-chat/main`, the aiChat service's deploy branch.
+   Verified with `git merge-base --is-ancestor`.
+3. **Enabled for customers.** **Not established.** Two gates stand in front of
+   it and both default off in the repository:
+   `AI_CHAT_DISCHARGE_ORG_ALLOWLIST` defaults to `""` ("Empty default = no orgs
+   run discharge = safe rollout") and `AI_CHAT_TEMPORAL_ENABLED` defaults to
+   `false` ("Ships DARK ... the durable path is a no-op"). Those are repository
+   defaults. I cannot read the production environment, so I cannot say whether
+   any organisation has either gate opened. The allowlist's existence tells us
+   the intended rollout is per-organisation, which is not the same as knowing
+   any organisation is on it.
+
+The draft says merged and deployed behind a rollout gate, and says the
+customer-facing state is not established here.
+
+### 3. The delegated path does not change CRM records
+
+The earlier note implied the flow ends in a record change, and put "the CRM
+records the run changed" on the capture list. Tracing the code says otherwise.
+
+`apps/aiChat/src/modules/agentRun/worker/runSubAgentLLM.ts` resolves the same
+tool set the parent uses and then removes every side-effecting tool before the
+child model ever sees it. Its own comment: "children are read-only by default.
+A future v2 may add an explicit `delegated_side_effect_tools` schema field on
+spawn_sub_agent; v1 ships strict." Searching the source for
+`delegated_side_effect_tools` returns that comment and nothing else, so
+delegating a write is not implemented.
+
+The reactivated parent is different. `runReactivation.ts` builds
+`reactivationTools` as the resolved tool set plus widget and agent-control
+tools, with no side-effect strip, so the parent keeps write-capable tools on
+every cycle.
+
+So the accurate statement, and the one the draft uses: **the delegated work is
+read-only; any record change belongs to the parent turn.** A long-running run
+can end in a write, but the delegation this case study is about is not what
+performs it. The CRM-record frame is removed from the capture scenario, because
+showing it would illustrate a claim this trace does not support.
+
+### 4. Decision D3 checked against the current implementation
+
+The RFC is dated 2026-06-06 and marked Draft. Intent and current behaviour
+happen to agree here, and I checked rather than assumed.
+
+`pinnedMemoryExtractor.ts` states its own status in its header: "Phase 1 of
+long-horizon-agent-runs: WRITE-ONLY side index ... Reactivation today replays
+the FULL chat history with sub-agent results substituted in. Pinned memory
+isn't injected into the rebuilt prompt yet - it just accumulates." Grepping the
+reactivation path for `pinned_memory` returns nothing, which matches. The
+extractor is also explicitly heuristic, keyed on write-shaped tool-name
+prefixes, and returns nothing at all for decisions.
+
+So D3 holds today: replay the full history, write pinned memory, do not inject
+it. Two things to keep separate anyway. The RFC is historical intent and still
+says Draft; the header comment is the current behaviour. And the Phase 2 that
+would make pinned memory load-bearing has not happened, so the cost described
+in D3 is being paid now while the benefit is still deferred.
+
+### 5. The spreadsheet incident is one incident
+
+The earlier note used it as though it demonstrated the improvement. It does
+not. It is a single documented failure, recorded in the RFC as the reason to
+start, with no before-and-after measurement attached to it and nothing
+comparing the old path to the new one. It motivates the work; it does not
+evidence its result.
+
+It also contains a customer's file, its size, its row count and the token and
+time cost of their request. That is operational detail about a customer, so
+none of those figures goes on the site. The draft describes the shape of the
+task and stops there.
+
