@@ -2501,3 +2501,247 @@ time cost of their request. That is operational detail about a customer, so
 none of those figures goes on the site. The draft describes the shape of the
 task and stops there.
 
+## The case-study draft, and the one capture to make
+
+### What was written
+
+`src/content/work/helping-an-agent-finish-longer-tasks.mdx`, registered in
+`src/lib/work.ts`, with a homepage entry added ahead of the existing one in
+`src/components/site/content.ts`. Nothing else on the site changed and nothing
+was deployed, so the draft is reviewable only at the local URL.
+
+The reading path is 433 words across the five sections asked for: the task that
+did not fit, what I did, handing work out and picking it up, one decision and
+what it costs, and where this stands. Three disclosures carry the technical
+detail and all start closed: what survives a resume, what the helpers can and
+cannot do, and how far the status can actually be verified. The homepage entry
+is 42 words including its title and its read link.
+
+`artifact: { kind: 'none' }`. There is no image, figure, canvas or demo
+container on the page, empty or otherwise, because no authentic capture of this
+path exists. The marketing screenshot stays where it is, on the story
+exploration, as company context.
+
+Kept off the page and only in these notes: commit and line counts, repository
+and pull-request references, SHAs, and the incident's file size, row count,
+token cost and duration.
+
+### The capture to make, once
+
+One screen recording of a single run, plus one still. Four beats, in order:
+
+1. **The request.** Ask Octolane, with a request that will genuinely fan out.
+   Type it live so the reader sees it entered rather than pre-filled.
+2. **Visible progress.** The run panel with more than one helper working at
+   once, long enough to read what each is doing. This is the frame that shows a
+   run rather than a chat, and nothing supplied shows it today.
+3. **The resume.** The moment the agent comes back with the helpers' results
+   folded in and carries on. This is the whole point of the design and it is
+   invisible in a still of the finished answer, so the recording has to cover
+   it rather than cutting to the end.
+4. **The final result.** The finished answer with its sources shown.
+
+**No CRM record frame.** The earlier version of this list had one. Tracing the
+code removed it: the delegated helpers run with every data-changing tool
+stripped before the model sees them, so the delegated work cannot produce a
+record change. The parent turn keeps write-capable tools, so a run can end in
+one, but that is the parent acting, not the delegation this piece is about.
+Showing a record change here would illustrate a claim the trace does not
+support. If a record change is wanted later it needs its own trace of the
+parent's write path and its own framing.
+
+**Environment label.** The recording must carry, on the page or in the caption,
+which environment it came from and that the data is a demo workspace. Since the
+rollout gates cannot be read from outside production, the capture has to be
+taken wherever the path is actually enabled, and the label has to say which
+that was. "Recorded in a demo workspace with the durable path enabled" is
+accurate if true; "in production" is not sayable on current evidence.
+
+**Waiting time.** A real run waits, sometimes for minutes. If the recording is
+sped up or if dead time is cut, the caption must say so and say roughly how
+much, for example "shortened from about four minutes; the waiting between the
+helpers finishing and the agent resuming is cut". An unlabelled speed-up would
+misrepresent the latency, which is exactly the kind of claim there is no
+measurement for.
+
+**A suggested task**, chosen so the delegated half is read-only and honest: ask
+for a comparison across several named accounts that requires reading email,
+meetings and records for each, and a written summary at the end. It fans out,
+it needs a resume, and nothing it delegates writes anything.
+
+### Verification
+
+`cap/draft.mjs`, 60 checks at 1440x900, 390x844 and 200% zoom. The homepage
+entry present, first in the list, under 80 words, focusable with a visible ring
+and opening the article by keyboard. The article's title matching the working
+title; the five sections present and in order; three disclosures all closed and
+all opening on activation and revealing content; no media container; no leak of
+repository paths, PR numbers, SHAs, commit counts or the incident's figures; no
+em dashes; all four collaborators named; the status stated as merged and
+deployed but off by default; the delegated work described as read only; no
+horizontal overflow; all text at AA; no console errors. Plus the story
+exploration, the existing case study with its demo, and the studio exploration
+all still rendering.
+
+One caveat on my own probe: the word count it prints for the homepage entry is
+unreliable, because at some widths the selector matched a shorter link. The
+entry's copy was counted directly from the source at 42 words.
+
+## Pass: connecting the case study to Story
+
+The draft already existed from the previous pass. It was reviewed rather than
+rewritten, one section was corrected against the code, and the page it was
+missing from now links to it.
+
+### The decision section was wrong, and the code said so
+
+The instruction to confirm the implementation before describing the decision
+earned its place. The draft said the agent "replays its whole conversation" and
+that the index of load-bearing facts exists "so there is already a floor of
+facts to keep when history has to be trimmed", implying the trimming was still
+ahead.
+
+Reading `runReactivation.ts` says otherwise. The resumed call rebuilds the
+history up to and including the parent message, capped at 500 rows, and then
+runs `trimHistoricalToolResults` over it. Trimming is happening now, and the
+code's own comment gives the reason: a single tool result "can be 100K+ chars",
+and without the guard a long chat's continuation "re-sends megabytes of dead
+tool output and can blow the provider's prompt limit outright - the cycle dies
+on a 400 and the user sees an empty failed continuation". In one mode the
+stubbing is deterministic and age-keyed so the prompt prefix stays byte-stable
+across cycles and the provider's cache still hits.
+
+What remains true: the conversation is replayed rather than summarised, and the
+pinned-memory index is written and still not read back, so it is not what
+decides which tool results survive. Size budget and age decide that.
+
+The article now says that. The decision reads as replay rather than summarise,
+and where history must shed weight it sheds the bulkiest thing rather than the
+narrative. The disclosure carries the deterministic stubbing and the fact that
+the index is written but not yet consulted.
+
+Re-confirmed at the same time, unchanged: helpers still have side-effecting
+tools stripped, both rollout gates still default off, and the two commits are
+still ancestors of the deploy branch.
+
+### What was added
+
+- `src/explorations/data.ts`: a `case*` block, three parts and a link.
+- `src/components/explorations/story/StoryExploration.tsx`: a section between
+  Octolane and photography, using the page's existing classes. Heading measured
+  at the same face and size as the Octolane heading, Instrument Serif at 28px,
+  and the same 64px section padding on desktop, 56px on mobile. 89 words. No
+  artifact, no placeholder, no comparison.
+- `src/app/explorations/studio/[slug]/page.tsx`: the preview route, previously
+  a folder for one slug, now serves any published case study. One shell for
+  both, so they cannot drift. Unknown slugs 404.
+
+The link carries `?from=story`, which makes the article's existing origin table
+useful again: entering from Story gives "Back to Story", entering from Studio
+still gives "Back to Studio".
+
+### Verification
+
+`cap/connect.mjs`, 52 checks at 1440x900 and 390x844. The entry between
+Octolane and photography in that order; headed with the working title; problem
+and contribution both present; 89 words; the link descriptive and carrying its
+origin; heading typography identical to the section above; section padding
+identical; no artifact in the entry; the comparison still absent; no overflow.
+Then the journey: the link focused and followed by keyboard, the article
+opening under the exploration shell with its five sections and three closed
+disclosures, no media container, the decision text matching what the code does,
+the rollout status still hedged, no invented metric, both ways back pointing at
+Story and landing on Story rendered. Then the other case study, still
+previewing with its demo and still returning to Studio, and the live homepage
+entry still first with its article still rendering.
+
+`pnpm lint` clean, `tsc --noEmit` clean, 24 tests, build compiled with
+`/explorations/studio/[slug]` dynamic and both work routes prerendered.
+
+Two notes on the harness. The scratchpad had been cleared between sessions, so
+`playwright-core` was reinstalled and only the new script exists; the earlier
+suites' results stand for the code as it was when they ran, and this pass's
+changes are covered by the new one. And my first spacing check measured the gap
+between two section boxes and read 0px, because the gap lives inside the next
+section's top padding. Comparing computed padding instead gives 64px against
+Octolane's 64px. That is the same mistake recorded earlier in these notes,
+measuring a box rather than its padded content.
+
+## Editorial pass on the case study
+
+### "Deployed" is now supported, and here is what supports it
+
+The instruction was to say deployed only if a successful deployment record
+identifies the revision. The earlier note's basis was weaker than that: it was a
+branch-ancestry check against `origin/ai-chat/main`, which shows code reached a
+branch, not that a deploy ran.
+
+There is a stronger record. The aiChat service deploys through a Porter
+workflow triggered on pushes to `ai-chat/main`, and its runs are visible:
+`porter-app-3283-chat.yml` has a run with conclusion **success** on 2026-09-17
+against head revision `ede2c95b1`. All four of the named agent-run commits are
+ancestors of that revision, and all 71 files of the module are present in its
+tree. So a successful deployment record identifies a revision containing this
+work, and "deployed" is now the accurate word.
+
+Worth noting what is not evidence: the 30 GitHub deployment records on the
+repository are all `environment=staging` at a single revision. Production
+deployment goes through Porter, whose own record I cannot read; the workflow run
+is the part that is visible from here.
+
+Customer access stays separate and still unestablished, for the same reason as
+before.
+
+### The incident, stated without the contradiction
+
+The draft said both "the agent could not do it" and "finished by a slower
+route", which cannot both be true as written. The record resolves it:
+
+- The delegation path failed outright. The agent split the file sensibly and
+  every attempt was rejected for exceeding the per-handoff size limit.
+- The turn then fell back to working through the file inside the same
+  conversation.
+- The record notes the fallback beginning. It does not say whether the fallback
+  completed the request, and the second failure it documents, a working set that
+  only grows, is the reason that route is bounded too.
+
+The article now says exactly that, including the part we do not know. It also no
+longer implies that a few hundred rows inherently exceeds a model's context: the
+cause was a handoff limit far smaller than the work, plus a context that only
+grows.
+
+### Other edits
+
+- Both entries, on Story and on the live homepage, now carry the same two
+  sentences: the problem and the contribution. Rollout status is out of them
+  and lives in the article's status section, where three separate
+  qualifications have room to stay apart. The link reads "Read the case study".
+- "the resume" became "resuming execution" and "the machinery that resumes a
+  run with results in hand". "Runs out of room before it runs out of task" is
+  gone; the limit is described as what it is, a fixed amount of context per
+  call. Section titles follow: "The request that failed", "Delegating, saving
+  progress, resuming".
+- The reading path is about 500 words, up from 433, because spelling out what
+  failed, what the fallback did, and what remains unknown takes words. The
+  decision, its cost, and all four collaborators are unchanged.
+
+### Verification
+
+`cap/connect.mjs`, 62 checks at 1440x900 and 390x844, including six new ones:
+the entry as a single paragraph, rollout status absent from it, the link
+wording, the opening specific to the incident rather than to row counts, the
+fallback and the unknown both stated, "deployed" accompanied by its basis with
+customer access kept separate, and the awkward phrasings gone. Plus everything
+from the previous pass: section order, typography and padding matched to the
+section above, no artifact, return navigation to Story, the other case study
+still previewing and returning to Studio, the live homepage entry and article.
+
+`pnpm lint` clean, `tsc --noEmit` clean, 24 tests, build compiled.
+
+Two harness mistakes, both mine. The entry's paragraph count included the
+link's own paragraph, because the filter still matched the old link wording;
+it now excludes any paragraph containing a link. And two status checks read
+`document.body.innerText`, which omits the contents of a closed `details`
+element, so text that was present read as missing. Reading `textContent`
+fixes it. That is a new one to remember: innerText is a rendering-aware
+projection and disclosures are exactly where it differs.
