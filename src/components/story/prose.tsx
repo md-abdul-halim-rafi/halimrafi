@@ -53,4 +53,24 @@ export const proseComponents: MDXComponents = {
     />
   ),
   hr: () => <div className="rule-fade mt-12" />,
+
+  /* Tables. The article's comparison is genuinely tabular, so it gets a table
+     rather than a styled list. It scrolls inside its own box at narrow widths,
+     which is what keeps the page from scrolling sideways. */
+  table: (props) => (
+    <div className="breakout mt-8 overflow-x-auto">
+      <table {...props} className="w-full min-w-[34rem] border-collapse text-left text-[0.9375rem]" />
+    </div>
+  ),
+  thead: (props) => <thead {...props} />,
+  tbody: (props) => <tbody {...props} />,
+  tr: (props) => <tr {...props} className="border-b border-[color:var(--hairline)] last:border-0" />,
+  th: (props) => (
+    <th
+      {...props}
+      className="label border-b border-[color:var(--hairline-strong)] pb-2.5 pr-6 align-bottom"
+    />
+  ),
+  td: (props) => <td {...props} className="py-3.5 pr-6 align-top leading-[1.5] text-ink-11" />,
+  caption: (props) => <caption {...props} className="label pb-3 text-left" />,
 }

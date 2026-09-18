@@ -1,5 +1,6 @@
 import type { MDXComponents } from 'mdx/types'
 import { proseComponents } from '@/components/story/prose'
+import { Callout } from '@/components/story/Callout'
 import { Disclosure } from '@/components/story/Disclosure'
 import { Lede } from '@/components/story/Lede'
 import { StreamingDemo } from '@/components/demo/StreamingDemo'
@@ -8,6 +9,7 @@ import { StreamingDemo } from '@/components/demo/StreamingDemo'
 export function useMDXComponents(): MDXComponents {
   return {
     ...proseComponents,
+    Callout,
     Disclosure,
     Lede,
     // The demo breaks wider than the reading column; the column itself stays at

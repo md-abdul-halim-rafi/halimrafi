@@ -23,11 +23,21 @@ export type WritingMeta = {
   title: string
   /** One sentence. Used in the list, in the archive and as the description. */
   description: string
-  /** ISO date of publication. */
+  /**
+   * ISO date of publication. An article with no date cannot be published: see
+   * the guard in `publishedWriting` below, which is there because the first
+   * article arrived without one.
+   */
   date: string
   /** ISO date of a later material revision, if there has been one. */
   updated?: string
   status: WritingStatus
+  /**
+   * Who the piece is by, when that is not simply the site's owner. An article
+   * written by a company's engineering team is not personal writing, and the
+   * page says so rather than letting the site's own byline stand in.
+   */
+  byline?: string
   /**
    * Section headings, in order, for the reading rail. Omit for a piece short
    * enough not to need one, and the rail is not rendered at all.
@@ -45,7 +55,12 @@ export type WritingModule = {
  * to read from it, so the first entry needs no other change: the list appears
  * on the story page, the archive fills, and the sitemap picks it up.
  */
-const registry: Record<string, () => Promise<WritingModule>> = {}
+const registry: Record<string, () => Promise<WritingModule>> = {
+  'your-agents-knowledge-base-is-not-a-retrieval-problem': () =>
+    import(
+      '@/content/writing/your-agents-knowledge-base-is-not-a-retrieval-problem.mdx'
+    ) as Promise<WritingModule>,
+}
 
 export const writingSlugs = Object.keys(registry)
 
@@ -65,7 +80,23 @@ export async function publishedWriting(): Promise<WritingMeta[]> {
   return modules
     .flatMap((m) => (m ? [m.meta] : []))
     .filter((meta) => meta.status === 'published')
+    .filter((meta) => {
+      // A published article without a real date would render "Invalid Date" in
+      // the list, sort unpredictably, and carry a broken `lastModified` into
+      // the sitemap. Refusing to publish it is better than any of those, and
+      // the warning says which file to fix.
+      if (isRealDate(meta.date)) return true
+      console.warn(
+        `[writing] "${meta.slug}" is marked published but has no valid date, so it is being ` +
+          `withheld. Set a publication date in its meta.`,
+      )
+      return false
+    })
     .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+function isRealDate(iso: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso) && !Number.isNaN(Date.parse(`${iso}T00:00:00Z`))
 }
 
 /**

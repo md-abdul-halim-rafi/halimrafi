@@ -8,12 +8,16 @@ import { slugify } from '@/components/story/prose'
 import { Toc } from '@/components/story/Toc'
 import { ArrowRight } from '@/components/ui/icons'
 import { site } from '@/lib/site'
-import { formatArticleDate, loadWriting, writingSlugs } from '@/lib/writing'
+import { formatArticleDate, loadWriting, publishedWriting } from '@/lib/writing'
 
 type Params = { params: Promise<{ slug: string }> }
 
-export function generateStaticParams() {
-  return writingSlugs.map((slug) => ({ slug }))
+/**
+ * Published slugs only. A draft would otherwise be prerendered as its own 404,
+ * which works but leaves a build artifact named after an unpublished piece.
+ */
+export async function generateStaticParams() {
+  return (await publishedWriting()).map((meta) => ({ slug: meta.slug }))
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -33,7 +37,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url,
       publishedTime: meta.date,
       ...(meta.updated ? { modifiedTime: meta.updated } : {}),
-      authors: [site.name],
+      authors: [meta.byline ?? site.name],
     },
     twitter: { card: 'summary_large_image', title: meta.title, description: meta.description },
   }
@@ -88,7 +92,8 @@ export default async function WritingPage({ params }: Params) {
               <p className="mt-6 max-w-[46ch] text-[1.0625rem] leading-[1.65] text-soft">
                 {meta.description}
               </p>
-              <p className="mt-8 border-t border-[color:var(--hairline)] pt-6 font-mono text-[0.8125rem] text-ink-11">
+              <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-[color:var(--hairline)] pt-6 font-mono text-[0.8125rem] text-ink-11">
+                {meta.byline ? <span>{meta.byline}</span> : null}
                 <time dateTime={meta.date}>{formatArticleDate(meta.date)}</time>
                 {meta.updated ? (
                   <>

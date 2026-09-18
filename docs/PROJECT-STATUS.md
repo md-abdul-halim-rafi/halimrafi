@@ -2988,3 +2988,74 @@ the convention.
 
 The article itself. Nothing in the structure names or dates anything, and the
 first entry needs one MDX file and one line in the registry.
+
+## The first article, added as a draft
+
+The supplied artifact was read in full and converted to MDX at
+`src/content/writing/your-agents-knowledge-base-is-not-a-retrieval-problem.mdx`.
+Title, standfirst, every section heading, every subhead, the comparison table,
+the three callouts, the three pull quotes, the ten-point checklist, the credit
+note and the endnote are the article's own words. Nothing was summarised,
+reordered or added.
+
+### Why it is a draft
+
+**The article carries no publication date.** Its byline is "Octolane
+Engineering" and "~15 min read", and no date appears anywhere in the source. So
+the date field is empty and the status is draft, which keeps the piece off the
+story page, out of the archive, out of the navigation and out of the sitemap,
+and makes its own URL 404. Nothing invented a date to get around this.
+
+A guard was added to `publishedWriting` for the same reason: an entry marked
+published without a valid ISO date is withheld and logged, rather than
+rendering "Invalid Date" in the list and carrying a broken `lastModified` into
+the sitemap.
+
+**It is bylined to a team, not to a person.** A `byline` field now exists on the
+model and is rendered on the article and in the archive when present, and feeds
+the OpenGraph author. Putting a company engineering post under a personal
+Writing section without saying whose it is would misattribute it.
+
+### What the article needed from the pipeline
+
+- **remark-gfm**, for the comparison table. Named as a string in
+  `next.config.ts` rather than imported: Turbopack passes loader options across
+  a boundary that only takes serialisable values, and handing it the imported
+  function fails the build outright.
+- **Table components** in the prose map. The table breaks out wider than the
+  reading column and scrolls inside its own box, so a 34rem table is readable
+  on a 320px screen without the page itself scrolling sideways.
+- **A `Callout` component** for the article's three labelled asides. Not a
+  Disclosure: a disclosure hides detail the reader may skip, and these are
+  lines the reader should not skip, so they are always open.
+
+### Verified by publishing it temporarily, then reverting
+
+46 checks at 1440x900, 390x844 and 320x568 with the article published under a
+temporary date, before restoring the draft: the title and standfirst are the
+article's own, the byline names Octolane Engineering, all ten sections and all
+eighteen subheads render, the table renders whole at nine rows by three columns,
+three callouts, three pull quotes, the ten-point checklist, the contents rail
+listing every section, the canonical URL, no horizontal overflow at any width,
+and no console errors. Then the story page showing it between the case study and
+the photography closing, one entry with no "All writing" link since there is
+only one, and the sitemap carrying the archive and the article.
+
+Then reverted to draft and re-checked: 9 checks confirming the story section is
+absent, nothing links to the archive, Writing is not in the navigation, the
+archive says nothing is published, the article's URL 404s, and the sitemap is
+back to its four public URLs.
+
+### Three assertions of mine were wrong, not the page
+
+I guessed fifteen subheads; the source has eighteen. I counted `ol > li` across
+the document, which swept in the contents rail's ten items alongside the
+checklist's ten. And I flagged thirty-three elements as painting past the edge
+when all thirty-three were table cells inside the box that scrolls, which is
+exactly how a wide table is meant to behave on a phone.
+
+### Waiting on
+
+**The publication date.** One line, and the article publishes itself: the story
+page lists it, the archive fills, Writing joins the navigation, and the sitemap
+gains two URLs.

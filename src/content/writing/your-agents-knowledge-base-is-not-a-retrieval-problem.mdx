@@ -1,0 +1,465 @@
+export const meta = {
+  slug: 'your-agents-knowledge-base-is-not-a-retrieval-problem',
+  title: "Your agent's knowledge base is not a retrieval problem",
+  description:
+    'We connected our documentation site to our AI agent so it would stop answering product questions from memory. Retrieval was the easy part. Almost all of the work started after it was already working.',
+  // The supplied article carries no publication date. Nothing here invents
+  // one, and `status` stays 'draft' until the real date arrives, which keeps
+  // the piece off every public surface in the meantime.
+  date: '',
+  status: 'draft',
+  byline: 'Octolane Engineering',
+  sections: [
+    'The confidently wrong answer',
+    "The naive version, and why it wasn't enough",
+    'How we tested',
+    'How we iterated',
+    'Guards, and the judgment behind them',
+    'Before and after',
+    'On confidence, and showing your working',
+    "If you're doing this yourself",
+    'What made this tractable',
+    'Limits of this account',
+  ],
+}
+
+<Lede>Ask an AI agent how many API endpoints your product has.</Lede>
+
+## The confidently wrong answer
+
+If no single page in your documentation lists them all, you will still get a
+number. It will be wrong. It will also be *sourced*: the agent will have found
+real pages, quoted them accurately, and added them up.
+
+That is where we started. Our agent found the two overview pages that exist,
+counted what each listed, and reported the sum. Every individual fact it used
+was correct. The total was invented. The complete enumeration lived in exactly
+one machine-readable file it had no way to reach.
+
+What makes this interesting rather than just a bug: the agent did nothing wrong
+by its own lights. It retrieved. It cited. It summarised. And the answer was
+unfalsifiable from the user's side. You would have to already know the right
+number to know this one was wrong.
+
+> The enemy isn't wrong facts. It's answers the reader has no way to check.
+
+We spent a long time treating this as a retrieval project. Get the docs in front
+of the model, the thinking goes, and the model stops making things up. Retrieval
+worked almost immediately: the agent could find any page we asked about. It
+still produced answers we would not want a customer to act on, and better search
+alone would not have fixed them.
+
+This piece is about what came after. How we tested, how we iterated, what the
+first version got wrong that the last version gets right, and the judgment calls
+in between. If you are about to wire a knowledge base into an agent, the
+failures below are the ones waiting for you.
+
+## The naive version, and why it wasn't enough
+
+Version one is one tool: search the docs, return the top passages. It is maybe
+forty lines of adapter code over a documentation endpoint. It works. The model
+calls it, gets real content back, and writes a plausible answer with a link at
+the end.
+
+If you evaluate it by spot-checking a few answers for correctness, you will ship
+it. We nearly did. The failures only appear when you read entire transcripts,
+slowly, asking not "is this right" but "how would a user know if this were
+wrong".
+
+Five failure classes showed up. Better search alone would not fix any of them.
+
+### It doesn't call the tool
+
+Questions about how a product works often don't sound like documentation
+questions. "How do I set up an automatic field" reads to a router as a question
+about the user's own data. The documentation tool is absent on exactly the
+queries that need it, and the model answers from pretraining without any signal
+that it did.
+
+### It stretches a near miss
+
+Retrieval hands back its best matches whether or not they are good ones. Ask
+about a feature the product doesn't have and you get the three most lexically
+similar pages, which are about something else. Without an explicit notion of
+"the corpus does not cover this", the model treats those pages as the answer and
+writes confidently about a feature that doesn't exist.
+
+### It answers the adjacent question
+
+The most common and least visible failure. The docs cover the topic but not the
+specific thing asked. The agent describes the topic fluently, never mentions the
+gap, and the reader leaves thinking they were answered. A user who can see
+what's missing can go find it. A user handed a smooth partial answer cannot.
+
+### It cites some of what it used
+
+An answer would cite the two pages it was obviously about, and silently draw
+three further claims from two other pages it had also retrieved. The citations
+look thorough. They vouch for a subset of the answer, and the reader has no way
+to tell which subset.
+
+### It computes totals no page states
+
+The counting failure from the opening, which generalises to any "how many" or
+"what are all the" question. The model sums the partial lists it happened to
+retrieve. The arithmetic is right and the premise is wrong.
+
+<Callout label="The shape of the problem">
+Every one of these is an **epistemic** failure, not a retrieval failure. The
+model had the right documents. What it lacked was a way to know the limits of
+its evidence, and an obligation to make its reasoning checkable by the person
+reading.
+</Callout>
+
+## How we tested
+
+This is where most of our real learning happened, and it's the part least
+discussed when people write about agent features. Testing a probabilistic system
+that produces prose is genuinely different from testing a function, and several
+of our early test cases were worse than useless: they were green, and they
+proved nothing.
+
+### Read whole transcripts, don't assert on substrings
+
+Nearly every failure in the previous section survives a check like "does the
+answer mention the feature" or "does it contain a link". The adjacent-question
+failure in particular produces text that passes every keyword assertion you
+would think to write, because the words are all there. It's the absence of one
+sentence naming the gap that makes it wrong.
+
+So the primary evaluation loop was a person reading complete answers against the
+actual corpus, asking a specific question of each: *for every claim here, can I
+point at the page it came from?* Slow, unglamorous, and the only thing that
+found the interesting failures.
+
+### Watch for tests that exercise nothing
+
+We wrote a batch of cases for off-topic queries: ask about something the docs
+obviously don't cover, assert the agent says so. They passed immediately. They
+also tested nothing, because for an obviously off-topic question the model never
+called the documentation tool at all. The assertion was checking behaviour on a
+code path that never ran.
+
+This is a general hazard with agent tests. The thing you're testing is
+downstream of a decision the model makes, so a case can be silently vacuous. We
+started pinning the precondition explicitly: assert the tool was invoked, *then*
+assert what happened with the result.
+
+### Verify the premise of a negative test
+
+We nearly shipped three cases asserting "the documentation doesn't cover X" for
+three topics that the documentation, on inspection, covered thoroughly. We'd
+written the cases from memory of what the product does rather than from the
+corpus.
+
+Had they shipped, they would have locked in wrong behaviour as expected
+behaviour. Grep the corpus before writing a negative case. The premise needs
+verifying as much as the assertion does.
+
+### Feed streaming text one character at a time
+
+Part of our citation handling operates on the live token stream, which means it
+sees text in arbitrary fragments. Tests that push whole sentences through it
+pass easily. Tests that push one character at a time found two real bugs: a link
+held forever because the logic waited for proof-of-completion that could never
+arrive, and a case where a partially-arrived URL was judged as if finished.
+
+If any part of your system consumes a stream, test it at the nastiest chunk
+boundary you can construct, not the convenient one.
+
+### Ask whether a test would fail if the behaviour inverted
+
+Our sharpest lesson. We had three precise, well-written tests pinning a
+behaviour that turned out to be a serious bug. They weren't sloppy. They were
+exact about the wrong thing, and their existence made the bug look like a
+decision.
+
+The check that would have caught it: for each test, ask whether it would still
+pass if the behaviour were wrong in the *opposite* direction. A test that asserts
+"this link was removed" should be accompanied by one asserting "this other link
+survived", or you have only pinned half of a rule and the half you pinned may be
+the wrong half.
+
+### Two bugs can cancel into a passing test
+
+Later, two tests passed only because a second defect suppressed the output that
+would have revealed the first. Fixing the second made the first visible, and two
+tests that had been green for weeks went red immediately.
+
+<Callout label="Testing takeaway">
+"The tests pass" and "the behaviour is correct" are independent claims about an
+agent feature. Treat the test suite as evidence about the paths it actually
+exercises, and keep a human reading whole answers for as long as the feature is
+young.
+</Callout>
+
+## How we iterated
+
+The loop was simple and we ran it many times: put the feature in front of a live
+agent, run a batch of real questions, read every answer in full, identify the
+*class* of failure rather than the instance, fix the class, repeat. The word
+doing the work there is *class*, and getting it wrong cost us more time than
+anything else in the project.
+
+### Fixing the instance makes it come back wearing a different hat
+
+One answer had a phrasing problem: the agent gave a correct figure and then
+explained, at length, how it had ruled out two other figures. We fixed the
+specific phrasing. The next run produced the same failure with none of the
+original wording and no numbers in it at all. Same shape, same damage, nothing a
+string match would catch.
+
+The second fix had to describe the *category* of thing not to do, and include the
+first failure as a worked example of what the category looks like.
+
+### When you've fixed it three times, stop fixing instances
+
+Our instructions to the model had a recurring defect: several sections written to
+guide tool selection also happened to state facts about the product. The model
+read them as a source and repeated them as product truth, uncited, exactly the
+behaviour the whole feature exists to prevent.
+
+We found and fixed this three separate times, in three different sections, each
+time concluding we were done. The fourth occurrence made the pattern obvious.
+The fix that finally held did two things differently: it stated the rule as
+covering *every* section, including ones not yet written, and it gave the model a
+heuristic for recognising new instances rather than a list of known ones.
+
+Enumerating instances does not fix a class. If you have patched the same shape
+three times, the next patch should be a rule about the shape.
+
+### Root causes are smaller than you expect
+
+The verbose-reconciliation failure above traced back to a single word in a tool
+description. The text offered the model a choice: reconcile the sources *or*
+state which figure it was giving. That "or" was an invitation to narrate, and the
+model accepted it every time.
+
+When an agent does something you didn't ask for, read your own instructions
+adversarially before assuming the model is being creative. Very often you told it
+to.
+
+## Guards, and the judgment behind them
+
+The highest-value component we built is the one that verifies citations: it
+compares every documentation link in an answer against what the tools actually
+returned and removes the ones nothing returned, converting "the agent cited a
+page" from a claim into a checked fact. It is also the component that caused our
+worst bug, and the lessons from building it generalise well beyond documentation.
+
+### A guard will over-reach, so write down what it does not cover
+
+Ours was built to adjudicate documentation links. What it actually adjudicated
+was *every absolute URL in the answer*. Any link that hadn't come from a
+documentation tool failed the check and was deleted.
+
+The blast radius was the whole product. On any turn that used any tool, every
+link in the answer disappeared: a company's own website from a CRM lookup,
+citations from web search, a URL copied out of an email. The feature flag didn't
+help, because it removed the documentation tools while leaving the guard running.
+
+The code was correct inside the boundary it assumed. The boundary was wrong. This
+is the single most common shape of defect we hit, and it is nearly invisible in
+review because the function reads perfectly in isolation; the *name* encodes the
+intended scope and the code does not.
+
+<Callout label="Practice">
+For any guard, filter or validator, write down in the code what it deliberately
+does **not** govern, and why. It is the cheapest documentation you will ever
+write and it's the thing reviewers cannot infer.
+</Callout>
+
+### Never let the model's own output count as evidence
+
+Our verification collected what the tools returned so it could compare citations
+against it. One of the fields it read was the tool call's *arguments*, which are
+written by the model.
+
+That is a closed loop. The model writes a URL into a query, the verifier reads it
+back out of the same record, and the fabricated link is treated as tool-verified.
+The check validates the thing it was built to catch.
+
+The same trap has a subtler form. When a sub-agent does work and reports back,
+its report is prose the model wrote. Grounding the parent's citations in that
+prose lets a hallucination from the child become a verified citation in the
+parent. Be precise about which parts of a record are machine-produced and which
+are model-produced, and only ever ground in the former.
+
+### Where a check lives is a design decision
+
+When we found that sub-agent problem, the obvious fix was to stop the parent
+trusting child prose. That's the right diagnosis and the wrong prescription: the
+parent only ever receives prose, so refusing to trust it would strip every
+citation from every delegated question, breaking the feature hardest on the
+hardest questions.
+
+The evidence needed to tell a real citation from an invented one existed one
+level down, where the child still had its own tool results. Moving the check
+there solved it cleanly. The parent keeps trusting child prose, and the prose is
+now trustworthy.
+
+Generalised: when a rule cannot be made both safe and useful, the problem is
+often that it's in the wrong place, not that it needs better logic.
+
+### If you guard a stream, guard the stored copy from the same source
+
+We verify citations twice: once on the live stream so the user never sees a
+fabricated link, and once before persisting so the stored answer is clean. Two
+implementations of one rule is an invitation to drift, and the drift is
+user-visible in the worst way: you read one answer, reload, and it says something
+else.
+
+The structural fix is to make both layers consume the same transformed text
+rather than each doing its own pass. Where we couldn't do that, we made the
+second layer a deliberate backstop and wrote down exactly which cases it exists
+to catch. Worth checking early: anything that accumulates partial output during a
+stream, such as checkpointing for resumability, can persist unguarded text before
+your final pass ever runs.
+
+## Before and after
+
+The concrete difference between the first working version and the one we shipped.
+Nothing here is about better search; the retrieval layer barely changed.
+
+| Behaviour | Version one | Shipped |
+| --- | --- | --- |
+| Tool surface | One search tool | Search, fetch a full page, and list every page that exists |
+| Availability | Router decides; absent on questions that don't sound like doc questions | Always present, never routed away from |
+| Near-miss results | Presented as the answer | Scored for relevance; a weak match is reported as "not covered" |
+| Partial coverage | Adjacent question answered smoothly, gap unmentioned | Gap named explicitly in one line before the partial answer |
+| Citations | Model's choice; typically a subset of pages used | Every page that contributed a claim, verified against tool output |
+| Fabricated links | Rendered, clickable | Removed before display and before storage |
+| Counting questions | Sum of whatever partial lists were retrieved | Answered from the complete index, or declined |
+| Docs unreachable | Indistinguishable from "docs say nothing" | Distinct state; the agent says it couldn't check |
+| Uncited answer | Shipped as-is | Sources actually consulted are appended |
+
+Read down the "shipped" column and a theme emerges that we didn't plan: almost
+every row is about making a limit visible. What isn't covered, what couldn't be
+reached, what a claim rests on. The feature's value turned out to live as much in
+the honest negatives as in the answers.
+
+## On confidence, and showing your working
+
+One failure deserves its own section because it's a product lesson rather than an
+engineering one, and because the answer that triggered it was factually correct.
+
+Asked a counting question, the agent gave the right number. Then it explained that
+a naive count would produce a larger figure, that the underlying material is
+organised in a way that causes double counting, and that its number was the
+correct one rather than the two alternatives.
+
+Every word was true. The effect on a reader is that the number looks contested. An
+agent that argues with itself in public reads as unsure, and worse, it exported an
+internal quirk of our own documentation to someone who had no reason to care.
+
+> Confidence isn't a tone you add. It's what's left when you delete the hedging.
+
+The rule we landed on: **report what the reader cannot see and needs; never what
+only you needed.** A genuine limitation is the first kind and must be stated
+plainly. Which of two internal representations you reconciled to get there is the
+second kind and belongs nowhere near the answer.
+
+This is a real tension rather than a simple rule, and it's worth stating
+carefully, because the opposite failure is worse. An agent that suppresses its
+uncertainty to sound authoritative is dangerous. The distinction is not confidence
+versus honesty. It's between a limit that changes what the reader should do, which
+they must be told, and a working step that changes nothing for them, which is
+noise dressed as candour.
+
+## If you're doing this yourself
+
+Condensed, in roughly the order the decisions come up.
+
+1. **Give the model an index, not just search.** Search cannot answer "what
+   exists" or "how many". If your platform publishes a complete page list, expose
+   it as its own tool. If it doesn't, generate one.
+2. **Make the knowledge tool always available.** If a router decides whether the
+   agent may consult the docs, it will get it wrong on exactly the questions that
+   sound like something else. The cost of the tool being present and unused is far
+   lower than the cost of it being absent and needed.
+3. **Distinguish "no match" from "couldn't reach it".** These must stay separable
+   all the way to the model, or an outage renders as confident silence about a
+   documented feature.
+4. **Give retrieval a relevance floor.** Without an explicit threshold and a
+   distinct "weak match" state, the agent treats the least-bad result as the
+   answer.
+5. **Require citation of every page that contributed, not every page about the
+   topic.** The test we give the model: if this page hadn't come back, would any
+   sentence in my answer disappear? If yes, cite it.
+6. **Verify citations against tool output, and only against machine-produced
+   fields.** Never ground in the model's own tool arguments or in another model's
+   prose. That's a loop, not a check.
+7. **Write down what your guard doesn't cover.** In the code, next to what it
+   does. Scope is the defect class you will actually hit.
+8. **Make "the docs don't say" a first-class, rewarded answer.** Most of the value
+   is in the honest negatives. If your instructions only describe how to answer,
+   the model will always answer.
+9. **Read whole transcripts, with the corpus open beside you.** No assertion suite
+   substitutes for this while the feature is new.
+10. **Fix classes, not instances.** And give the model a way to recognise new
+    members of the class, rather than a list of the ones you've already seen.
+
+## What made this tractable
+
+One external dependency made this a great deal easier than it would otherwise
+have been.
+
+Our documentation is published with **Mintlify**, and two things they do by
+default turned out to be the difference between a hard project and an impossible
+one.
+
+The first is that they publish a complete machine-readable index of every page.
+That file is the only published artifact that enumerates the whole corpus, and
+it's what makes counting and coverage questions answerable at all. Without it
+there is no correct source for "how many endpoints are there", and an agent asked
+that question has no honest option but to decline. With it, the question has an
+answer.
+
+The second is a documentation endpoint that speaks the Model Context Protocol,
+and speaks it forgivingly: a single well-formed call works without a session
+handshake, which let us treat documentation search as one ordinary HTTP request
+instead of running a full protocol client inside a request path that has a
+latency budget.
+
+Their support team was responsive and technically precise when we had questions
+about the endpoint's behaviour. Credit where it's due.
+
+The transferable point for anyone choosing a documentation platform with agents
+in mind: **ask whether it publishes a complete index, not just a search API**.
+Search answers "what does the corpus say about X". An index answers "what
+exists", and those are different questions. Whole categories of agent failure
+come from having only the first one available.
+
+## Limits of this account
+
+One product, one documentation corpus, one agent architecture. We have not
+validated any of this against a second implementation, and some of what reads
+here as a principle is really a pattern we saw repeatedly in a single system.
+
+The honest version of "we found these failures" is that most of them were found
+by a person reading answers, not by the test suite. The suite is good at
+preventing the return of a known failure and was close to useless at discovering
+a new one. We expect that ratio to shift as the feature matures, but it hasn't
+yet.
+
+We should also be clear that the guards earned their place. This piece spends
+most of its length on how our verification went wrong, which could read as an
+argument against building it. It isn't. The citation check caught fabricated
+links repeatedly during development, including several that no reviewer noticed.
+The failures described here were found in internal testing, not by customers,
+which is the outcome the whole approach is designed to produce.
+
+If you're building something similar and hit a failure class we didn't cover,
+we'd genuinely like to hear about it.
+
+> A reliable agent isn't one that always knows the answer. It's one that knows
+> what evidence it has, what that evidence supports, what it doesn't, and can
+> show the reader all three.
+
+---
+
+Written from the engineering notes and commit history of the work itself, so the
+reasoning is what we thought at the time rather than what we'd say with
+hindsight. Specific product details, internal file names and verbatim model
+instructions have been left out; everything structural about the failures and
+fixes is as it happened.
