@@ -21,6 +21,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: meta.title,
     description: meta.summary,
     alternates: { canonical: url },
+    /*
+     * An unlisted piece is not offered to anyone who has not been given the
+     * link, and that has to include a crawler that reaches it by some other
+     * route. Leaving it out of the sitemap only stops it being submitted.
+     *
+     * `follow` stays true: the page is not disowned, and the links out of it
+     * lead to pages that are on offer.
+     */
+    ...(meta.listed === false ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: meta.title,
       description: meta.summary,
