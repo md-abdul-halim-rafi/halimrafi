@@ -6,7 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Switcher } from '@/components/explorations/Switcher'
 import { STORY } from '@/explorations/data'
-import { formatArticleDate, type ArticleEntry } from '@/lib/articles'
+import { ArticleList } from '@/components/article/ArticleList'
+import { type ArticleEntry } from '@/lib/articles'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
 /**
@@ -296,26 +297,12 @@ export function StoryExploration({
                 {STORY.writingHeading}
               </h2>
 
-              <ul className="mt-8 space-y-8">
-                {articles.map((article) => (
-                  <li key={article.href}>
-                    {article.kind === 'case-study' ? (
-                      <p className="story-mono story-quiet mb-2 text-[0.6875rem]">Case study</p>
-                    ) : null}
-                    <h3 className="text-[1.0625rem] leading-[1.45]">
-                      <Link href={article.href} className="story-link story-link-in">
-                        {article.title}
-                      </Link>
-                    </h3>
-                    <p className="story-mid mt-2 max-w-[33rem] text-[0.9375rem] leading-[1.6]">
-                      {article.description}
-                    </p>
-                    <p className="story-mono story-quiet mt-2 text-[0.75rem]">
-                      <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
-                    </p>
-                  </li>
-                ))}
-              </ul>
+              {/* The same list the archive publishes, so an entry cannot
+                  look like one thing here and another there. One level down
+                  from this section's own heading. */}
+              <div className="mt-8">
+                <ArticleList articles={articles} headingLevel={3} />
+              </div>
 
               {moreArticles ? (
                 <p className="mt-8">
