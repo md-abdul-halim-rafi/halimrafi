@@ -20,22 +20,25 @@ export function slugify(node: ReactNode): string {
  *
  * Every child takes the reading measure by default; anything that should be
  * wider opts in with `.breakout`.
+ *
+ * Headings carry no styling utilities either. They used the `.heading` class,
+ * which lives in Tailwind's utilities layer and therefore beat every
+ * components-layer rule the article tried to set on them whatever its
+ * specificity — the article's serif silently lost to it. Their appearance is
+ * set in CSS alongside the rest of the article's type.
  */
 export const proseComponents: MDXComponents = {
   h2: ({ children, ...props }) => (
     <h2
       {...props}
       id={slugify(children)}
-      className="heading scroll-mt-8 text-[1.5rem] leading-[1.25] text-ink-12 sm:text-[1.75rem]"
+
     >
       {children}
     </h2>
   ),
   h3: (props) => (
-    <h3
-      {...props}
-      className="heading scroll-mt-8 text-[1.3125rem] leading-snug text-ink-12"
-    />
+    <h3 {...props} />
   ),
   p: (props) => <p {...props} className="article-body" />,
   ul: (props) => <ul {...props} className="list-disc space-y-2.5 pl-5" />,
@@ -47,7 +50,10 @@ export const proseComponents: MDXComponents = {
       style={{ marginTop: 0 }}
     />
   ),
-  strong: (props) => <strong {...props} className="font-semibold text-ink-12" />,
+  /* Emphasis reads as emphasis, not as a second voice. Weight alone carries
+     it; the colour bump on top made every bold phrase the darkest thing on the
+     line. */
+  strong: (props) => <strong {...props} className="font-semibold" />,
   code: (props) => (
     <code
       {...props}

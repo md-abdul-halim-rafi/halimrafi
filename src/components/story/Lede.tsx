@@ -1,14 +1,14 @@
 /**
  * The article's opening paragraph.
  *
- * It carried a drop cap until the body face changed to a grotesque. A
- * high-contrast serif capital against Inter read as borrowed rather than
- * designed, and holding its baseline across widths and font-load states needed
- * a measuring pass on every resize. Scale and ink carry the opening instead,
- * which is font-agnostic and has no failure mode.
+ * Once a drop cap, then a size of its own two steps above the body. Both were
+ * ways of announcing that the article had started, which the title had already
+ * done. Set in the reading face at reading size, the opening sentence is the
+ * first sentence of the piece rather than a poster for it, and the reader is
+ * already reading by the end of it.
+ *
+ * It keeps the full ink step, which is the whole of its remaining emphasis.
  */
 export function Lede({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[1.3125rem] leading-[1.5] text-ink-12 sm:text-[1.4375rem]">{children}</p>
-  )
+  return <p className="article-body text-ink-12">{children}</p>
 }

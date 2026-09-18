@@ -1,15 +1,23 @@
 import type { Metadata } from 'next'
-import { Geist_Mono, Instrument_Serif, Inter } from 'next/font/google'
+import { Geist_Mono, Instrument_Serif, Inter, Source_Serif_4 } from 'next/font/google'
 import { site } from '@/lib/site'
 import './globals.css'
 
 /**
- * Three roles, kept strictly separate.
+ * Four roles, kept strictly separate.
  *
- * Instrument Serif carries the display sizes, where its high contrast has room
- * to show. Inter does the reading, which is what it is for. Geist Mono is
- * reserved for technical annotation: dates, labels, timings, code. Nothing
- * borrows another's job.
+ * Instrument Serif carries the display sizes on the front page, where its high
+ * contrast has room to show. Source Serif 4 does the reading inside an article
+ * and nowhere else: Instrument Serif is a display face and thins out badly at
+ * twenty pixels, while Inter reads as interface rather than as a piece of
+ * writing. Inter keeps everything that is interface — navigation, metadata,
+ * contents, tables, controls. Geist Mono is technical annotation: dates,
+ * labels, timings, code.
+ *
+ * Source Serif is loaded variable with real italics, because an article's
+ * emphasis is genuinely italic and a synthesised slant next to a serif's own
+ * is obvious. `font-synthesis-weight: none` on the body means the weights an
+ * article asks for have to be real ones, and a variable face has them all.
  */
 const sans = Inter({
   subsets: ['latin'],
@@ -20,6 +28,13 @@ const sans = Inter({
 const mono = Geist_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+})
+
+const reading = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-reading',
+  style: ['normal', 'italic'],
   display: 'swap',
 })
 
@@ -57,7 +72,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable} ${display.variable}`}>
+    <html
+      lang="en"
+      className={`${sans.variable} ${mono.variable} ${display.variable} ${reading.variable}`}
+    >
       <body className="min-h-dvh antialiased">{children}</body>
     </html>
   )

@@ -14,8 +14,10 @@ export function useMDXComponents(): MDXComponents {
     Lede,
     // The demo breaks wider than the reading column; the column itself stays at
     // the body measure.
+    /* `breakout-demo` keeps the interface face inside an article set in a
+       serif: the demo is a piece of product, not a piece of the writing. */
     Demo: () => (
-      <div className="breakout my-12">
+      <div className="breakout breakout-demo">
         <StreamingDemo />
       </div>
     ),

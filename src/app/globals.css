@@ -134,8 +134,8 @@
      header's own 2.5rem padding — so a wide table and the rule above it share
      an edge instead of missing each other by 80px. */
   --measure-wide: 53rem;
-  --read-size: 1.1875rem;
-  --read-leading: 1.7;
+  --read-size: 1.25rem;
+  --read-leading: 1.65;
   /* The gap between the reading column and the contents rail beside it. */
   --rail-w: 11.5rem;
   --rail-gap: 3rem;
@@ -144,6 +144,9 @@
 @media (max-width: 767px) {
   :root {
     --field-strength: 0.45;
+    /* A phone holds fewer characters a line at any size, so the body steps
+       down one notch rather than running to forty-something characters. */
+    --read-size: 1.1875rem;
   }
 }
 
@@ -176,6 +179,10 @@
   --color-demo-caption: var(--demo-caption);
 
   --font-display: var(--font-serif);
+  /* The article's reading face. Georgia is the fallback because it is the one
+     serif that is actually installed everywhere and its proportions are close
+     enough that a swap does not reflow the page into a different shape. */
+  --font-read: var(--font-reading), Georgia, 'Times New Roman', serif;
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 
@@ -584,6 +591,19 @@
     grid-column: wide;
   }
 
+  /* The article is set in the reading serif; everything that is interface
+     stays in the interface face. Scoped here so the front page, the archive
+     and the embedded demo are untouched. */
+  .article-grid {
+    font-family: var(--font-read);
+  }
+  .article-grid :is(.label, .article-summary, .article-meta, .article-details, table, .contents-disclosure, .contents-rail, .back-link, .breakout-demo, button, input, select, textarea) {
+    font-family: var(--font-sans);
+  }
+  .article-grid :is(code, kbd, samp, pre) {
+    font-family: var(--font-mono);
+  }
+
   /* The studio exploration renders the same MDX inside its own two-column
      composition rather than this grid, so it caps its children itself. It
      shares the rhythm below, which is why that is written against both. */
@@ -604,17 +624,61 @@
     max-width: var(--measure-read);
   }
 
+  /* Prose is set at its natural spacing. The tracking on `.heading` is for a
+     grotesque at interface sizes and has no business in a serif paragraph. */
+  .article-grid > :is(p, ul, ol, li, blockquote) {
+    letter-spacing: normal;
+  }
+
+  /* Headings are the reading face too, so a section title belongs to the piece
+     it opens rather than to the interface around it.
+
+     Set here rather than through the `.heading` utility the prose components
+     used to carry: that class is in the utilities layer, which wins over this
+     one no matter how specific a rule here is, so every attempt to give an
+     article heading its own face lost silently. */
+  :is(.article-grid, .prose-column) > :is(h2, h3) {
+    font-family: var(--font-read);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--ink-12);
+    text-wrap: pretty;
+    /* Small on purpose. `scrollIntoView` counts the element's own top margin,
+       which is now 2.2em for a section heading, so the 2rem this used to carry
+       landed the heading 95px down the screen with nothing above it. The
+       heading's own margin is the clearance; this is the last few pixels. */
+    scroll-margin-top: 0.5rem;
+  }
+  :is(.article-grid, .prose-column) > h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+  :is(.article-grid, .prose-column) > h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+  @media (min-width: 640px) {
+    :is(.article-grid, .prose-column) > h2 {
+      font-size: 1.75rem;
+    }
+    :is(.article-grid, .prose-column) > h3 {
+      font-size: 1.375rem;
+    }
+  }
+
   /* The opening. The title was capped at 15ch — narrower than the body it sat
      above — which is what wrapped a long one onto four tall lines. It gets the
      column now, at a size that wraps to two or three. */
   .article-title {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.018em;
-    font-size: clamp(2.125rem, 4.6vw, 3.125rem);
-    line-height: 1.06;
+    font-family: var(--font-read);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    /* 34px on a phone, 46px from about 1280 up. Nothing is hard-wrapped: the
+       title finds its own break at every width. */
+    font-size: clamp(2.125rem, 3.2vw, 2.875rem);
+    line-height: 1.15;
     color: var(--ink-12);
-    text-wrap: balance;
+    text-wrap: pretty;
   }
   .article-summary {
     margin-top: 1.25rem;
@@ -653,23 +717,45 @@
     color: var(--ink-11);
   }
 
-  /* One rhythm for the body, set here rather than per element, so a heading is
-     always preceded by more space than a paragraph and a list never collides
-     with the sentence introducing it. */
+  /* One rhythm, set here rather than on each element.
+
+     Headings carry both of their own gaps, in their own em. That is the fix
+     for a subheading reading as attached to the paragraph above it: the gap
+     was a fixed 2rem while the paragraph rhythm was 1.1em, so a 21px
+     subheading cleared its neighbour by eleven pixels more than an ordinary
+     paragraph did, which is not a separation anyone can see.
+
+     Grid items do not collapse margins, so whatever follows a heading must
+     contribute nothing or the two gaps add up. */
   :is(.article-grid, .prose-column) > * + * {
-    margin-top: 1.1em;
+    margin-top: 1em;
   }
-  :is(.article-grid, .prose-column) > * + :is(h2, .rule-fade) {
-    margin-top: 3rem;
+  :is(.article-grid, .prose-column) > h2 {
+    margin-top: 2.2em;
+    margin-bottom: 0.7em;
   }
-  :is(.article-grid, .prose-column) > * + h3 {
-    margin-top: 2rem;
-  }
-  :is(.article-grid, .prose-column) > * + :is(ul, ol, blockquote, .breakout, details) {
-    margin-top: 1.5rem;
+  :is(.article-grid, .prose-column) > h3 {
+    margin-top: 1.65em;
+    margin-bottom: 0.6em;
   }
   :is(.article-grid, .prose-column) > :is(h2, h3) + * {
-    margin-top: 0.9rem;
+    margin-top: 0;
+  }
+  /* A heading straight after a heading keeps only the lower one's own gap,
+     rather than stacking a section break on top of a subsection break. */
+  :is(.article-grid, .prose-column) > :is(h2, h3) + h3 {
+    margin-top: 0.8em;
+  }
+
+  /* Set-apart blocks get a little more than a paragraph and no more. */
+  :is(.article-grid, .prose-column) > * + :is(blockquote, details, aside, .breakout, .rule-fade) {
+    margin-top: 1.5em;
+  }
+  :is(.article-grid, .prose-column) > :is(blockquote, details, aside, .breakout, .rule-fade) + * {
+    margin-top: 1.5em;
+  }
+  :is(.article-grid, .prose-column) > :is(h2, h3) + :is(blockquote, details, aside, .breakout) {
+    margin-top: 0;
   }
 
   /* Contents, wide. It hangs beside the centred column: half the column, the
