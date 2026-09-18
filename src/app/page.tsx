@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SiteHeader } from '@/components/site/SiteHeader'
 import { StoryExploration } from '@/components/explorations/story/StoryExploration'
 import { STORY } from '@/explorations/data'
 import { storyProps } from '@/lib/storyProps'
@@ -15,9 +16,10 @@ import { site } from '@/lib/site'
  * No exploration switcher here: that control exists to hop between directions
  * in development and is not part of the site.
  *
- * The composition carries no site header or footer of its own. That is the
- * design, not an omission, so the header's Work link points into this page's
- * own work section rather than at a nav bar that no longer exists here.
+ * The header is the shared `SiteHeader`, passed in rather than imported
+ * because the composition is a client component. Every page renders that same
+ * header now; this page used to carry one of its own that looked like it but
+ * measured differently, which shifted the top of the page on every navigation.
  */
 export const metadata: Metadata = {
   alternates: { canonical: site.url },
@@ -25,6 +27,11 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   return (
-    <StoryExploration {...(await storyProps())} switcher={false} caseHref={STORY.caseHrefLive} />
+    <StoryExploration
+      {...(await storyProps())}
+      header={<SiteHeader current="home" />}
+      switcher={false}
+      caseHref={STORY.caseHrefLive}
+    />
   )
 }

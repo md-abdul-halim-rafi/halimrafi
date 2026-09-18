@@ -36,7 +36,7 @@ export default async function WorkPage({ params }: Params) {
 
   return (
     <>
-      <SiteHeader current={'work'} />
+      <SiteHeader />
       <HashScroll />
 
       {/*

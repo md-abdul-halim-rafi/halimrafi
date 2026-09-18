@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SiteHeader } from '@/components/site/SiteHeader'
 import { StoryExploration } from '@/components/explorations/story/StoryExploration'
 import { storyProps } from '@/lib/storyProps'
 
@@ -16,5 +17,5 @@ export const metadata: Metadata = {
  * keeps the exploration switcher.
  */
 export default async function StoryPage() {
-  return <StoryExploration {...(await storyProps())} />
+  return <StoryExploration {...(await storyProps())} header={<SiteHeader current="home" />} />
 }

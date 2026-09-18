@@ -1,11 +1,11 @@
 'use client'
 
-import { Fragment, useLayoutEffect, useRef } from 'react'
+import { Fragment, useLayoutEffect, useRef, type ReactNode } from 'react'
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { Switcher } from '@/components/explorations/Switcher'
-import { person, STORY } from '@/explorations/data'
+import { STORY } from '@/explorations/data'
 import { formatArticleDate, type WritingMeta } from '@/lib/writing'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
@@ -67,6 +67,7 @@ function Words({ text, from = 0.38, step = 0.06 }: { text: string; from?: number
 }
 
 export function StoryExploration({
+  header,
   photograph,
   gallery,
   writing,
@@ -74,6 +75,15 @@ export function StoryExploration({
   switcher = true,
   caseHref = STORY.caseHrefExploration,
 }: {
+  /**
+   * The site header, rendered by the server route above this client component.
+   *
+   * This composition used to carry a header of its own, which drifted from the
+   * one every other page renders and made the top of the page jump on
+   * navigation. It is a slot rather than an import because the header reads the
+   * writing registry on the server.
+   */
+  header: ReactNode
   /** The one photograph in the closing. */
   photograph: StudioAsset | null
   /** Every photograph, in order, for the viewer behind the gallery link. */
@@ -133,18 +143,9 @@ export function StoryExploration({
 
   return (
     <div ref={root} data-explore="story" className="story-type-350 min-h-dvh bg-paper">
-      <div className="mx-auto max-w-[58rem] px-6 pb-28 sm:px-10">
-        <header className="flex items-baseline justify-between gap-6 pt-6">
-          <p className="story-ink text-[0.8125rem] font-medium">{person.name}</p>
-          <a
-            href={`mailto:${STORY.email}`}
-            className="story-mono story-control story-link story-link-out"
-          >
-            <span>Email</span>
-          </a>
-        </header>
-        <hr className="story-rule mt-5" />
+      {header}
 
+      <div className="mx-auto max-w-[58rem] px-6 pb-28 sm:px-10">
         <main>
           {/* One group: the place, the name, the role, at the spacing of a
               lockup rather than three separated lines. */}

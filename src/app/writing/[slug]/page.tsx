@@ -67,7 +67,7 @@ export default async function WritingPage({ params }: Params) {
 
   return (
     <>
-      <SiteHeader current={'writing'} />
+      <SiteHeader />
       <HashScroll />
 
       <div id="article" className="relative mx-auto max-w-[58rem] px-6 sm:px-10">
