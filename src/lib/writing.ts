@@ -33,9 +33,10 @@ export type WritingMeta = {
   updated?: string
   status: WritingStatus
   /**
-   * Who the piece is by, when that is not simply the site's owner. An article
-   * written by a company's engineering team is not personal writing, and the
-   * page says so rather than letting the site's own byline stand in.
+   * Who the piece is by, when that is not the site's owner — a company's
+   * engineering team, a co-author, a guest. Omitted is the ordinary case and
+   * means the owner, whose name the pages fill in; it does not mean an article
+   * with no byline at all.
    */
   byline?: string
   /**

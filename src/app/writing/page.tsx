@@ -57,7 +57,7 @@ export default async function WritingArchive() {
                   {article.description}
                 </p>
                 <p className="mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1 font-mono text-[0.8125rem] text-ink-10">
-                  {article.byline ? <span>{article.byline}</span> : null}
+                  <span>{article.byline ?? site.name}</span>
                   <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
                   {article.updated ? (
                     <>

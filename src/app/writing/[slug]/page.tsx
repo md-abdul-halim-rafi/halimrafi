@@ -91,7 +91,7 @@ export default async function WritingPage({ params }: Params) {
                 {meta.description}
               </p>
               <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-[color:var(--hairline)] pt-6 font-mono text-[0.8125rem] text-ink-11">
-                {meta.byline ? <span>{meta.byline}</span> : null}
+                <span>{meta.byline ?? site.name}</span>
                 <time dateTime={meta.date}>{formatArticleDate(meta.date)}</time>
                 {meta.updated ? (
                   <>
