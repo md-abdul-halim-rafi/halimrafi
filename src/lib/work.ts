@@ -26,6 +26,16 @@ export type WorkMeta = {
    * described. Simulated artifacts are always labelled where they appear.
    */
   artifact: { kind: 'simulated-demo' | 'screenshot' | 'none'; label?: string }
+  /**
+   * Whether the piece is offered in the Writing lists. Default is yes.
+   *
+   * `false` is not the same as a draft: the page is published, its URL works,
+   * and it stays in the sitemap. It simply is not put in front of a reader who
+   * is browsing. The streaming prototype is the case it exists for — a real
+   * piece of writing about a simulated artifact, kept reachable without being
+   * featured.
+   */
+  listed?: boolean
   /** Section headings, in order, for the article's side rail. */
   sections: string[]
 }
