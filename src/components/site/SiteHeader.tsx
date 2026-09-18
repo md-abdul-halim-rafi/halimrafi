@@ -3,52 +3,40 @@ import { site } from '@/lib/site'
 import { publishedWriting } from '@/lib/writing'
 
 /**
- * The site header.
+ * The site header, in the front page's register.
  *
- * A sticky strip on an opaque surface, not a translucent floating pill. The old
- * pill let sentences show through and around it while the page scrolled, which
- * read as a defect rather than a material. An opaque strip with a hairline under
- * it means text passes behind a real edge.
+ * It used to be a sticky translucent app bar with a nav, which belonged to the
+ * editorial homepage that the story composition replaced. Against that
+ * composition it read as furniture from another site: a bar that follows you
+ * down a page whose own header simply sits at the top and scrolls away.
  *
- * Its height is published as `--header-h` so anchor scrolling and keyboard focus
- * can clear it. Nothing is scroll-triggered, so its presence is predictable and
- * a keyboard user never has focus land under an element that just appeared.
+ * So this is the front page's header with the links the other pages need: the
+ * name on the left, a way onward on the right, one hairline under it, and no
+ * stickiness. Same measure and same padding as the page below it, so the name
+ * lines up with the first line of the article rather than floating in a
+ * full-width bar above it.
  */
 export async function SiteHeader({ current }: { current?: 'work' | 'about' | 'writing' }) {
-  // The archive only earns a place in the navigation once something is in it.
-  // Reading the published set here means the first article adds the link, with
-  // no second place to remember to change.
   const hasWriting = (await publishedWriting()).length > 0
 
-  return (
-    <header className="sticky top-0 z-40 h-[var(--header-h)] border-b border-[color:var(--hairline)] bg-[color:color-mix(in_srgb,var(--paper)_92%,transparent)] backdrop-blur-md backdrop-saturate-150">
-      <div className="mx-auto flex h-full max-w-[82rem] items-center justify-between gap-6 px-5 sm:px-8">
-        <Link
-          href="/"
-          className="link-quiet trim-cap -mx-2 rounded-sm px-2 py-1 text-[0.875rem] font-medium text-ink-12"
-        >
-          {site.name}
-        </Link>
+  const link = (active: boolean) =>
+    `story-mono text-[0.75rem] ${active ? 'text-ink-12' : 'story-link story-link-in'}`
 
-        <nav aria-label="Site" className="flex items-center gap-1">
-          <Link
-            // The front page's work section. `#work` was an id on the
-            // editorial homepage this replaced, and would now scroll nowhere.
-            href="/#octolane"
-            aria-current={current === 'work' ? 'page' : undefined}
-            className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
-              current === 'work' ? 'text-ink-12' : 'text-muted hover:text-ink-12'
-            }`}
-          >
-            Work
+  return (
+    <header className="mx-auto w-full max-w-[58rem] px-6 sm:px-10">
+      <div className="flex items-baseline justify-between gap-6 border-b border-[color:var(--hairline)] py-6">
+        <p className="text-[0.8125rem] font-medium text-ink-12">
+          <Link href="/" className="story-link story-link-in">
+            {site.name}
           </Link>
+        </p>
+
+        <nav aria-label="Site" className="flex items-baseline gap-5">
           {hasWriting ? (
             <Link
               href="/writing"
               aria-current={current === 'writing' ? 'page' : undefined}
-              className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
-                current === 'writing' ? 'text-ink-12' : 'text-muted hover:text-ink-12'
-              }`}
+              className={link(current === 'writing')}
             >
               Writing
             </Link>
@@ -56,9 +44,7 @@ export async function SiteHeader({ current }: { current?: 'work' | 'about' | 'wr
           <Link
             href="/about"
             aria-current={current === 'about' ? 'page' : undefined}
-            className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
-              current === 'about' ? 'text-ink-12' : 'text-muted hover:text-ink-12'
-            }`}
+            className={link(current === 'about')}
           >
             About
           </Link>

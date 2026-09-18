@@ -37,7 +37,7 @@ export default async function WritingArchive() {
     <>
       <SiteHeader current={'writing'} />
 
-      <main className="mx-auto w-full max-w-[58rem] px-5 pb-24 sm:px-8">
+      <main className="mx-auto w-full max-w-[58rem] px-6 pb-24 sm:px-10">
         <header className="pb-10 pt-16 sm:pb-12 sm:pt-20">
           <h1 className="display max-w-[15ch] text-[clamp(2.5rem,6.4vw,4.25rem)] leading-[1.0] text-ink-12">
             Writing

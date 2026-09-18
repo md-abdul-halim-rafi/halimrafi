@@ -3163,3 +3163,53 @@ front-page suite re-run at 39 checks, the build, 24 tests, lint and types.
 The contrast check is the one that mattered here: the ink ladder and the accent
 both moved, and pages whose contrast had been verified against the old paper
 were re-measured against the new one rather than assumed to be fine.
+
+## The article page was still the old site, and I had not looked at it
+
+Rafi opened the article, scrolled to the middle, and asked why it looked wrong
+and what the bar at the top was. Both fair. I had been checking the article with
+assertions about tokens and contrast, all of which passed, and had not once
+looked at the middle of the rendered page.
+
+### What was actually wrong
+
+**Three widths were fighting.** The container was 82rem, the grid gave the
+reading column about 1027px, and `.prose-column > *` capped text at
+`--measure-read`, 38rem. So body text stopped at x=920 while the rules under it
+and the footer ran to x=1340. Four hundred pixels of one and not the other, on
+every rule down the page. That is what reads as broken: not a wide margin, but
+two different right edges in the same column.
+
+**The bar at the top was the old site.** A sticky translucent app bar with a
+Work and About nav, left over from the editorial homepage that the story
+composition replaced. The front page's own header is a static line that scrolls
+away. A bar that follows you down a page whose front page has no bar is
+furniture from somewhere else.
+
+### What changed
+
+One measure for the site. Every page is now the front page's container, 58rem
+with the same padding, so text and the rules beneath it share an edge.
+
+One header. The sticky bar is replaced by the front page's own treatment: the
+name on the left, the onward links on the right, one hairline under it, static.
+The nav lost its Work item, because the front page is the work now and the name
+is the way back to it.
+
+The contents rail hangs in the left margin instead of taking a grid column,
+which is what had pushed the column off centre. It appears only from 84rem up,
+which is where 58rem of column plus 13rem of margin either side actually fits.
+The first version of that used a 1180px breakpoint and put the rail at x=-82,
+off the left edge of the screen; the arithmetic is in the comment now so the
+next person does not have to redo it.
+
+### Verified
+
+20 checks on the rail at 1280, 1340, 1345, 1440, 1600 and 1920: hidden below
+84rem, fully on screen above it, never overlapping the column, never causing
+overflow. 42 site-wide checks across the front page, About, the archive, both
+case studies and a 404: one paper, one accent, AA throughout, no overflow, no
+stale wording. 39 front-page checks, the build, 24 tests, lint and types.
+
+And this time I looked at the rendered page at four scroll depths before and
+after, which is what should have happened first.

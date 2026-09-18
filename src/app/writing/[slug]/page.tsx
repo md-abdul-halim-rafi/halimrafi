@@ -70,20 +70,18 @@ export default async function WritingPage({ params }: Params) {
       <SiteHeader current={'writing'} />
       <HashScroll />
 
-      <div id="article" className="mx-auto max-w-[82rem] px-5 sm:px-8">
+      <div id="article" className="relative mx-auto max-w-[58rem] px-6 sm:px-10">
         <div
           className={
             sections.length > 0
-              ? 'grid xl:grid-cols-[10rem_minmax(0,1fr)] xl:gap-x-14'
+              ? ''
               : 'grid'
           }
         >
           {sections.length > 0 ? <Toc sections={sections} /> : null}
 
           <div
-            className={`prose-column mx-auto w-full max-w-[58rem] min-w-0 ${
-              sections.length > 0 ? 'xl:mx-0 xl:max-w-none' : ''
-            }`}
+            className="prose-column w-full min-w-0"
           >
             <header className="max-w-none pb-12 pt-16 sm:pb-14 sm:pt-20">
               <h1 className="display max-w-[15ch] text-[clamp(2.5rem,6.4vw,4.25rem)] leading-[1.0] text-ink-12">

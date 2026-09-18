@@ -6,7 +6,7 @@ export default function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-[76rem] px-5 pt-20 sm:px-8">
+      <main className="mx-auto max-w-[58rem] px-6 pt-20 sm:px-10">
         <p className="label">404</p>
         <h1 className="display mt-5 text-[clamp(2.25rem,6vw,3.5rem)] leading-[1.02] text-ink-12">
           This page does not exist.
