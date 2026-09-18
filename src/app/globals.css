@@ -695,6 +695,20 @@
     color: var(--ink-12);
     text-wrap: pretty;
   }
+  /* Below about 390px the column loses width faster than the ramp above gives
+     size back, and the long title went to four lines again. Measured on a
+     320px screen, whose column is 272px: it takes three lines at 26px and four
+     at 27px, so the ramp here is steeper and lands on 26.
+
+     The two formulas meet at 30px at 390px, so there is no step between them,
+     and the floor keeps a title legible on a 280px screen rather than letting
+     it chase the column down indefinitely. */
+  @media (max-width: 24.4375rem) {
+    .article-title {
+      font-size: clamp(1.5rem, 5.71vw + 0.48rem, 1.875rem);
+    }
+  }
+
   .article-summary {
     margin-top: 1.25rem;
     max-width: var(--measure-read);
