@@ -139,7 +139,6 @@ export function StoryExploration({
     0,
     gallery.findIndex((item) => item.id === photograph?.id),
   )
-  const moreIndex = gallery.length > 1 ? (shownIndex + 1) % gallery.length : 0
 
   return (
     <div ref={root} data-explore="story" className="story-type-350 min-h-dvh bg-paper">
@@ -383,14 +382,9 @@ export function StoryExploration({
                   <figcaption className="story-quiet mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-[0.8125rem] leading-[1.5]">
                     <span>{photograph.title}</span>
                     {gallery.length > 1 ? (
-                      <button
-                        type="button"
-                        onClick={(event) => lightbox.show(gallery, moreIndex, event.currentTarget)}
-                        aria-haspopup="dialog"
-                        className="story-link story-link-in"
-                      >
+                      <Link href="/photographs" className="story-link story-link-in">
                         More photographs
-                      </button>
+                      </Link>
                     ) : null}
                   </figcaption>
                 </figure>

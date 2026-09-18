@@ -1,6 +1,4 @@
-import type { StudioAsset } from '@/components/explorations/studio/StudioLightbox'
-import { availablePhotographs } from './photographs'
-import { PHOTO_CREDIT } from './photoCredit'
+import { photographAssets } from './photographAssets'
 import { publishedWriting, WRITING_PREVIEW_COUNT } from './writing'
 
 /**
@@ -17,19 +15,10 @@ import { publishedWriting, WRITING_PREVIEW_COUNT } from './writing'
  * boundary is where the work has to happen either way.
  */
 export async function storyProps() {
-  const photographs: StudioAsset[] = availablePhotographs().map((photo) => ({
-    id: photo.file,
-    kind: 'photograph',
-    src: `/photographs/${photo.file}`,
-    alt: photo.alt,
-    width: photo.width,
-    height: photo.height,
-    title: photo.label,
-    caption: PHOTO_CREDIT,
-  }))
+  const photographs = photographAssets()
 
   // The closing shows the first frame in the manifest, which is also where the
-  // viewer's sequence starts; the rest stay behind the gallery link.
+  // viewer's sequence starts; the rest are at `/photographs`.
   const photograph = photographs[0] ?? null
 
   const writing = await publishedWriting()

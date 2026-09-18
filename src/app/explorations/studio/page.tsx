@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { StudioExploration } from '@/components/explorations/studio/StudioExploration'
-import type { StudioAsset } from '@/components/explorations/studio/StudioLightbox'
-import { availablePhotographs } from '@/lib/photographs'
-import { PHOTO_CREDIT } from '@/lib/photoCredit'
+import { photographAssets } from '@/lib/photographAssets'
 
 export const metadata: Metadata = {
   title: 'Studio exploration',
@@ -22,16 +20,7 @@ export const metadata: Metadata = {
  * substitute was put in its place.
  */
 export default function StudioPage() {
-  const photographs: StudioAsset[] = availablePhotographs().map((photo) => ({
-    id: photo.file,
-    kind: 'photograph',
-    src: `/photographs/${photo.file}`,
-    alt: photo.alt,
-    width: photo.width,
-    height: photo.height,
-    title: photo.label,
-    caption: PHOTO_CREDIT,
-  }))
+  const photographs = photographAssets()
 
   // The page closes on the first frame in the manifest, which is also where the
   // viewer's sequence starts. The rest of the roll stays in the viewer, behind
