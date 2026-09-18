@@ -10,7 +10,7 @@ import type { ReactNode } from 'react'
  */
 export function Callout({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <aside className="mt-8 border-l-2 border-[color:var(--signal)] bg-[color:var(--signal-wash)] py-5 pl-5 pr-6 sm:pl-6">
+    <aside className="border-l-2 border-[color:var(--signal)] bg-[color:var(--signal-wash)] py-5 pl-5 pr-6 sm:pl-6">
       <p className="label text-signal">{label}</p>
       <div className="mt-2.5 [&>p]:mt-3 [&>p:first-child]:mt-0">{children}</div>
     </aside>

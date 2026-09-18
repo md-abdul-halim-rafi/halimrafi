@@ -1,14 +1,9 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { SiteFooter } from '@/components/site/Chrome'
-import { SiteHeader } from '@/components/site/SiteHeader'
-import { HashScroll } from '@/components/story/HashScroll'
+import { ArticleLayout } from '@/components/article/ArticleLayout'
 import { slugify } from '@/components/story/prose'
-import { Toc } from '@/components/story/Toc'
-import { ArrowRight } from '@/components/ui/icons'
 import { site } from '@/lib/site'
-import { formatArticleDate, loadWriting, publishedWriting } from '@/lib/writing'
+import { loadWriting, publishedWriting } from '@/lib/writing'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -46,16 +41,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 /**
  * One article.
  *
- * The case study's reading shell, reused rather than rebuilt: the same
- * 82rem grid with a 10rem rail, the same 58rem reading column, the same
- * display and prose styles. What it does not reuse is the case study's
- * metadata block. A case study says what the role and the artifact were; an
- * article has a title, a sentence and a date, and adding empty fields for the
- * rest would be a form nobody filled in.
+ * The same shell a case study is published in, with no case-study details and
+ * no kicker — an essay has a title, a sentence and a date, and adding empty
+ * fields for a role it does not have would be a form nobody filled in.
  *
- * A draft returns 404. Nothing else needs to know: the list, the archive and
- * the sitemap all read the published set, so a draft cannot leak by being
- * forgotten in one of them.
+ * A draft returns 404. Nothing else needs to know: every list reads the
+ * published set, so a draft cannot leak by being forgotten in one of them.
  */
 export default async function WritingPage({ params }: Params) {
   const { slug } = await params
@@ -66,65 +57,16 @@ export default async function WritingPage({ params }: Params) {
   const sections = (meta.sections ?? []).map((title) => ({ id: slugify(title), title }))
 
   return (
-    <>
-      <SiteHeader />
-      <HashScroll />
-
-      <div id="article" className="relative mx-auto max-w-[58rem] px-6 sm:px-10">
-        <div
-          className={
-            sections.length > 0
-              ? ''
-              : 'grid'
-          }
-        >
-          {sections.length > 0 ? <Toc sections={sections} /> : null}
-
-          <div
-            className="prose-column w-full min-w-0"
-          >
-            <header className="max-w-none pb-12 pt-16 sm:pb-14 sm:pt-20">
-              <h1 className="display max-w-[15ch] text-[clamp(2.5rem,6.4vw,4.25rem)] leading-[1.0] text-ink-12">
-                {meta.title}
-              </h1>
-              <p className="mt-6 max-w-[46ch] text-[1.0625rem] leading-[1.65] text-soft">
-                {meta.description}
-              </p>
-              <p className="mt-8 flex flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-[color:var(--hairline)] pt-6 font-mono text-[0.8125rem] text-ink-11">
-                <span>{meta.byline ?? site.name}</span>
-                <time dateTime={meta.date}>{formatArticleDate(meta.date)}</time>
-                {meta.updated ? (
-                  <>
-                    {' · updated '}
-                    <time dateTime={meta.updated}>{formatArticleDate(meta.updated)}</time>
-                  </>
-                ) : null}
-              </p>
-            </header>
-
-            <Body />
-
-            <div className="mt-16 max-w-none">
-              <div className="rule-fade" />
-              <p className="pt-6">
-                <Link
-                  href="/writing"
-                  className="group inline-flex items-center gap-1.5 text-[0.9375rem] font-medium text-signal"
-                >
-                  <span className="trim-cap">All writing</span>
-                  <span className="icon-slot">
-                    <span>
-                      <ArrowRight />
-                    </span>
-                  </span>
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <SiteFooter />
-    </>
+    <ArticleLayout
+      kind="article"
+      title={meta.title}
+      description={meta.description}
+      date={meta.date}
+      updated={meta.updated}
+      byline={meta.byline}
+      sections={sections}
+    >
+      <Body />
+    </ArticleLayout>
   )
 }

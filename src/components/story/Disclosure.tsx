@@ -13,7 +13,7 @@ export function Disclosure({
   children: React.ReactNode
 }) {
   return (
-    <details className="group measure mt-6 border-t border-[color:var(--hairline)]">
+    <details className="group border-t border-[color:var(--hairline)]">
       <summary className="flex cursor-pointer list-none items-baseline gap-3 py-4 text-[0.9375rem] font-medium text-ink marker:hidden hover:text-signal [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden

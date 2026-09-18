@@ -12,25 +12,34 @@ export function slugify(node: ReactNode): string {
 /**
  * Element mapping for article prose.
  *
- * The reading column is fixed at the body measure; anything that should be
- * wider opts in with `.breakout` rather than the column widening around it.
+ * Spacing is deliberately absent here. `.article-grid` sets one rhythm for the
+ * whole article — a heading always gets more room above it than a paragraph,
+ * a list always less — so an element carrying its own `mt-` would be arguing
+ * with its neighbours about which of them owns the gap. These rules set what a
+ * thing looks like; the grid sets where it sits.
+ *
+ * Every child takes the reading measure by default; anything that should be
+ * wider opts in with `.breakout`.
  */
 export const proseComponents: MDXComponents = {
   h2: ({ children, ...props }) => (
     <h2
       {...props}
       id={slugify(children)}
-      className="heading mt-14 scroll-mt-28 text-[1.4375rem] leading-[1.25] text-ink-12 sm:text-[1.625rem]"
+      className="heading scroll-mt-8 text-[1.5rem] leading-[1.25] text-ink-12 sm:text-[1.75rem]"
     >
       {children}
     </h2>
   ),
   h3: (props) => (
-    <h3 {...props} className="mt-9 text-[1.0625rem] font-semibold leading-snug text-ink-12" />
+    <h3
+      {...props}
+      className="heading scroll-mt-8 text-[1.3125rem] leading-snug text-ink-12"
+    />
   ),
-  p: (props) => <p {...props} className="mt-5 article-body" />,
-  ul: (props) => <ul {...props} className="mt-5 list-disc space-y-2.5 pl-5" />,
-  ol: (props) => <ol {...props} className="mt-5 list-decimal space-y-2.5 pl-5" />,
+  p: (props) => <p {...props} className="article-body" />,
+  ul: (props) => <ul {...props} className="list-disc space-y-2.5 pl-5" />,
+  ol: (props) => <ol {...props} className="list-decimal space-y-2.5 pl-5" />,
   li: (props) => (
     <li
       {...props}
@@ -49,17 +58,24 @@ export const proseComponents: MDXComponents = {
   blockquote: (props) => (
     <blockquote
       {...props}
-      className="mt-7 border-l-2 border-[color:color-mix(in_srgb,var(--signal)_40%,transparent)] pl-5 text-ink-10 italic"
+      className="border-l-2 border-[color:color-mix(in_srgb,var(--signal)_40%,transparent)] pl-5 text-ink-11 italic [&>p]:text-[1.0625rem]"
     />
   ),
-  hr: () => <div className="rule-fade mt-12" />,
+  hr: () => <div className="rule-fade" />,
 
   /* Tables. The article's comparison is genuinely tabular, so it gets a table
      rather than a styled list. It scrolls inside its own box at narrow widths,
      which is what keeps the page from scrolling sideways. */
   table: (props) => (
-    <div className="breakout mt-8 overflow-x-auto">
-      <table {...props} className="w-full min-w-[34rem] border-collapse text-left text-[0.9375rem]" />
+    /* The scroll box is the table's own, so a narrow screen scrolls the table
+       and not the page. Text stays at reading size: shrinking it to avoid the
+       scroll would make the one part of the article built for comparison the
+       hardest part to read. */
+    <div className="breakout overflow-x-auto">
+      <table
+        {...props}
+        className="w-full min-w-[36rem] border-collapse text-left text-[1rem]"
+      />
     </div>
   ),
   thead: (props) => <thead {...props} />,

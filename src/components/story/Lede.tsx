@@ -9,6 +9,6 @@
  */
 export function Lede({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-7 text-[1.25rem] leading-[1.55] text-ink-12 sm:text-[1.375rem]">{children}</p>
+    <p className="text-[1.3125rem] leading-[1.5] text-ink-12 sm:text-[1.4375rem]">{children}</p>
   )
 }

@@ -117,15 +117,28 @@
   /* The field is decoration; it steps back on narrow screens where the
      headline needs the whole column. */
   --field-strength: 1;
-  --measure-title: 18ch;
+  /* The article column: what the title and the headings may use. Wider than
+     the prose, so a title wraps to fewer lines without the body running past a
+     comfortable line length. */
+  --measure-article: 42rem;
   /* The live site's own value; each exploration palette overrides it. */
   --demo-caption: var(--text-muted);
 
-  --measure-read: 38rem;
-  /* What a figure widens to when it steps out of the reading column. */
-  --measure-wide: 58rem;
-  --read-size: 1.0625rem;
-  --read-leading: 1.75;
+  /* The prose measure. 38.5rem at 19px lands at roughly 67 characters a line,
+     inside the 65–70 that reads comfortably for a long piece. Measured, not
+     assumed: 40rem came out at 70, right on the edge. */
+  --measure-read: 38.5rem;
+  /* What a table or figure widens to when it steps out of the reading column.
+     It widens about the same centre line, so the column stays where it is, and
+     it stops exactly where the site header's rule does — 58rem less that
+     header's own 2.5rem padding — so a wide table and the rule above it share
+     an edge instead of missing each other by 80px. */
+  --measure-wide: 53rem;
+  --read-size: 1.1875rem;
+  --read-leading: 1.7;
+  /* The gap between the reading column and the contents rail beside it. */
+  --rail-w: 11.5rem;
+  --rail-gap: 3rem;
 }
 
 @media (max-width: 767px) {
@@ -285,8 +298,8 @@
   .measure {
     max-width: var(--measure-read);
   }
-  .measure-title {
-    max-width: var(--measure-title);
+  .measure-article {
+    max-width: var(--measure-article);
   }
 
   /* Technical annotation. Mono, uppercase, tracked, quiet. */
@@ -534,9 +547,46 @@
     color: var(--ink-11);
   }
 
-  /* Left aligned, not centred: the opening and the body then share one edge.
-     Centring each block inside the column is what put the title and the first
-     paragraph on different alignments. */
+  /* The article's layout, as columns rather than a container with a max width.
+     The reading column is centred in the viewport; a table or figure marked
+     `.breakout` widens about that same centre line instead of pushing the
+     column off it, which is what made the old layout read as left-aligned text
+     with a large dead gutter on the right.
+
+     Every child takes the reading column by default, so a new element in an
+     MDX file needs no class to be placed correctly. */
+  .article-grid {
+    --page-gutter: 1.5rem;
+    display: grid;
+    justify-content: center;
+    padding-inline: var(--page-gutter);
+    /* The page margin is padding, not a pair of 1fr tracks. With tracks, the
+       reading column's `min(…, 100%)` resolved against the whole container and
+       the gutters were then added outside it, so a phone got a grid wider than
+       its own viewport and the page scrolled sideways. Padding takes the
+       margin out of `100%` before the column is sized. */
+    grid-template-columns:
+      [wide-start] minmax(0, calc((var(--measure-wide) - var(--measure-article)) / 2))
+      [read-start] min(var(--measure-article), 100%)
+      [read-end] minmax(0, calc((var(--measure-wide) - var(--measure-article)) / 2))
+      [wide-end];
+  }
+  @media (min-width: 640px) {
+    .article-grid {
+      --page-gutter: 2.5rem;
+    }
+  }
+  .article-grid > * {
+    grid-column: read;
+    min-width: 0;
+  }
+  .article-grid > .breakout {
+    grid-column: wide;
+  }
+
+  /* The studio exploration renders the same MDX inside its own two-column
+     composition rather than this grid, so it caps its children itself. It
+     shares the rhythm below, which is why that is written against both. */
   .prose-column > * {
     max-width: var(--measure-read);
     margin-inline: 0;
@@ -544,6 +594,148 @@
   .prose-column > .breakout {
     max-width: var(--measure-wide);
     width: 100%;
+  }
+
+  /* Prose holds the narrower measure inside the article column; headings and
+     the title get the column's full width. They share a left edge, so the
+     difference reads as a heading running longer rather than as two
+     alignments. */
+  .article-grid > :is(p, ul, ol, blockquote, details) {
+    max-width: var(--measure-read);
+  }
+
+  /* The opening. The title was capped at 15ch — narrower than the body it sat
+     above — which is what wrapped a long one onto four tall lines. It gets the
+     column now, at a size that wraps to two or three. */
+  .article-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.018em;
+    font-size: clamp(2.125rem, 4.6vw, 3.125rem);
+    line-height: 1.06;
+    color: var(--ink-12);
+    text-wrap: balance;
+  }
+  .article-summary {
+    margin-top: 1.25rem;
+    max-width: var(--measure-read);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
+  /* Close to the summary, not floated between it and the article: the gap
+     under the metadata was doing the work of a section break. */
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1.5rem;
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-11);
+  }
+  /* Case-study extras. A quiet row under the metadata, not the bordered block
+     that used to open the page ahead of the writing. */
+  .article-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin-top: 1.125rem;
+  }
+  .article-details dd {
+    margin-top: 0.4rem;
+    max-width: 34ch;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--ink-11);
+  }
+
+  /* One rhythm for the body, set here rather than per element, so a heading is
+     always preceded by more space than a paragraph and a list never collides
+     with the sentence introducing it. */
+  :is(.article-grid, .prose-column) > * + * {
+    margin-top: 1.1em;
+  }
+  :is(.article-grid, .prose-column) > * + :is(h2, .rule-fade) {
+    margin-top: 3rem;
+  }
+  :is(.article-grid, .prose-column) > * + h3 {
+    margin-top: 2rem;
+  }
+  :is(.article-grid, .prose-column) > * + :is(ul, ol, blockquote, .breakout, details) {
+    margin-top: 1.5rem;
+  }
+  :is(.article-grid, .prose-column) > :is(h2, h3) + * {
+    margin-top: 0.9rem;
+  }
+
+  /* Contents, wide. It hangs beside the centred column: half the column, the
+     gap, then the rail, measured from the page's centre line rather than from
+     a container edge, so it stays put as the viewport changes. */
+  .contents-rail {
+    display: none;
+  }
+  @media (min-width: 76rem) {
+    .contents-rail {
+      display: block;
+      position: absolute;
+      inset-block: 0;
+      left: 50%;
+      margin-left: calc(-0.5 * var(--measure-article) - var(--rail-gap) - var(--rail-w));
+      width: var(--rail-w);
+      pointer-events: none;
+    }
+    .contents-rail-inner {
+      position: sticky;
+      top: 2.5rem;
+      pointer-events: auto;
+    }
+  }
+
+  /* Contents, narrow. A closed disclosure that costs one line above the
+     article until it is wanted. */
+  .contents-disclosure {
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    padding-block: 0.25rem;
+  }
+  .contents-disclosure summary::-webkit-details-marker {
+    display: none;
+  }
+  .contents-caret {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 0;
+    transition: transform 200ms var(--ease-out-quint);
+  }
+  .contents-disclosure[open] .contents-caret {
+    transform: rotate(90deg);
+  }
+
+  /* The way back. Nothing here moves on hover: the arrow is permanent and the
+     label does not slide over to make room for it. */
+  .back-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--signal);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+    transition: text-decoration-color 200ms var(--ease-out-quint);
+  }
+  .back-link:is(:hover, :focus-visible) {
+    text-decoration-color: var(--signal);
+  }
+  .back-link-arrow {
+    flex: none;
   }
 }
 
