@@ -137,19 +137,32 @@ export function StudioLightbox({
     }
     document.addEventListener('keydown', onKey)
 
-    // Lock the page and mark it, so the exploration switcher can step out of the
-    // way rather than glowing through the overlay.
+    /*
+     * Lock the page and mark it, so the exploration switcher can step out of
+     * the way rather than glowing through the overlay.
+     *
+     * The lock goes on the root element, not only on the body. `overflow` set
+     * on the body reaches the viewport only while the root's own overflow is
+     * `visible`, and the root here carries `overflow-x: clip` as a horizontal
+     * guard — which quietly switched this lock off. Measured before the fix:
+     * a wheel over the backdrop took the page behind the dialog from 298 to
+     * 605.
+     */
     const { body } = document
-    const previousOverflow = body.style.overflow
+    const root = document.documentElement
+    const previousBodyOverflow = body.style.overflow
+    const previousRootOverflow = root.style.overflowY
     const previousPadding = body.style.paddingRight
-    const gap = window.innerWidth - document.documentElement.clientWidth
+    const gap = window.innerWidth - root.clientWidth
     body.style.overflow = 'hidden'
+    root.style.overflowY = 'hidden'
     if (gap > 0) body.style.paddingRight = `${gap}px`
     body.dataset.viewerOpen = 'true'
 
     return () => {
       document.removeEventListener('keydown', onKey)
-      body.style.overflow = previousOverflow
+      body.style.overflow = previousBodyOverflow
+      root.style.overflowY = previousRootOverflow
       body.style.paddingRight = previousPadding
       delete body.dataset.viewerOpen
     }

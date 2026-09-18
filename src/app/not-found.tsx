@@ -1,6 +1,16 @@
+import type { Metadata } from 'next'
 import { SiteFooter } from '@/components/site/Chrome'
 import { SiteHeader } from '@/components/site/SiteHeader'
 import { BackLink } from '@/components/ui/BackLink'
+
+/**
+ * A title of its own. Without it the 404 inherited the root layout's default,
+ * so a wrong address sat in the reader's tabs and history calling itself the
+ * front page.
+ */
+export const metadata: Metadata = {
+  title: 'Page not found',
+}
 
 /**
  * The page a wrong address lands on.

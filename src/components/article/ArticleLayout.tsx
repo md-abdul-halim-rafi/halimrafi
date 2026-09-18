@@ -72,7 +72,7 @@ export function ArticleLayout({
         })}
       />
 
-      <div id="article" className="article-grid relative pb-4">
+      <main id="article" className="article-grid relative pb-4">
         <header className="pb-6 pt-14 sm:pt-16">
           {kind === 'case-study' ? <p className="label">Case study</p> : null}
           <h1 className={`article-title ${kind === 'case-study' ? 'mt-5' : ''}`}>{title}</h1>
@@ -108,7 +108,7 @@ export function ArticleLayout({
             <BackLink href="/writing">All writing</BackLink>
           </p>
         </div>
-      </div>
+      </main>
 
       <SiteFooter />
     </>
