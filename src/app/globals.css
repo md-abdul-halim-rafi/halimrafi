@@ -181,7 +181,13 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
+    /* Deliberately not `smooth`. On the root it applied to every scroll the
+       page performs, including the router's reset on navigation, so opening an
+       article rendered it at the previous page's offset and glided to the top
+       over half a second — the reader saw the middle of a page they had not
+       opened yet. Smooth scrolling now belongs to the contents links that
+       actually want it, which ask for it per call. */
+    scroll-behavior: auto;
   }
 
   body {
@@ -221,11 +227,15 @@
   /* Anchors and keyboard focus clear the sticky header instead of landing
      underneath it. scroll-padding on the scrolling element covers focus moves
      the browser performs itself, which scroll-margin alone does not. */
+  /* The site header scrolls away with the page rather than sitting over it,
+     so an anchor needs breathing room above it, not clearance under a bar.
+     scroll-padding on the scrolling element also covers focus moves the
+     browser performs itself, which scroll-margin alone does not. */
   html {
-    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+    scroll-padding-top: 2rem;
   }
   :target {
-    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+    scroll-margin-top: 2rem;
   }
 
   .on-signal:focus-visible {
