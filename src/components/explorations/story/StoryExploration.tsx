@@ -6,10 +6,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Switcher } from '@/components/explorations/Switcher'
 import { person, STORY } from '@/explorations/data'
+import { formatArticleDate, type WritingMeta } from '@/lib/writing'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
 /**
- * Story: introduction, current work, one case study, a personal closing.
+ * Story: introduction, current work, one case study, writing, a personal
+ * closing. The writing section is absent while nothing is published.
  *
  * The streaming comparison that used to sit between the work and the closing
  * was removed on request. Its component, fixtures and tests are untouched and
@@ -67,11 +69,17 @@ function Words({ text, from = 0.38, step = 0.06 }: { text: string; from?: number
 export function StoryExploration({
   photograph,
   gallery,
+  writing,
+  moreWriting,
 }: {
   /** The one photograph in the closing. */
   photograph: StudioAsset | null
   /** Every photograph, in order, for the viewer behind the gallery link. */
   gallery: StudioAsset[]
+  /** The newest published articles, already trimmed to what this page shows. */
+  writing: WritingMeta[]
+  /** Whether the archive holds more than the list above. */
+  moreWriting: boolean
 }) {
   const lightbox = useLightbox()
   const root = useRef<HTMLDivElement>(null)
@@ -283,6 +291,56 @@ export function StoryExploration({
               </Link>
             </p>
           </section>
+
+          {/* Writing, between the case study and the closing.
+
+              Text entries, at the page's own rhythm: a linked title, a
+              sentence, a date. No cards, no thumbnails, no categories. The
+              section is not rendered at all while nothing is published, since
+              a heading over an empty list is a promise the page cannot keep,
+              and the archive link appears only when there is more behind the
+              list than the list shows. */}
+          {writing.length > 0 ? (
+            <section aria-labelledby="writing" className="pt-14 sm:pt-16">
+              <hr className="story-rule w-14" />
+              <h2
+                id="writing"
+                className="story-display story-ink mt-5 max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+              >
+                {STORY.writingHeading}
+              </h2>
+
+              <ul className="mt-7 space-y-7">
+                {writing.map((article) => (
+                  <li key={article.slug}>
+                    <h3 className="text-[1.0625rem] leading-[1.45]">
+                      <Link
+                        href={`/writing/${article.slug}`}
+                        className="story-link story-link-in"
+                      >
+                        {article.title}
+                      </Link>
+                    </h3>
+                    <p className="story-mid mt-2 max-w-[33rem] text-[0.9375rem] leading-[1.6]">
+                      {article.description}
+                    </p>
+                    <p className="story-mono story-quiet mt-2 text-[0.75rem]">
+                      <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+
+              {moreWriting ? (
+                <p className="mt-7">
+                  <Link href={STORY.writingAllHref} className="story-link story-link-in story-read">
+                    <span>{STORY.writingAllLabel}</span>
+                    <span aria-hidden>&rarr;</span>
+                  </Link>
+                </p>
+              ) : null}
+            </section>
+          ) : null}
 
           {/* The closing: a photograph at a modest size, the sentence beside
               it, the gallery, and the background line. */}

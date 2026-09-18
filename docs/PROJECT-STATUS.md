@@ -2918,3 +2918,73 @@ fixing, reintroduced within the same edit. The answer was not to expose twenty
 numeric utilities but to give the smallest corner a name, `--r-xs`, like the
 other three. Caught by the check that asserts no element with a rounded class
 computes to 0px, which is now part of the suite.
+
+## Writing: the structure, with no articles in it
+
+Built to receive articles; nothing invented to fill it. The registry is empty,
+so the section on the story page is absent, the archive says it has nothing,
+and the sitemap does not mention it.
+
+### How it works
+
+`src/lib/writing.ts` is the same shape as `work.ts`: an MDX file exports `meta`,
+one line registers it, no page changes. Fields are slug, title, description,
+date, optional `updated`, status, and optional `sections` for the reading rail.
+Two content types with two conventions would be one convention too many, which
+is why this mirrors the existing one rather than inventing a second.
+
+Everything public reads `publishedWriting()`, which filters to published and
+sorts newest first. A draft is therefore absent from the story list, the
+archive and the sitemap for the same reason its own URL 404s, rather than
+because three separate places each remembered to exclude it.
+
+- `/writing` is the archive: title, sentence, date, newest first. No cards, no
+  thumbnails, no categories, no search.
+- `/writing/[slug]` reuses the case study's reading shell, the 82rem grid with
+  its 10rem rail and the 58rem column, and drops the case-study metadata block.
+  A case study has a role and an artifact; an article has a date. The rail is
+  only rendered when the article declares sections.
+- The story page shows the three newest between the case study and the
+  photography closing, and "All writing" only when there are more than three.
+  The section is not rendered at all while there are none.
+- The navigation gains a Writing link when the first article is published, for
+  the same reason: a link to an empty archive is a dead end.
+- `src/app/sitemap.ts` is new, built from the same sources the pages read, and
+  takes its host from `site.url`. It lists the homepage, About and the case
+  studies; it adds the archive and the articles once there are any; it excludes
+  the exploration routes, which are noindex.
+- Articles carry a canonical URL, an OpenGraph article type with
+  `publishedTime` and `modifiedTime`, and the author.
+
+`formatArticleDate` is new alongside `formatDate`. A case study is dated to the
+month, which suits a stretch of work; an article is published on a day and a
+reader scanning a list wants to know which one. The `datetime` attribute is the
+ISO date either way.
+
+### Verified with fixtures, then verified empty
+
+Five throwaway fixtures were registered, four published and one draft, the whole
+path was checked at desktop and mobile, and then they were deleted. 52 checks
+passed with them present: the section between the case study and photography,
+three entries newest first, the draft absent, each entry a linked title with a
+sentence and a date, no cards or images, "All writing" appearing at four, the
+heading and section padding measured identical to the section above, titles
+carrying the in-page link style, the article rendering without role or artifact
+metadata inside the reading width, canonical URLs on the article and the
+archive, the archive listing all four with the draft absent, Writing joining the
+navigation, the draft URL returning 404, and the sitemap listing the archive and
+the four articles, excluding the draft and the explorations, on the configured
+host.
+
+Then 9 checks with the registry empty again: no writing section, story back to
+its four sections, nothing linking to the archive, no Writing in the navigation,
+`/writing` still resolving and saying plainly that nothing is published, an
+unknown slug 404ing, and the sitemap back to its four public URLs.
+
+The fixtures are gone. `src/content/writing/` holds only a README describing
+the convention.
+
+### Waiting on
+
+The article itself. Nothing in the structure names or dates anything, and the
+first entry needs one MDX file and one line in the registry.

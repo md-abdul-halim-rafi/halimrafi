@@ -3,6 +3,7 @@ import { StoryExploration } from '@/components/explorations/story/StoryExplorati
 import type { StudioAsset } from '@/components/explorations/studio/StudioLightbox'
 import { availablePhotographs } from '@/lib/photographs'
 import { PHOTO_CREDIT } from '@/lib/photoCredit'
+import { publishedWriting, WRITING_PREVIEW_COUNT } from '@/lib/writing'
 
 export const metadata: Metadata = {
   title: 'Story exploration',
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
  * not product evidence, and it says so in its own caption on the homepage.
  * What is still missing is recorded in docs/PROJECT-STATUS.md.
  */
-export default function StoryPage() {
+export default async function StoryPage() {
   const photographs: StudioAsset[] = availablePhotographs().map((photo) => ({
     id: photo.file,
     kind: 'photograph',
@@ -35,5 +36,17 @@ export default function StoryPage() {
   // viewer's sequence starts; the rest stay behind the gallery link.
   const photograph = photographs[0] ?? null
 
-  return <StoryExploration photograph={photograph} gallery={photographs} />
+  // The three newest, and whether there is more behind them. Resolved here
+  // because the component below is a client component and the registry reads
+  // from the server.
+  const writing = await publishedWriting()
+
+  return (
+    <StoryExploration
+      photograph={photograph}
+      gallery={photographs}
+      writing={writing.slice(0, WRITING_PREVIEW_COUNT)}
+      moreWriting={writing.length > WRITING_PREVIEW_COUNT}
+    />
+  )
 }

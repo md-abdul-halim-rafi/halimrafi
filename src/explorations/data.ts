@@ -235,6 +235,15 @@ export const STORY = {
   caseHref: '/explorations/studio/helping-an-agent-finish-longer-tasks?from=story',
 
   /**
+   * The writing section. The entries come from the content registry, so
+   * nothing here names an article: this is the heading and the archive link,
+   * and the link only appears once there is more to read than the page shows.
+   */
+  writingHeading: 'Writing',
+  writingAllLabel: 'All writing',
+  writingAllHref: '/writing',
+
+  /**
    * Background, and it belongs with the work rather than the photography.
    *
    * Held as segments rather than one string with the company names sliced out
