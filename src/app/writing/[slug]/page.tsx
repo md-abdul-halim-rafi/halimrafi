@@ -64,6 +64,7 @@ export default async function WritingPage({ params }: Params) {
       date={meta.date}
       updated={meta.updated}
       byline={meta.byline}
+      url={`${site.url}/writing/${meta.slug}`}
       sections={sections}
     >
       <Body />

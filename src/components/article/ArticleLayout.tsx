@@ -4,6 +4,7 @@ import { SiteHeader } from '@/components/site/SiteHeader'
 import { HashScroll } from '@/components/story/HashScroll'
 import { BackLink } from '@/components/ui/BackLink'
 import { formatArticleDate, type ArticleKind } from '@/lib/articles'
+import { articleJsonLd, JsonLd } from '@/lib/jsonLd'
 import { Contents, type Section } from './Contents'
 
 export type ArticleDetail = { term: string; value: string }
@@ -37,6 +38,7 @@ export function ArticleLayout({
   byline,
   sections,
   details,
+  url,
   children,
 }: {
   kind: ArticleKind
@@ -48,12 +50,27 @@ export function ArticleLayout({
   sections: Section[]
   /** Case-study extras — role, collaborators. Omitted entirely for an essay. */
   details?: ArticleDetail[]
+  /** The piece's canonical URL, for the structured data. */
+  url: string
   children: ReactNode
 }) {
   return (
     <>
       <SiteHeader />
       <HashScroll />
+
+      <JsonLd
+        data={articleJsonLd({
+          kind,
+          url,
+          title,
+          description,
+          date,
+          updated,
+          byline,
+          sections: sections.map((section) => section.title),
+        })}
+      />
 
       <div id="article" className="article-grid relative pb-4">
         <header className="pb-6 pt-14 sm:pt-16">

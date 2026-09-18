@@ -4,6 +4,7 @@ import { SiteHeader } from '@/components/site/SiteHeader'
 import { ArticleList } from '@/components/article/ArticleList'
 import { BackLink } from '@/components/ui/BackLink'
 import { publishedArticles } from '@/lib/articles'
+import { collectionJsonLd, JsonLd } from '@/lib/jsonLd'
 import { site } from '@/lib/site'
 
 const description = `Writing and case studies by ${site.name}, newest first.`
@@ -34,6 +35,7 @@ export default async function WritingArchive() {
   return (
     <>
       <SiteHeader current="writing" />
+      <JsonLd data={collectionJsonLd(articles)} />
 
       <main className="mx-auto w-full max-w-[58rem] px-6 pb-24 sm:px-10">
         {/* The heading names the page; the entries are what a reader scans, so

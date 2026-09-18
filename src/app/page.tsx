@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SiteHeader } from '@/components/site/SiteHeader'
+import { JsonLd, personJsonLd } from '@/lib/jsonLd'
 import { StoryExploration } from '@/components/explorations/story/StoryExploration'
 import { storyProps } from '@/lib/storyProps'
 import { site } from '@/lib/site'
@@ -26,10 +27,13 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   return (
-    <StoryExploration
-      {...(await storyProps())}
-      header={<SiteHeader current="home" />}
-      switcher={false}
-    />
+    <>
+      <JsonLd data={personJsonLd()} />
+      <StoryExploration
+        {...(await storyProps())}
+        header={<SiteHeader current="home" />}
+        switcher={false}
+      />
+    </>
   )
 }

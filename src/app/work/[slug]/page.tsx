@@ -76,6 +76,7 @@ export default async function WorkPage({ params }: Params) {
       title={meta.title}
       description={meta.summary}
       date={meta.date}
+      url={`${site.url}/work/${meta.slug}`}
       sections={sections}
       details={details}
     >
