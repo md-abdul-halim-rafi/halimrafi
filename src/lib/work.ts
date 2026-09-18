@@ -27,13 +27,14 @@ export type WorkMeta = {
    */
   artifact: { kind: 'simulated-demo' | 'screenshot' | 'none'; label?: string }
   /**
-   * Whether the piece is offered in the Writing lists. Default is yes.
+   * Whether the piece is offered anywhere. Default is yes.
    *
-   * `false` is not the same as a draft: the page is published, its URL works,
-   * and it stays in the sitemap. It simply is not put in front of a reader who
-   * is browsing. The streaming prototype is the case it exists for — a real
-   * piece of writing about a simulated artifact, kept reachable without being
-   * featured.
+   * `false` is not the same as a draft: the page is published and its URL
+   * works, so a link already shared still resolves. It simply is not put in
+   * front of anyone who has not been given it — not in the Writing lists, and
+   * not in the sitemap. The streaming prototype is the case it exists for: a
+   * real piece of writing about a simulated artifact, kept reachable without
+   * being offered.
    */
   listed?: boolean
   /** Section headings, in order, for the article's side rail. */
@@ -66,6 +67,16 @@ export async function allWorkMeta(): Promise<WorkMeta[]> {
     .flatMap((m) => (m ? [m.meta] : []))
     .filter((meta) => meta.status === 'published')
     .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+/**
+ * Published and listed, which is what every surface that offers a piece to a
+ * reader wants. Defined once so the lists and the sitemap cannot disagree
+ * about what is on offer, which is exactly how an unlisted page ends up
+ * crawled.
+ */
+export async function listedWorkMeta(): Promise<WorkMeta[]> {
+  return (await allWorkMeta()).filter((meta) => meta.listed !== false)
 }
 
 export function formatDate(iso: string): string {

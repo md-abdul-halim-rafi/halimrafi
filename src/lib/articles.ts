@@ -1,4 +1,4 @@
-import { allWorkMeta } from './work'
+import { listedWorkMeta } from './work'
 import { publishedWriting } from './writing'
 
 /**
@@ -32,21 +32,17 @@ export type ArticleEntry = {
 }
 
 export async function publishedArticles(): Promise<ArticleEntry[]> {
-  const [work, writing] = await Promise.all([allWorkMeta(), publishedWriting()])
+  const [work, writing] = await Promise.all([listedWorkMeta(), publishedWriting()])
 
   const entries: ArticleEntry[] = [
-    // `listed: false` keeps a published piece out of the lists without taking
-    // its URL away. The sitemap reads `allWorkMeta` directly and still has it.
-    ...work
-      .filter((meta) => meta.listed !== false)
-      .map((meta) => ({
-        kind: 'case-study' as const,
-        slug: meta.slug,
-        href: `/work/${meta.slug}`,
-        title: meta.title,
-        description: meta.summary,
-        date: meta.date,
-      })),
+    ...work.map((meta) => ({
+      kind: 'case-study' as const,
+      slug: meta.slug,
+      href: `/work/${meta.slug}`,
+      title: meta.title,
+      description: meta.summary,
+      date: meta.date,
+    })),
     ...writing.map((meta) => ({
       kind: 'article' as const,
       slug: meta.slug,
