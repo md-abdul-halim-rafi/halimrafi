@@ -71,6 +71,8 @@ export function StoryExploration({
   gallery,
   writing,
   moreWriting,
+  switcher = true,
+  caseHref = STORY.caseHrefExploration,
 }: {
   /** The one photograph in the closing. */
   photograph: StudioAsset | null
@@ -80,6 +82,18 @@ export function StoryExploration({
   writing: WritingMeta[]
   /** Whether the archive holds more than the list above. */
   moreWriting: boolean
+  /**
+   * The exploration switcher. It belongs to the exploration routes, where it
+   * exists to hop between directions in development. On the site's own front
+   * page it is furniture from somewhere else, so that route turns it off.
+   */
+  switcher?: boolean
+  /**
+   * Where the case-study entry goes. Defaults to the exploration's own preview;
+   * the front page passes the published article, since a public page must not
+   * link into the noindex explorations.
+   */
+  caseHref?: string
 }) {
   const lightbox = useLightbox()
   const root = useRef<HTMLDivElement>(null)
@@ -177,7 +191,7 @@ export function StoryExploration({
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2
                 id="octolane"
-                className="story-display story-ink max-w-[18ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+                className="story-display story-ink max-w-[18ch] scroll-mt-20 text-[clamp(1.75rem,3.4vw,2.25rem)] sm:scroll-mt-24"
               >
                 {STORY.workHeading}
               </h2>
@@ -285,7 +299,7 @@ export function StoryExploration({
               {STORY.caseBody}
             </p>
             <p className="mt-5">
-              <Link href={STORY.caseHref} className="story-link story-link-in story-read">
+              <Link href={caseHref} className="story-link story-link-in story-read">
                 <span>{STORY.caseLabel}</span>
                 <span aria-hidden>&rarr;</span>
               </Link>
@@ -408,7 +422,7 @@ export function StoryExploration({
           onClose={lightbox.hide}
         />
       ) : null}
-      <Switcher />
+      {switcher ? <Switcher /> : null}
     </div>
   )
 }

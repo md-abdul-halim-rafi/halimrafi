@@ -232,7 +232,18 @@ export const STORY = {
   caseBody:
     'Some requests need several rounds of work. I designed and built the execution path that lets Ask Octolane delegate tasks, save progress, and resume with the results.',
   caseLabel: 'Read the case study',
-  caseHref: '/explorations/studio/helping-an-agent-finish-longer-tasks?from=story',
+  /**
+   * Two destinations for one entry, because two routes render this page.
+   *
+   * The site's front page sends the reader to the published article. The
+   * exploration sends them to its own preview of the same article, with the
+   * origin named so the way back returns to the exploration rather than to the
+   * live site. A public page must never link into the explorations: they are
+   * noindex previews, and a reader arriving there from the front page would be
+   * reading a copy.
+   */
+  caseHrefLive: '/work/helping-an-agent-finish-longer-tasks',
+  caseHrefExploration: '/explorations/studio/helping-an-agent-finish-longer-tasks?from=story',
 
   /**
    * The writing section. The entries come from the content registry, so

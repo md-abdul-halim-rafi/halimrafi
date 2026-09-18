@@ -32,7 +32,9 @@ export async function SiteHeader({ current }: { current?: 'work' | 'about' | 'wr
 
         <nav aria-label="Site" className="flex items-center gap-1">
           <Link
-            href="/#work"
+            // The front page's work section. `#work` was an id on the
+            // editorial homepage this replaced, and would now scroll nowhere.
+            href="/#octolane"
             aria-current={current === 'work' ? 'page' : undefined}
             className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
               current === 'work' ? 'text-ink-12' : 'text-muted hover:text-ink-12'

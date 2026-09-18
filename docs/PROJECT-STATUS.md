@@ -3059,3 +3059,62 @@ exactly how a wide table is meant to behave on a phone.
 **The publication date.** One line, and the article publishes itself: the story
 page lists it, the archive fills, Writing joins the navigation, and the sitemap
 gains two URLs.
+
+## The story composition is now the front page
+
+`/` renders it. The editorial homepage it replaces is still in the tree as
+`HomeEditorial`, unused and unreferenced, so reverting is one line.
+
+`/explorations/story` still renders the same composition from the same loader,
+which is deliberate: two copies of a page's data fetching is how two surfaces
+drift into showing different photographs. What differs between them is the
+shell, and only the shell.
+
+| | `/` | `/explorations/story` |
+| --- | --- | --- |
+| Indexed | yes, canonical `https://halimrafi.com` | no, `noindex, nofollow` |
+| Exploration switcher | absent | present, dev only |
+| Case-study link | `/work/helping-an-agent-finish-longer-tasks` | the exploration's preview, with `?from=story` |
+
+### Two things promoting it broke, both fixed
+
+**It linked into the explorations.** The case-study entry pointed at
+`/explorations/studio/helping-an-agent-finish-longer-tasks?from=story`. That is
+a noindex preview of an article that also exists publicly, so the front page
+would have been sending readers to a copy. The destination is now a prop:
+`caseHrefLive` for the site, `caseHrefExploration` for the exploration, and the
+front page passes the first.
+
+**The header's Work link pointed at nothing.** It was `/#work`, an id that lived
+on the editorial homepage. The new front page's work section is the Octolane
+one, so the link is `/#octolane` and that heading gained the same scroll
+clearance the case-study heading has. Verified by clicking it from `/about` and
+landing with the heading on screen.
+
+### What the front page no longer carries
+
+The editorial homepage listed both case studies. The story composition features
+one. **`/work/making-a-response-readable` now has no link from any public page.**
+It still renders, and it is still in the sitemap, but nothing points at it.
+
+That is a content decision rather than a defect, so it is recorded here rather
+than fixed: adding a second entry to the case section would change a
+composition that was frozen deliberately. Three options if it matters: add it to
+the case section, wait for the writing list to carry it, or let it be an
+unlinked page that only the sitemap knows about.
+
+### Verified
+
+39 checks at 1440x900 and 390x844: the front page is the story composition with
+its four sections and no switcher, nothing on it links into the explorations,
+the case study points at the published article, it is indexable with the right
+canonical and keeps the site's title and description, the product figure and the
+photograph both render, both contact paths remain, no horizontal overflow, no
+console errors. The case-study link followed out and back, the article's own
+"Back to the work" landing on the new front page, and the header's Work anchor
+scrolling to the work section from another page. The exploration keeps its
+switcher, its own preview link and its noindex. About, the other case study and
+the archive all still render, and the sitemap still lists the front page and
+both case studies.
+
+Build compiles with `/` as a static route, 24 tests, lint and types clean.
