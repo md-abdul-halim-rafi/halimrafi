@@ -15,15 +15,16 @@ import { publishedWriting } from '@/lib/writing'
  * The site URL comes from `site.url` and is not repeated anywhere in here.
  *
  * Absent on purpose: the exploration routes, which are marked noindex in their
- * own layout and are not part of the public site; and `/writing` itself while
- * nothing is published, since an empty archive is not worth crawling.
+ * own layout and are not part of the public site; `/writing` itself while
+ * nothing is published, since an empty archive is not worth crawling; and
+ * `/about`, which is no longer a page and redirects to the front page.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [work, writing] = await Promise.all([allWorkMeta(), publishedWriting()])
 
   const entries: MetadataRoute.Sitemap = [
     { url: site.url, changeFrequency: 'monthly', priority: 1 },
-    { url: `${site.url}/about`, changeFrequency: 'yearly', priority: 0.5 },
+    { url: `${site.url}/photographs`, changeFrequency: 'monthly', priority: 0.5 },
   ]
 
   for (const meta of work) {

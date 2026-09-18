@@ -17,13 +17,18 @@ import { publishedWriting } from '@/lib/writing'
  * The geometry is the front page's, because that is the register the rest of
  * the site was brought into: `pt-6` above, a 40px control row, the dotted rule
  * below. The links are the same set everywhere, so nothing appears, disappears
- * or moves across a navigation — which also gives the front page the way to
- * About it had been missing since the composition replaced the old homepage.
+ * or moves across a navigation.
+ *
+ * About is not among them: the standalone page was removed, and what it held
+ * that the site still wants — the biography and the way to get in touch — is on
+ * the front page. Photographs is reached from the front page's closing rather
+ * than from here, which keeps this row to the two destinations that are not
+ * already on the page a reader starts from.
  *
  * The current page is named but not linked, and on the front page that applies
  * to the name itself.
  */
-export async function SiteHeader({ current }: { current?: 'home' | 'about' | 'writing' }) {
+export async function SiteHeader({ current }: { current?: 'home' | 'writing' }) {
   const hasWriting = (await publishedWriting()).length > 0
 
   return (
@@ -40,8 +45,9 @@ export async function SiteHeader({ current }: { current?: 'home' | 'about' | 'wr
         </p>
 
         <nav aria-label="Site" className="flex items-baseline gap-x-6">
-          {hasWriting ? <Item href="/writing" label="Writing" current={current === 'writing'} /> : null}
-          <Item href="/about" label="About" current={current === 'about'} />
+          {hasWriting ? (
+            <Item href="/writing" label="Writing" current={current === 'writing'} />
+          ) : null}
           <a
             href={`mailto:${STORY.email}`}
             className="story-mono story-control story-link story-link-out"
