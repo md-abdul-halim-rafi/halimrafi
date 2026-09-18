@@ -6,12 +6,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Switcher } from '@/components/explorations/Switcher'
 import { STORY } from '@/explorations/data'
-import { formatArticleDate, type WritingMeta } from '@/lib/writing'
+import { formatArticleDate, type ArticleEntry } from '@/lib/articles'
 import { StudioLightbox, useLightbox, type StudioAsset } from '../studio/StudioLightbox'
 
 /**
- * Story: introduction, current work, one case study, writing, a personal
- * closing. The writing section is absent while nothing is published.
+ * Story: introduction, current work, everything published, a personal closing.
+ * The writing section is absent while nothing is published.
  *
  * The streaming comparison that used to sit between the work and the closing
  * was removed on request. Its component, fixtures and tests are untouched and
@@ -70,10 +70,9 @@ export function StoryExploration({
   header,
   photograph,
   gallery,
-  writing,
-  moreWriting,
+  articles,
+  moreArticles,
   switcher = true,
-  caseHref = STORY.caseHrefExploration,
 }: {
   /**
    * The site header, rendered by the server route above this client component.
@@ -88,22 +87,16 @@ export function StoryExploration({
   photograph: StudioAsset | null
   /** Every photograph, in order, for the viewer behind the gallery link. */
   gallery: StudioAsset[]
-  /** The newest published articles, already trimmed to what this page shows. */
-  writing: WritingMeta[]
+  /** The newest published pieces, already trimmed to what this page shows. */
+  articles: ArticleEntry[]
   /** Whether the archive holds more than the list above. */
-  moreWriting: boolean
+  moreArticles: boolean
   /**
    * The exploration switcher. It belongs to the exploration routes, where it
    * exists to hop between directions in development. On the site's own front
    * page it is furniture from somewhere else, so that route turns it off.
    */
   switcher?: boolean
-  /**
-   * Where the case-study entry goes. Defaults to the exploration's own preview;
-   * the front page passes the published article, since a public page must not
-   * link into the noindex explorations.
-   */
-  caseHref?: string
 }) {
   const lightbox = useLightbox()
   const root = useRef<HTMLDivElement>(null)
@@ -277,61 +270,40 @@ export function StoryExploration({
             </p>
           </section>
 
-          {/* The case study, between the work and the closing. Heading, one
-              paragraph carrying the problem and the contribution, then a link.
-              No panel and no artifact, because the article has none either,
-              and no rollout status, because saying it accurately takes three
-              qualifications and those live in the article. */}
-          <section aria-labelledby="case" className="pt-14 sm:pt-16">
-            <hr className="story-rule w-14" />
-            {/* The landing target for the way back from the article. The
-                scroll margin keeps the heading clear of the viewport's top
-                edge, with the section's own rule visible above it, so the
-                reader arrives at the entry rather than with it jammed against
-                the edge. */}
-            <h2
-              id="case"
-              className="story-display story-ink mt-5 max-w-[20ch] scroll-mt-20 text-[clamp(1.75rem,3.4vw,2.25rem)] sm:scroll-mt-24"
-            >
-              {STORY.caseHeading}
-            </h2>
-            <p className="story-mid mt-4 max-w-[33rem] text-[1.0625rem] leading-[1.55]">
-              {STORY.caseBody}
-            </p>
-            <p className="mt-5">
-              <Link href={caseHref} className="story-link story-link-in story-read">
-                <span>{STORY.caseLabel}</span>
-                <span aria-hidden>&rarr;</span>
-              </Link>
-            </p>
-          </section>
+          {/* Writing: one section for everything published, between the work
+              and the closing.
 
-          {/* Writing, between the case study and the closing.
+              A case study used to get a section of its own here, with an essay
+              listed smaller underneath. Two headings for two pieces made them
+              look like unrelated bodies of work, and the reader had to notice
+              that the smaller list was the same kind of thing. One list, one
+              treatment, a label on the pieces that are case studies.
 
-              Text entries, at the page's own rhythm: a linked title, a
-              sentence, a date. No cards, no thumbnails, no categories. The
-              section is not rendered at all while nothing is published, since
-              a heading over an empty list is a promise the page cannot keep,
-              and the archive link appears only when there is more behind the
-              list than the list shows. */}
-          {writing.length > 0 ? (
+              The section is not rendered while nothing is published, since a
+              heading over an empty list is a promise the page cannot keep, and
+              the archive link appears only when there is more behind the list
+              than the list shows. */}
+          {articles.length > 0 ? (
             <section aria-labelledby="writing" className="pt-14 sm:pt-16">
               <hr className="story-rule w-14" />
+              {/* The landing target for the way back from an article. The
+                  scroll margin keeps the heading clear of the viewport's top
+                  edge, with the section's own rule visible above it. */}
               <h2
                 id="writing"
-                className="story-display story-ink mt-5 max-w-[20ch] text-[clamp(1.75rem,3.4vw,2.25rem)]"
+                className="story-display story-ink mt-5 max-w-[20ch] scroll-mt-20 text-[clamp(1.75rem,3.4vw,2.25rem)] sm:scroll-mt-24"
               >
                 {STORY.writingHeading}
               </h2>
 
-              <ul className="mt-7 space-y-7">
-                {writing.map((article) => (
-                  <li key={article.slug}>
+              <ul className="mt-8 space-y-8">
+                {articles.map((article) => (
+                  <li key={article.href}>
+                    {article.kind === 'case-study' ? (
+                      <p className="story-mono story-quiet mb-2 text-[0.6875rem]">Case study</p>
+                    ) : null}
                     <h3 className="text-[1.0625rem] leading-[1.45]">
-                      <Link
-                        href={`/writing/${article.slug}`}
-                        className="story-link story-link-in"
-                      >
+                      <Link href={article.href} className="story-link story-link-in">
                         {article.title}
                       </Link>
                     </h3>
@@ -345,8 +317,8 @@ export function StoryExploration({
                 ))}
               </ul>
 
-              {moreWriting ? (
-                <p className="mt-7">
+              {moreArticles ? (
+                <p className="mt-8">
                   <Link href={STORY.writingAllHref} className="story-link story-link-in story-read">
                     <span>{STORY.writingAllLabel}</span>
                     <span aria-hidden>&rarr;</span>

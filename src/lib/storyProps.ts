@@ -1,5 +1,5 @@
 import { photographAssets } from './photographAssets'
-import { publishedWriting, WRITING_PREVIEW_COUNT } from './writing'
+import { ARTICLE_PREVIEW_COUNT, publishedArticles } from './articles'
 
 /**
  * Everything the story composition needs, resolved on the server.
@@ -21,12 +21,12 @@ export async function storyProps() {
   // viewer's sequence starts; the rest are at `/photographs`.
   const photograph = photographs[0] ?? null
 
-  const writing = await publishedWriting()
+  const articles = await publishedArticles()
 
   return {
     photograph,
     gallery: photographs,
-    writing: writing.slice(0, WRITING_PREVIEW_COUNT),
-    moreWriting: writing.length > WRITING_PREVIEW_COUNT,
+    articles: articles.slice(0, ARTICLE_PREVIEW_COUNT),
+    moreArticles: articles.length > ARTICLE_PREVIEW_COUNT,
   }
 }

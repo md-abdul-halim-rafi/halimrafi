@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { SiteFooter } from '@/components/site/Chrome'
 import { SiteHeader } from '@/components/site/SiteHeader'
+import { ArticleList } from '@/components/article/ArticleList'
+import { BackLink } from '@/components/ui/BackLink'
+import { publishedArticles } from '@/lib/articles'
 import { site } from '@/lib/site'
-import { formatArticleDate, publishedWriting } from '@/lib/writing'
 
-const description = 'Articles by Halim Rafi, newest first.'
+const description = `Writing and case studies by ${site.name}, newest first.`
 
 export const metadata: Metadata = {
   title: 'Writing',
@@ -20,18 +21,15 @@ export const metadata: Metadata = {
 }
 
 /**
- * The archive: everything published, newest first, and nothing else.
+ * The archive: everything published, newest first, in one list.
  *
- * One entry is a title, a sentence and a date, which is the same three things
- * the story page shows. No cards, no thumbnails, no categories, no search. A
- * list this length does not need to be navigated, only read.
- *
- * With nothing published the page still renders, since the route has to exist
- * for the first article to land on. Nothing links here until there is
- * something to link to.
+ * It used to hold essays only, while the case studies lived at their own URLs
+ * with nothing linking to them but the front page's single featured entry. A
+ * reader had no way to find the rest. Both kinds are here now, told apart by a
+ * label rather than by being kept in different places.
  */
 export default async function WritingArchive() {
-  const articles = await publishedWriting()
+  const articles = await publishedArticles()
 
   return (
     <>
@@ -45,35 +43,16 @@ export default async function WritingArchive() {
         </header>
 
         {articles.length > 0 ? (
-          <ul className="border-t border-[color:var(--hairline)]">
-            {articles.map((article) => (
-              <li key={article.slug} className="border-b border-[color:var(--hairline)] py-7">
-                <h2 className="text-[1.125rem] leading-snug">
-                  <Link href={`/writing/${article.slug}`} className="link-quiet">
-                    {article.title}
-                  </Link>
-                </h2>
-                <p className="mt-2 max-w-[60ch] text-[0.9375rem] leading-[1.6] text-muted">
-                  {article.description}
-                </p>
-                <p className="mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1 font-mono text-[0.8125rem] text-ink-10">
-                  <span>{article.byline ?? site.name}</span>
-                  <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
-                  {article.updated ? (
-                    <>
-                      {' · updated '}
-                      <time dateTime={article.updated}>{formatArticleDate(article.updated)}</time>
-                    </>
-                  ) : null}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ArticleList articles={articles} />
         ) : (
           <p className="max-w-[60ch] text-[0.9375rem] leading-[1.6] text-muted">
             Nothing published yet.
           </p>
         )}
+
+        <p className="mt-12">
+          <BackLink href="/">Home</BackLink>
+        </p>
       </main>
 
       <SiteFooter />

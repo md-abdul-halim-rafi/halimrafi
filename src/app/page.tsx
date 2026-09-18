@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { SiteHeader } from '@/components/site/SiteHeader'
 import { StoryExploration } from '@/components/explorations/story/StoryExploration'
-import { STORY } from '@/explorations/data'
 import { storyProps } from '@/lib/storyProps'
 import { site } from '@/lib/site'
 
@@ -31,7 +30,6 @@ export default async function Page() {
       {...(await storyProps())}
       header={<SiteHeader current="home" />}
       switcher={false}
-      caseHref={STORY.caseHrefLive}
     />
   )
 }
