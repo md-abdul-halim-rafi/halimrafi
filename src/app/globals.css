@@ -746,6 +746,20 @@
     color: var(--ink-11);
   }
 
+  /* The not-found heading. The article serif, because it is a sentence
+     addressed to a reader rather than a piece of interface, at a size that
+     states the problem without announcing it: 32px on a phone, 42px from about
+     1440 up, ramping between so nothing steps at a breakpoint. */
+  .not-found-title {
+    font-family: var(--font-read);
+    font-weight: 500;
+    font-size: clamp(1.875rem, 0.95vw + 1.77rem, 2.625rem);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: var(--ink-12);
+    text-wrap: pretty;
+  }
+
   /* An entry in the Writing list, wherever that list is published.
 
      The title is the article's own reading serif at close to the size it will
