@@ -20,7 +20,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title: meta.title,
     description: meta.summary,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      // Unlisted means unlisted: no Markdown is served for it, so none is
+      // advertised.
+      ...(meta.listed === false ? {} : { types: { 'text/markdown': `${url}.md` } }),
+    },
     /*
      * An unlisted piece is not offered to anyone who has not been given the
      * link, and that has to include a crawler that reaches it by some other

@@ -3,7 +3,23 @@ import createMDX from '@next/mdx'
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
-  outputFileTracingIncludes: {},
+  /* The Markdown route reads the MDX off disk at request time, so the content
+     has to travel with the build rather than only into the compiled bundle. */
+  outputFileTracingIncludes: {
+    '/api/md/[dir]/[slug]': ['./src/content/**/*.mdx'],
+  },
+
+  /**
+   * An article's Markdown sits at the article's own address with a `.md`
+   * suffix, which is where something reading the site as text will try first.
+   * The handler lives under /api; nobody needs to know that.
+   */
+  async rewrites() {
+    return [
+      { source: '/writing/:slug.md', destination: '/api/md/writing/:slug' },
+      { source: '/work/:slug.md', destination: '/api/md/work/:slug' },
+    ]
+  },
 
   /**
    * `/about` was a standalone page and is not one any more. What it held that
