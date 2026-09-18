@@ -27,7 +27,7 @@ export function Photographs({ limit }: { limit?: number }) {
         {shown.map((photo) => (
           <li key={photo.file} className={photo.orientation === 'landscape' ? 'sm:col-span-2' : ''}>
             <figure className="m-0">
-              <div className="overflow-hidden rounded-[var(--r-md)] bg-sunk">
+              <div className="overflow-hidden rounded-md bg-sunk">
                 <Image
                   src={`/photographs/${photo.file}`}
                   alt={photo.alt}

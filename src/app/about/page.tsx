@@ -59,7 +59,7 @@ export default function AboutPage() {
         </dl>
 
         {contactable ? (
-          <div className="mt-12 rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface p-7">
+          <div className="mt-12 rounded-lg border border-[color:var(--hairline)] bg-surface p-7">
             <h2 className="heading text-[1.25rem] leading-snug">
               Have a difficult product problem?
             </h2>

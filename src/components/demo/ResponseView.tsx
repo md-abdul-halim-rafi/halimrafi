@@ -5,7 +5,7 @@ function InlineRun({ run }: { run: Inline }) {
   if (run.type === 'strong') return <strong className="font-semibold">{run.value}</strong>
   if (run.type === 'code')
     return (
-      <code className="rounded-[2px] bg-sunk px-1 py-0.5 font-mono text-[0.9em] text-ink/85">
+      <code className="rounded-xs bg-sunk px-1 py-0.5 font-mono text-[0.9em] text-ink/85">
         {run.value}
       </code>
     )
@@ -25,7 +25,7 @@ function Inlines({ content }: { content: Inline[] }) {
 /** The record the tool returns once it resolves. */
 function ResolvedRecord() {
   return (
-    <div className="h-full rounded-[var(--radius)] border border-[color:var(--hairline)] bg-surface">
+    <div className="h-full rounded-md border border-[color:var(--hairline)] bg-surface">
       <div className="flex items-baseline justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-2.5">
         <span className="font-medium">{ACCOUNT_RECORD.name}</span>
         <span className="label">Account</span>
@@ -49,7 +49,7 @@ function ResolvedRecord() {
 
 function PendingRecord({ overdue, label }: { overdue: boolean; label: string }) {
   return (
-    <div className="flex h-full flex-col justify-center rounded-[var(--radius)] border border-dashed border-[color:var(--hairline-strong)] bg-sunk/60 px-4 py-3">
+    <div className="flex h-full flex-col justify-center rounded-md border border-dashed border-[color:var(--hairline-strong)] bg-sunk/60 px-4 py-3">
       <p className="text-sm text-muted">
         {overdue ? 'Still waiting on the account record.' : `${label}…`}
       </p>

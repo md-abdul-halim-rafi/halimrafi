@@ -66,7 +66,7 @@ export function WorkbenchExploration() {
               aria-orientation="vertical"
               aria-label="Projects"
               onKeyDown={onKeyDown}
-              className="overflow-hidden rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface"
+              className="overflow-hidden rounded-lg border border-[color:var(--hairline)] bg-surface"
             >
               {work.map((item, i) => {
                 const isActive = item.id === selected
@@ -112,7 +112,7 @@ export function WorkbenchExploration() {
             id="wb-panel"
             aria-labelledby={`wb-tab-${active.id}`}
             tabIndex={-1}
-            className="min-w-0 rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface"
+            className="min-w-0 rounded-lg border border-[color:var(--hairline)] bg-surface"
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-[color:var(--hairline)] px-5 py-4 sm:px-7">
               <h2 className="text-[1.25rem] font-semibold tracking-[-0.02em] text-ink-12">

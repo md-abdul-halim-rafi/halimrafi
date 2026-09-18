@@ -98,7 +98,7 @@ export function StudioExploration({
             {/* One interaction worth examining. Inset on the sunken surface so
                 it reads as part of this work rather than a section of its own,
                 and captioned as a prototype so it is not read as shipped. */}
-            <div className="mt-10 max-w-[36rem] rounded-[var(--r-lg)] bg-sunk px-6 py-6 sm:px-7">
+            <div className="mt-10 max-w-[36rem] rounded-lg bg-sunk px-6 py-6 sm:px-7">
               <h3 className="text-[1.0625rem] font-medium leading-[1.35] text-ink-12">
                 Making a response readable
               </h3>

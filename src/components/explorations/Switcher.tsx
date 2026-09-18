@@ -28,7 +28,7 @@ export function Switcher() {
 
   return (
     <div className="exploration-switcher fixed bottom-3 right-3 z-40 print:hidden">
-      <div className="flex items-center gap-1 rounded-[var(--r-pill)] border border-[color:var(--hairline)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-1 shadow-[0_1px_2px_rgba(18,22,27,0.05)] backdrop-blur-md">
+      <div className="flex items-center gap-1 rounded-pill border border-[color:var(--hairline)] bg-[color:color-mix(in_srgb,var(--surface)_92%,transparent)] p-1 shadow-[0_1px_2px_rgba(18,22,27,0.05)] backdrop-blur-md">
         {/* Rendered only while open, so the closed control holds no hidden tab
             stops behind it. The links unfold to the left of the toggle, which
             keeps the toggle itself in the corner. */}
@@ -41,7 +41,7 @@ export function Switcher() {
                   key={item.slug}
                   href={`/explorations/${item.slug}`}
                   aria-current={active ? 'page' : undefined}
-                  className={`trim-cap inline-flex items-center justify-center rounded-[var(--r-pill)] px-2.5 py-1 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] [@media(pointer:coarse)]:min-h-10 ${
+                  className={`trim-cap inline-flex items-center justify-center rounded-pill px-2.5 py-1 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] [@media(pointer:coarse)]:min-h-10 ${
                     active ? 'bg-ink-12 font-medium text-ink-1' : 'text-muted hover:text-ink-12'
                   }`}
                 >

@@ -39,7 +39,7 @@ function Segmented<T extends string>({
   return (
     <fieldset className="min-w-0">
       <legend className="label mb-2">{legend}</legend>
-      <div className="inline-flex flex-wrap gap-1 rounded-[var(--r-pill)] bg-sunk p-1">
+      <div className="inline-flex flex-wrap gap-1 rounded-pill bg-sunk p-1">
         {options.map((option) => {
           const selected = option.id === value
           return (
@@ -54,7 +54,7 @@ function Segmented<T extends string>({
                 // Cap-trimmed text leaves a 21px box, which is under the
                 // minimum target size. Touch pointers get a taller box; the
                 // pointer-fine treatment is unchanged.
-                'rounded-[var(--r-pill)] px-3 py-1.5 text-[0.8125rem] [@media(pointer:coarse)]:min-h-10',
+                'rounded-pill px-3 py-1.5 text-[0.8125rem] [@media(pointer:coarse)]:min-h-10',
                 'transition-[background-color,color,box-shadow] duration-200 [transition-timing-function:var(--ease-out-quint)]',
                 'disabled:cursor-not-allowed disabled:opacity-45',
                 selected
@@ -147,7 +147,7 @@ export function StreamingDemo() {
 
   return (
     <section
-      className="overflow-hidden rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface shadow-[var(--card-shadow)]"
+      className="overflow-hidden rounded-lg border border-[color:var(--hairline)] bg-surface shadow-[var(--card-shadow)]"
       aria-label="Streaming response demonstration"
     >
       <header className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2 border-b border-[color:var(--hairline)] px-4 py-3 sm:px-6">

@@ -86,7 +86,7 @@ export function CompactComparison({
 
   return (
     <figure className="m-0">
-      <div className={`grid gap-px overflow-hidden rounded-[var(--r-md)] bg-[color:var(--hairline)] ${stacked ? "" : "lg:grid-cols-2"}`}>
+      <div className={`grid gap-px overflow-hidden rounded-md bg-[color:var(--hairline)] ${stacked ? "" : "lg:grid-cols-2"}`}>
         {panes.map((pane) => (
           <div key={pane.mode} className="flex flex-col bg-surface">
             <div className="flex items-center justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-2.5">

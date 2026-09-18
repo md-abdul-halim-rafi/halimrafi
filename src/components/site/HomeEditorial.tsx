@@ -27,7 +27,7 @@ export function HomeEditorial() {
       <main className="mx-auto max-w-[76rem] px-5 sm:px-8">
         {/* The featured interaction, breaking wider than the reading column. */}
         <section className="-mt-10 sm:-mt-14" aria-labelledby="featured">
-          <Reveal className="rounded-[var(--r-lg)] border border-[color:var(--hairline)] bg-surface">
+          <Reveal className="rounded-lg border border-[color:var(--hairline)] bg-surface">
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-[color:var(--hairline)] px-4 py-3.5 sm:px-6">
               <h2 id="featured" className="label">
                 {home.artifact.label}

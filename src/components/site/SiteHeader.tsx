@@ -19,7 +19,7 @@ export function SiteHeader({ current }: { current?: 'work' | 'about' }) {
       <div className="mx-auto flex h-full max-w-[82rem] items-center justify-between gap-6 px-5 sm:px-8">
         <Link
           href="/"
-          className="link-quiet trim-cap -mx-2 rounded-[var(--r-sm)] px-2 py-1 text-[0.875rem] font-medium text-ink-12"
+          className="link-quiet trim-cap -mx-2 rounded-sm px-2 py-1 text-[0.875rem] font-medium text-ink-12"
         >
           {site.name}
         </Link>
@@ -28,7 +28,7 @@ export function SiteHeader({ current }: { current?: 'work' | 'about' }) {
           <Link
             href="/#work"
             aria-current={current === 'work' ? 'page' : undefined}
-            className={`trim-cap rounded-[var(--r-sm)] px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
+            className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
               current === 'work' ? 'text-ink-12' : 'text-muted hover:text-ink-12'
             }`}
           >
@@ -37,7 +37,7 @@ export function SiteHeader({ current }: { current?: 'work' | 'about' }) {
           <Link
             href="/about"
             aria-current={current === 'about' ? 'page' : undefined}
-            className={`trim-cap rounded-[var(--r-sm)] px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
+            className={`trim-cap rounded-sm px-2.5 py-1.5 text-[0.8125rem] transition-colors duration-200 [transition-timing-function:var(--ease-out-quint)] ${
               current === 'about' ? 'text-ink-12' : 'text-muted hover:text-ink-12'
             }`}
           >

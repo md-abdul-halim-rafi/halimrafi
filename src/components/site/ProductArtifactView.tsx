@@ -13,7 +13,7 @@ export function ProductArtifactView() {
 
   return (
     <figure className="m-0">
-      <div className="overflow-hidden rounded-[var(--radius)] border border-[color:var(--hairline)] bg-surface">
+      <div className="overflow-hidden rounded-lg border border-[color:var(--hairline)] bg-surface">
         <Image src={src} alt={alt} width={width} height={height} className="h-auto w-full" />
       </div>
       <figcaption className="mt-3 text-[0.8125rem] leading-[1.6] text-muted">{caption}</figcaption>

@@ -2848,3 +2848,73 @@ a longer pause on purpose because that is where the subject changes, a decision
 recorded earlier in these notes. The check now expresses the actual rule: the
 two middle sections share a rhythm and the closing is deliberately longer. The
 page was right and the test was encoding a rule nobody had made.
+
+## Corner radius: one ladder, and three square corners fixed
+
+Asked whether the radius was on a system everywhere. It was not, and one of the
+gaps was a live defect.
+
+### The defect
+
+Three elements used `rounded-[var(--radius)]`, and `--radius` was never defined
+in this project. An unknown custom property inside `var()` with no fallback
+makes the declaration invalid at computed-value time, so `border-radius` fell
+back to `0`. Measured in the browser: **0px, square corners**, on the homepage's
+product artifact frame and on the case study's demo panes, sitting beside cards
+at 14px and controls at 999px. An arbitrary Tailwind value cannot fail loudly,
+which is why nobody saw it.
+
+### What the product's own front end does
+
+Read rather than guessed at. `octolane.com` keeps an absolute ladder in
+`src/app/styles/variables.scss`, `--radius-1: 0px` through `--radius-20: 40px`
+plus `--radius-full`, exposes it to Tailwind through `RADIUS_TOKENS` in
+`tailwind.config.js`, and components ask for a rung by name
+(`rounded-radius-8`, which is 221 of the uses, then `radius-7` and `radius-9`).
+It also carries `cornerSuperellipse` for squircle corners, with a rule stated
+in `Favicon.tsx` worth keeping in mind: corner-shape and border-radius are
+independent, and round is the correct shape for a round radius.
+
+### What this project has now
+
+The same ladder, same numbers, same names, so a corner described in one
+repository means the same thing in the other. Over it, four semantic names,
+because a component should ask for a meaning rather than a rung:
+
+    --r-xs  -> --radius-4   3px
+    --r-sm  -> --radius-5   4px
+    --r-md  -> --radius-8   8px
+    --r-lg  -> --radius-11  14px
+    --r-pill -> --radius-full
+
+Only the semantic names become Tailwind utilities, so components read
+`rounded-md`, not `rounded-[var(--r-md)]`. That is the point of the change: an
+arbitrary value silently resolves to nothing, a missing utility does not. The
+workbench palette still retunes `--r-md` and `--r-lg` to squarer rungs, which
+is why the semantic layer stays rather than the ladder being used directly.
+
+Superellipse corners were not adopted. They would change every corner on the
+site, which is a redesign and was not asked for.
+
+### What actually changed on screen
+
+Every computed radius on the homepage, the case study, Story, About and Studio
+was captured before and after. The only differences are the three that were
+broken: the artifact frame is 14px again and the four demo panes are 8px again.
+Everything else is identical in effect. Pills read 9999px rather than 999px
+because the ladder's full rung is 9999px; the tallest pill on the site is 40px,
+so both clamp to the same shape.
+
+One deliberate 1px change: inline code was `rounded-[3px]` in the prose
+components and `rounded-[2px]` in the demo, two values for the same element.
+Both are `--r-xs` now, which is 3px.
+
+### A regression I introduced and caught
+
+Moving the strays onto the ladder, I wrote `rounded-4` and `rounded-3` in the
+components. Those rungs are variables, not Tailwind theme keys, so no utility
+was generated and inline code computed to 0px: precisely the failure I was
+fixing, reintroduced within the same edit. The answer was not to expose twenty
+numeric utilities but to give the smallest corner a name, `--r-xs`, like the
+other three. Caught by the check that asserts no element with a rounded class
+computes to 0px, which is now part of the suite.

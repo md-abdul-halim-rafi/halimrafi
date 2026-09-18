@@ -42,7 +42,7 @@ export const proseComponents: MDXComponents = {
   code: (props) => (
     <code
       {...props}
-      className="rounded-[3px] bg-sunk px-[0.35em] py-[0.15em] font-mono text-[0.85em] text-ink-11"
+      className="rounded-xs bg-sunk px-[0.35em] py-[0.15em] font-mono text-[0.85em] text-ink-11"
     />
   ),
   a: (props) => <a {...props} className="link-underline" />,
