@@ -685,9 +685,12 @@
     font-family: var(--font-read);
     font-weight: 500;
     letter-spacing: -0.005em;
-    /* 34px on a phone, 46px from about 1280 up. Nothing is hard-wrapped: the
-       title finds its own break at every width. */
-    font-size: clamp(2.125rem, 3.2vw, 2.875rem);
+    /* 30px on a phone, 36px on a tablet, 46px from about 1440 up. The middle
+       term ramps rather than sitting flat under the cap, so there is no step
+       where a breakpoint happens to fall — the title just gets smaller as the
+       column does. Nothing is hard-wrapped: it finds its own break at every
+       width. */
+    font-size: clamp(1.875rem, 1.52vw + 1.5rem, 2.875rem);
     line-height: 1.15;
     color: var(--ink-12);
     text-wrap: pretty;
