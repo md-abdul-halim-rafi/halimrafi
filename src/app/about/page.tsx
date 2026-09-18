@@ -37,7 +37,7 @@ export default function AboutPage() {
     <>
       <SiteHeader current="about" />
 
-      <main className="mx-auto max-w-[62rem] px-5 pt-16 sm:px-8 sm:pt-20">
+      <main className="mx-auto max-w-[58rem] px-6 pt-16 sm:px-10 sm:pt-20">
         <p className="label">About</p>
         <h1 className="display mt-5 text-[clamp(2.5rem,6vw,3.75rem)] leading-[1.0] text-ink-12">
           {site.name}

@@ -9,7 +9,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-20">
-      <div className="mx-auto max-w-[76rem] px-5 sm:px-8">
+      <div className="mx-auto max-w-[58rem] px-6 sm:px-10">
         <div className="rule-fade" />
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-4 py-9">
           <p className="label">
