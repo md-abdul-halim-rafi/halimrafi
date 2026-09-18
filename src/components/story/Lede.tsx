@@ -10,5 +10,5 @@
  * It keeps the full ink step, which is the whole of its remaining emphasis.
  */
 export function Lede({ children }: { children: React.ReactNode }) {
-  return <p className="article-body text-ink-12">{children}</p>
+  return <p className="article-lede article-body text-ink-12">{children}</p>
 }

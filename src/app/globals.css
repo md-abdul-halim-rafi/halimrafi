@@ -838,6 +838,14 @@
   :is(.article-grid, .prose-column) > :is(h2, h3) + h3 {
     margin-top: 0.8em;
   }
+  /* The opening sequence only. A section break between two sections wants the
+     full 2.2em; the break between the opening sentence and the section that
+     explains it does not, because nothing has been said yet for it to be a
+     break from. Scoped to the lede, so the rhythm through the rest of the
+     article is untouched. */
+  .article-grid > .article-lede + h2 {
+    margin-top: 1.35em;
+  }
 
   /* Set-apart blocks get a little more than a paragraph and no more. */
   :is(.article-grid, .prose-column) > * + :is(blockquote, details, aside, .breakout, .rule-fade) {
