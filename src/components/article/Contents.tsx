@@ -14,11 +14,16 @@ export type Section = { id: string; title: string }
  * work either way.
  *
  * The rail's breakpoint is derived rather than guessed. It needs half the
- * article column, plus the rail, plus the gap, plus a page margin, on each side
- * of centre — 76rem in total. Below that it is not rendered at all, so nothing
- * hangs off the page edge and nothing invisible sits in the tab order. Browser
- * zoom shrinks the viewport in CSS pixels, so zooming past roughly 150% hands
- * the reader the disclosure instead of a rail crushed against the text.
+ * article column (21rem), the gutter a wide table stops at (7rem), the rail
+ * itself (11.5rem) and a page margin (1.5rem) on each side of centre — 82rem
+ * in total. Below that it is not rendered at all, so nothing hangs off the page
+ * edge and nothing invisible sits in the tab order. Browser zoom shrinks the
+ * viewport in CSS pixels, so zooming past roughly 125% hands the reader the
+ * disclosure instead of a rail crushed against the text.
+ *
+ * The two breakpoints are the same number on purpose. They were 76 and 82 for
+ * one revision, which left every viewport between them — 1280 among them —
+ * with no contents navigation of any kind.
  */
 export function Contents({ sections, containerId = 'article' }: { sections: Section[]; containerId?: string }) {
   const [active, setActive] = useState(sections[0]?.id)
@@ -111,7 +116,7 @@ export function Contents({ sections, containerId = 'article' }: { sections: Sect
     <>
       {/* Narrow and zoomed-in. Closed by default: it is a way back to a
           section, not an introduction to the article. */}
-      <details ref={detailsRef} className="contents-disclosure [@media(min-width:76rem)]:hidden">
+      <details ref={detailsRef} className="contents-disclosure [@media(min-width:82rem)]:hidden">
         <summary className="label flex min-h-11 cursor-pointer list-none items-center gap-2">
           <span className="contents-caret" aria-hidden>
             &rsaquo;

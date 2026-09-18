@@ -77,7 +77,7 @@ export const proseComponents: MDXComponents = {
        and not the page. Text stays at reading size: shrinking it to avoid the
        scroll would make the one part of the article built for comparison the
        hardest part to read. */
-    <div className="breakout overflow-x-auto">
+    <div className="breakout" tabIndex={0} role="region" aria-label="Table">
       <table
         {...props}
         className="w-full min-w-[36rem] border-collapse text-left text-[1rem]"
@@ -93,6 +93,11 @@ export const proseComponents: MDXComponents = {
       className="label border-b border-[color:var(--hairline-strong)] pb-2.5 pr-6 align-bottom"
     />
   ),
-  td: (props) => <td {...props} className="py-3.5 pr-6 align-top leading-[1.5] text-ink-11" />,
+  td: (props) => (
+    <td
+      {...props}
+      className="py-3.5 pr-6 align-top leading-[1.5] text-ink-11 [overflow-wrap:anywhere]"
+    />
+  ),
   caption: (props) => <caption {...props} className="label pb-3 text-left" />,
 }

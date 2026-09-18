@@ -136,9 +136,11 @@
   --measure-wide: 53rem;
   --read-size: 1.25rem;
   --read-leading: 1.65;
-  /* The gap between the reading column and the contents rail beside it. */
   --rail-w: 11.5rem;
-  --rail-gap: 3rem;
+  /* The clear space between the article column and the contents rail. It is
+     wide enough to be the gutter a breakout stops at: a wide table can use the
+     room between the column and the rail, but never the rail's own. */
+  --rail-gap: 7rem;
 }
 
 @media (max-width: 767px) {
@@ -589,6 +591,16 @@
   }
   .article-grid > .breakout {
     grid-column: wide;
+    /* Anything wide scrolls inside itself rather than pushing the page. A long
+       URL or an unbreakable technical term in a cell cannot make the grid
+       wider than its column, which is what `min-width: 0` above guarantees. */
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .article-grid > .breakout:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 4px;
   }
 
   /* The article is set in the reading serif; everything that is interface
@@ -758,13 +770,21 @@
     margin-top: 0;
   }
 
-  /* Contents, wide. It hangs beside the centred column: half the column, the
-     gap, then the rail, measured from the page's centre line rather than from
-     a container edge, so it stays put as the viewport changes. */
+  /* Contents, wide.
+
+     The rail hangs beside the centred column: half the column, then the
+     gutter, then the rail, measured from the page's centre line so it stays
+     put as the viewport changes.
+
+     It appears only where it fits without touching anything. Half a viewport
+     has to hold half the column (21rem), the gutter (7rem), the rail (11.5rem)
+     and a page margin (1.5rem) — 41rem, so 82rem of viewport. Below that the
+     reader gets the disclosure instead, which is what "collapse the rail
+     before it collides" means in numbers rather than in a guess. */
   .contents-rail {
     display: none;
   }
-  @media (min-width: 76rem) {
+  @media (min-width: 82rem) {
     .contents-rail {
       display: block;
       position: absolute;
@@ -778,6 +798,23 @@
       position: sticky;
       top: 2.5rem;
       pointer-events: auto;
+    }
+
+    /* And the breakout stops before it.
+
+       This is the table overlap. `--measure-wide` was a flat 53rem centred on
+       the column, worked out from the reading layout alone as though the whole
+       width were the article's to use. With the rail present it is not: at
+       1440 the table ran 296..1144 while the rail sat at 136..320, so eight
+       rows of a comparison were printed over the contents list.
+
+       The breakout may reach from the page centre to the rail's near edge,
+       less a gutter, and no further. Half of that is
+       (0.5 * column + rail gutter - table gutter), so the whole is twice it —
+       50rem here, which is the widest a table can be while a 3rem gutter of
+       clear paper still separates it from the rail. */
+    .article-grid {
+      --measure-wide: calc(var(--measure-article) + 2 * (var(--rail-gap) - 3rem));
     }
   }
 
