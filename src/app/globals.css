@@ -14,26 +14,26 @@
 
 :root {
   /* Ink ramp, cool graphite. Low numbers are light. */
-  --ink-1: #fafbfc;
-  --ink-2: #f3f5f7;
-  --ink-3: #eaedf0;
-  --ink-4: #dfe3e8;
-  --ink-6: #c3cad1;
-  --ink-8: #939ca6;
-  --ink-9: #626b75;
-  --ink-10: #4d5763;
-  --ink-11: #2b333c;
-  --ink-12: #12161b;
+  --ink-1: #fbfaf8;
+  --ink-2: #f2efea;
+  --ink-3: #ebe7e0;
+  --ink-4: #e3ded7;
+  --ink-6: #cac4ba;
+  --ink-8: #9d968d;
+  --ink-9: #6a655d;
+  --ink-10: #524e46;
+  --ink-11: #302d26;
+  --ink-12: #17150f;
 
-  --paper: #fbfbfc;
-  --surface: #ffffff;
-  --sunk: #f2f4f6;
+  --paper: #f6f4f1;
+  --surface: #fffefc;
+  --sunk: #eeebe6;
 
   /* One signal colour. Used for state, never for decoration. */
-  --signal: #0f6b52;
-  --signal-hover: #0c5943;
+  --signal: #7a3f22;
+  --signal-hover: #63311a;
   --signal-ink: #ffffff;
-  --signal-wash: #e7f0ed;
+  --signal-wash: #f0e4dc;
 
   --text: var(--ink-12);
   /* Step 9 is the quiet-text step, and it has to clear 4.5:1 at 11px. Each
@@ -41,8 +41,8 @@
   --text-muted: var(--ink-9);
   --text-soft: var(--ink-10);
 
-  --hairline: rgba(18, 22, 27, 0.08);
-  --hairline-strong: rgba(18, 22, 27, 0.16);
+  --hairline: rgba(23, 21, 15, 0.1);
+  --hairline-strong: rgba(23, 21, 15, 0.2);
 
   /* The stage gradient behind the opening. Cool at the top, settling to paper. */
   --stage-top: #e7eaee;
@@ -800,6 +800,10 @@
   --hairline-strong: rgba(26, 23, 20, 0.2);
 }
 
+/* The story palette is the site's palette: the front page is this composition,
+   so its values moved up to `:root` and every page reads as one site. The block
+   is kept so the exploration route stays self-describing and so a future
+   direction can retune it without touching the site. */
 [data-explore='story'] {
   /* 4.7:1 on this paper, the same step the page's own captions use. */
   --demo-caption: rgba(23, 21, 15, 0.608);

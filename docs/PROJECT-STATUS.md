@@ -3118,3 +3118,48 @@ the archive all still render, and the sitemap still lists the front page and
 both case studies.
 
 Build compiles with `/` as a static route, 24 tests, lint and types clean.
+
+## One palette for the whole site
+
+Promoting the story composition to `/` left the site wearing two colour worlds.
+The front page was warm paper with a brown accent; every other page, including
+the case study it links straight to and the 404, was still the cool grey-blue
+paper and green accent of the homepage that had been replaced. Same site, two
+looks, one click apart.
+
+The story palette's values moved up to `:root`, so the header, the footer, the
+404, About, both case studies, the writing archive and the article shell all
+read as one site:
+
+    --paper           #fbfbfc -> #f6f4f1
+    --surface         #ffffff -> #fffefc
+    --sunk            #f2f4f6 -> #eeebe6
+    --signal          #0f6b52 -> #7a3f22
+    --signal-hover    #0c5943 -> #63311a
+    --signal-wash     #e7f0ed -> #f0e4dc
+    --ink-1 .. --ink-12, and both hairlines, moved together
+
+Only tokens changed. No layout, no type, no component.
+
+The `[data-explore='story']` block stays, now restating the site's own values,
+so the exploration route remains self-describing and a future direction can
+retune it without touching the site.
+
+### Wording that stopped being true
+
+"Back to the work" named the list that used to be the homepage. It appeared on
+the 404, on About and at the foot of every case study, and all three now point
+at a page that is no longer a list of work. They say "Back to the front page".
+
+### Verified
+
+42 checks at 1440x900 and 390x844 across the front page, About, the archive,
+both case studies and a real 404: every page sharing one paper
+`rgb(246, 244, 241)` and one accent `#7a3f22`, all text meeting AA under the new
+palette, no horizontal overflow anywhere, no stale wording, and no console
+errors beyond the 404 a deliberate 404 visit logs for itself. Plus the
+front-page suite re-run at 39 checks, the build, 24 tests, lint and types.
+
+The contrast check is the one that mattered here: the ink ladder and the accent
+both moved, and pages whose contrast had been verified against the old paper
+were re-measured against the new one rather than assumed to be fine.

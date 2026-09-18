@@ -88,7 +88,7 @@ export default function AboutPage() {
             href="/"
             className="group inline-flex items-center gap-1.5 text-[0.9375rem] font-medium text-signal"
           >
-            <span className="trim-cap">Back to the work</span>
+            <span className="trim-cap">Back to the front page</span>
             <span className="icon-slot">
               <span>
                 <ArrowRight />

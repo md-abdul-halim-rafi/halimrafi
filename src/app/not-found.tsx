@@ -13,7 +13,7 @@ export default function NotFound() {
         </h1>
         <p className="mt-6 text-[0.9375rem]">
           <Link href="/" className="link-underline">
-            Back to the work
+            Back to the front page
           </Link>
         </p>
       </main>
