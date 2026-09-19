@@ -202,6 +202,10 @@
 
 @layer base {
   html {
+    /* The site has one palette and no dark mode. Saying so keeps a dark-mode
+       browser from painting its own scrollbars, form controls and spellcheck
+       underlines against this paper. */
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
     /* Deliberately not `smooth`. On the root it applied to every scroll the
        page performs, including the router's reset on navigation, so opening an
