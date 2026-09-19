@@ -5,6 +5,7 @@ import { HashScroll } from '@/components/story/HashScroll'
 import { BackLink } from '@/components/ui/BackLink'
 import { formatArticleDate, type ArticleKind } from '@/lib/articles'
 import { articleJsonLd, JsonLd } from '@/lib/jsonLd'
+import { site } from '@/lib/site'
 import { Contents, type Section } from './Contents'
 
 export type ArticleDetail = { term: string; value: string }
@@ -79,7 +80,7 @@ export function ArticleLayout({
           <p className="article-summary">{description}</p>
 
           <p className="article-meta">
-            <span>{byline ?? 'Halim Rafi'}</span>
+            <span>{byline ?? site.name}</span>
             <time dateTime={date}>{formatArticleDate(date)}</time>
             {updated ? (
               <time dateTime={updated}>Updated {formatArticleDate(updated)}</time>

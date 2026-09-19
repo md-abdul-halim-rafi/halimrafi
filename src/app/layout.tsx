@@ -47,7 +47,7 @@ const display = Instrument_Serif({
 })
 
 const description =
-  'Halim Rafi is co-founder and CTO of Octolane AI. A record of what he builds, the choices behind it, and what he learns when people use it.'
+  `${site.name} is co-founder and CTO of Octolane AI. A record of what he builds, the choices behind it, and what he learns when people use it.`
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),

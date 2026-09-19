@@ -5,4 +5,6 @@
  *
  * Shown once per gallery, never repeated under each image.
  */
-export const PHOTO_CREDIT = 'Photographs by Halim Rafi'
+import { site } from './site'
+
+export const PHOTO_CREDIT = `Photographs by ${site.name}`

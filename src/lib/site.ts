@@ -13,9 +13,18 @@ export type ContactLink = {
 }
 
 export const site = {
-  name: 'Halim Rafi',
+  name: 'Rafi',
   domain: 'halimrafi.com',
   url: 'https://halimrafi.com',
+
+  /**
+   * The share card. A page that declares its own `openGraph` replaces the
+   * root's rather than merging with it, so every such page has to name this
+   * explicitly or it ships a large-image card with no image in it.
+   */
+  ogImage: '/opengraph-image.png',
+  ogImageAlt:
+    'Rafi — co-founder and CTO, Octolane AI. A record of what I build, the choices behind it, and what I learn when people use it.',
 
   headline: 'I build products, from the hard decision to the last interaction.',
   role: 'Co-founder and CTO, Octolane AI',

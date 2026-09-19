@@ -7,8 +7,12 @@
  * outcomes, because none have been supplied.
  */
 
+import { site } from '@/lib/site'
+
 export const person = {
-  name: 'Halim Rafi',
+  /* The name is `site.name` and not a second copy of it. Two constants holding
+     one fact agree right up until one of them is edited. */
+  name: site.name,
   intro:
     'Co-founder and CTO of Octolane AI, YC W24. Previously co-founded Mainly Coding, acquired by Shikho.',
   place: 'San Francisco',
