@@ -1,25 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="R">
   <!--
-    The tab mark: the site's ink on the site's paper, and its initial set in
-    the same serif fallback the stylesheet declares for reading
-    (`Georgia, 'Times New Roman', serif`). An SVG favicon cannot carry a
-    webfont, so rather than approximate Source Serif with something unrelated
-    it uses the stack the site itself falls back to when that font has not
-    loaded — the mark is then the same letter a reader sees for the first
-    moment of every cold visit.
+    The tab mark: a cream capital R on the site's ink, in the site's own
+    reading serif.
 
-    No rounded corners and no gradient: at sixteen pixels both turn to mush,
-    and the site does not use either.
+    The letter is an outline, not a <text> element. A favicon cannot carry a
+    webfont, so text here would render in whatever serif the viewer's system
+    supplies and the mark would differ per platform. These are Source Serif 4
+    Semibold's own contours, so it is the same R the site sets its titles in
+    wherever it is drawn.
+
+    Semibold rather than Regular because the thin strokes of the bowl and leg
+    go grey at sixteen pixels at Regular, and rather than Bold because Bold
+    closes the counter at that size. Checked by rasterising at 16 and 32 and
+    looking at the pixels, not at an enlargement of the vector.
+
+    Cap height is 70% of the square: large enough that each stroke gets pixels
+    to land on, with 9.6px above and below and about 11.5px either side.
+
+    The R is centred on its ink rather than its advance width, then moved
+    0.70px right. Centring the outline alone leaves the letter looking left of
+    centre, because the stem and bowl carry the weight while the leg is thin;
+    its measured ink centroid sits 1.40px left of the middle. Half of that
+    correction balances it — the full amount pushes the leg into the right
+    edge.
+
+    No rounded corner, no gradient, no shadow: at sixteen pixels they turn to
+    mush, and the site uses none of them.
   -->
-  <rect width="64" height="64" fill="#17150f" />
-  <text
-    x="32"
-    y="33"
-    fill="#f6f4f1"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="40"
-    font-weight="500"
-    text-anchor="middle"
-    dominant-baseline="central"
-  >R</text>
+  <rect width="64" height="64" fill="#17150f"/>
+  <g transform="translate(9.670 53.605)">
+    <path fill="#f6f4f1" d="M21.141-40.625L16.833-40.625Q16.767-36.383 16.734-32.109Q16.701-27.834 16.701-23.593L20.611-23.593Q25.780-23.593 28-26.144Q30.220-28.696 30.220-32.341Q30.220-40.625 21.141-40.625M8.151-40.293L2.585-40.890L2.585-44.005L22.533-44.005Q30.220-44.005 34.462-40.989Q38.703-37.974 38.703-32.672Q38.703-29.027 35.986-25.912Q33.269-22.798 27.172-21.804Q31.413-21.141 33.401-18.888Q35.389-16.634 36.317-12.327L38.372-3.711L43.475-3.115L43.475 0Q41.884 0.398 40.625 0.596Q39.366 0.795 37.444 0.795Q33.799 0.795 31.844-0.398Q29.889-1.591 29.359-4.639L27.370-13.851Q26.641-17.562 24.885-18.921Q23.129-20.279 19.617-20.279L16.701-20.279Q16.701-15.839 16.734-11.763Q16.767-7.688 16.833-3.711L22.533-3.115L22.533 0L2.585 0L2.585-3.115L8.151-3.711Q8.284-7.820 8.284-12.062Q8.284-16.303 8.284-20.544L8.284-23.394Q8.284-27.569 8.284-31.811Q8.284-36.052 8.151-40.293"/>
+  </g>
 </svg>
