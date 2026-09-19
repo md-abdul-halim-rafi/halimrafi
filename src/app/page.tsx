@@ -10,8 +10,7 @@ import { site } from '@/lib/site'
  *
  * It renders the story composition: the introduction, the work at Octolane with
  * one real product screenshot, one case study, writing when there is any, and
- * the photography closing. The editorial homepage this replaces is still in the
- * tree as `HomeEditorial`, unused, so the change is one line to undo.
+ * the photography closing.
  *
  * No exploration switcher here: that control exists to hop between directions
  * in development and is not part of the site.
