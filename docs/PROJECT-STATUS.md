@@ -3213,3 +3213,18 @@ stale wording. 39 front-page checks, the build, 24 tests, lint and types.
 
 And this time I looked at the rendered page at four scroll depths before and
 after, which is what should have happened first.
+
+## Removed: the Octolane brand image
+
+`public/octolane/octolane-revenue-superintelligence.jpg` is gone, along with
+`src/components/site/artifact.ts`, which was the only thing that referenced it.
+
+The entries above describing it as "in" and "used on the page" were true when
+they were written. It stopped being rendered when the editorial homepage was
+replaced by the story composition — that page shows one real product screenshot
+instead, `public/octolane/octolane-app-home.webp`, which stays — and it sat
+unreferenced from then until it was deleted.
+
+It is brand artwork rather than product evidence, which is why nothing put it
+back: the front page shows the product. If it is ever wanted again it is in the
+history, and in the company repo as `og-image-v3.jpg`.
