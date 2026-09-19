@@ -45,7 +45,18 @@ export function PhotographGallery({ photographs }: { photographs: StudioAsset[] 
                   alt={photo.alt}
                   width={photo.width}
                   height={photo.height}
-                  sizes="(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 92vw"
+                  /*
+                    A landscape frame spans two of the three columns, so it is
+                    laid out at roughly twice a portrait one and needs its own
+                    description. One `sizes` for both had the widest photograph
+                    on the page served the narrowest file — 288px into a 559px
+                    box — which is the one place softness is most visible.
+                  */
+                  sizes={
+                    photo.width > photo.height
+                      ? '(min-width: 1024px) 37rem, 92vw'
+                      : '(min-width: 1024px) 18rem, (min-width: 640px) 45vw, 92vw'
+                  }
                   className="h-auto w-full"
                 />
               </button>
