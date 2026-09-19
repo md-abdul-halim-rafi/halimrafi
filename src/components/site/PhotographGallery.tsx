@@ -62,6 +62,7 @@ export function PhotographGallery({ photographs }: { photographs: StudioAsset[] 
           assets={lightbox.open.assets}
           index={lightbox.open.index}
           origin={lightbox.open.origin}
+          thumb={lightbox.open.thumb}
           onStep={lightbox.step}
           onClose={lightbox.hide}
         />
