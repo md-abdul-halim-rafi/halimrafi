@@ -33,6 +33,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       publishedTime: meta.date,
       ...(meta.updated ? { modifiedTime: meta.updated } : {}),
       authors: [meta.byline ?? site.name],
+      images: [{ url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }],
     },
     twitter: { card: 'summary_large_image', title: meta.title, description: meta.description },
   }

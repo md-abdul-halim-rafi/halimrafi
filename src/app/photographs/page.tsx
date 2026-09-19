@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     description,
     type: 'website',
     url: `${site.url}/photographs`,
+    images: [{ url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }],
   },
 }
 

@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       url,
       publishedTime: meta.date,
       authors: [site.name],
+      images: [{ url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }],
     },
     twitter: { card: 'summary_large_image', title: meta.title, description: meta.summary },
   }
