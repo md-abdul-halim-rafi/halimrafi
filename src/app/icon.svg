@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!--
+    The tab mark: the site's ink on the site's paper, and its initial set in
+    the same serif fallback the stylesheet declares for reading
+    (`Georgia, 'Times New Roman', serif`). An SVG favicon cannot carry a
+    webfont, so rather than approximate Source Serif with something unrelated
+    it uses the stack the site itself falls back to when that font has not
+    loaded — the mark is then the same letter a reader sees for the first
+    moment of every cold visit.
+
+    No rounded corners and no gradient: at sixteen pixels both turn to mush,
+    and the site does not use either.
+  -->
+  <rect width="64" height="64" fill="#17150f" />
+  <text
+    x="32"
+    y="33"
+    fill="#f6f4f1"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="40"
+    font-weight="500"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >R</text>
+</svg>
