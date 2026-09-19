@@ -898,6 +898,29 @@
     transform: rotate(90deg);
   }
 
+  /* The header's mark. Sized in rem so it follows a reader's text size the way
+     the name it replaced did, rather than pinning itself to device pixels. */
+  .site-mark {
+    display: block;
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  /* A link around an image cannot carry the dotted underline the text links
+     use, so it answers with tone instead. Opacity only: nothing moves, and the
+     mark stays the same size under the pointer as beside it. */
+  .site-mark-link {
+    display: inline-flex;
+    border-radius: var(--r-xs);
+    transition: opacity 150ms var(--ease-out-quint);
+  }
+  .site-mark-link:hover {
+    opacity: 0.78;
+  }
+  .site-mark-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
   /* The way back. Nothing here moves on hover: the arrow is permanent and the
      label does not slide over to make room for it. */
   .back-link {

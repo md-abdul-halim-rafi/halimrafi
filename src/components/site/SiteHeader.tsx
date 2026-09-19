@@ -33,13 +33,22 @@ export async function SiteHeader({ current }: { current?: 'home' | 'writing' }) 
 
   return (
     <div className="mx-auto w-full max-w-[58rem] px-6 sm:px-10">
-      <header className="flex items-baseline justify-between gap-6 pt-6">
-        <p className="story-ink text-[0.8125rem] font-medium">
+      <header className="flex items-center justify-between gap-6 pt-6">
+        {/*
+          The mark, in place of the name set in type.
+
+          It is the favicon's own file rather than a copy of its path, so the
+          tab and the page cannot end up showing two different R's.
+
+          `alt` carries the name: on every page but the front one this is the
+          link home, and its accessible name is the only one it has.
+        */}
+        <p className="story-control">
           {current === 'home' ? (
-            person.name
+            <SiteMark />
           ) : (
-            <Link href="/" className="story-link story-link-in">
-              {person.name}
+            <Link href="/" className="site-mark-link" aria-label={`${person.name}, home`}>
+              <SiteMark decorative />
             </Link>
           )}
         </p>
@@ -58,6 +67,27 @@ export async function SiteHeader({ current }: { current?: 'home' | 'writing' }) 
       </header>
       <hr className="story-rule mt-5" />
     </div>
+  )
+}
+
+/**
+ * The R, at the size the header wears it.
+ *
+ * A plain `<img>`, not `next/image`: the file is 2.5KB of vector that must
+ * paint with the first frame of the header, and an optimiser has nothing to
+ * take off it. Width and height are set so the row reserves its box before the
+ * file arrives and the nav beside it never moves.
+ */
+function SiteMark({ decorative = false }: { decorative?: boolean }) {
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src="/icon.svg"
+      alt={decorative ? '' : person.name}
+      width={22}
+      height={22}
+      className="site-mark"
+    />
   )
 }
 
