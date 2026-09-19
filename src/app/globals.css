@@ -114,6 +114,10 @@
   /* The article column: what the title and the headings may use. Wider than
      the prose, so a title wraps to fewer lines without the body running past a
      comfortable line length. */
+  /* The sticky header's height, including its hairline. Anything that has to
+     clear it — anchor landings, the contents rail, focus scrolling — derives
+     its offset from this rather than repeating the number. */
+  --header-h: 3.8125rem;
   --measure-article: 42rem;
   /* The live site's own value; each exploration palette overrides it. */
   --demo-caption: var(--text-muted);
@@ -246,15 +250,14 @@
   /* Anchors and keyboard focus clear the sticky header instead of landing
      underneath it. scroll-padding on the scrolling element covers focus moves
      the browser performs itself, which scroll-margin alone does not. */
-  /* The site header scrolls away with the page rather than sitting over it,
-     so an anchor needs breathing room above it, not clearance under a bar.
-     scroll-padding on the scrolling element also covers focus moves the
-     browser performs itself, which scroll-margin alone does not. */
+  /* The header sits over the page now, so anchors, fragment loads and focus
+     moves the browser performs itself all have to clear it. scroll-padding on
+     the scrolling element covers all three; scroll-margin alone does not. */
   html {
-    scroll-padding-top: 2rem;
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
   }
   :target {
-    scroll-margin-top: 2rem;
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
   }
 
   .on-signal:focus-visible {
@@ -856,7 +859,7 @@
     }
     .contents-rail-inner {
       position: sticky;
-      top: 2.5rem;
+      top: calc(var(--header-h) + 1.5rem);
       pointer-events: auto;
     }
 
@@ -898,28 +901,166 @@
     transform: rotate(90deg);
   }
 
-  /* The header's mark. Sized in rem so it follows a reader's text size the way
-     the name it replaced did, rather than pinning itself to device pixels. */
-  .site-mark {
-    display: block;
-    width: 1.375rem;
-    height: 1.375rem;
+  /* The site header.
+
+     Sticky from the top, on opaque paper — not a translucent pane, because the
+     prose that scrolls under it is the thing it must not interfere with, and a
+     blur is a expensive way to half-solve that. One hairline under it and
+     nothing else: no shadow, no shrinking, no hiding on scroll.
+
+     Its height is fixed by the 40px control row inside it, so it is the same
+     on every page and while scrolling. `--header-h` carries that number to
+     everything that has to clear it. */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--paper);
+    border-bottom: 1px solid var(--hairline);
   }
-  /* A link around an image cannot carry the dotted underline the text links
-     use, so it answers with tone instead. Opacity only: nothing moves, and the
-     mark stays the same size under the pointer as beside it. */
-  .site-mark-link {
+  .site-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 58rem;
+    padding-inline: 1.5rem;
+    padding-block: 0.3125rem;
+    min-height: 3.75rem;
+  }
+  .site-header-inner--center {
+    justify-content: center;
+  }
+  @media (min-width: 640px) {
+    .site-header-inner {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+  }
+  @media (min-width: 30rem) {
+    .site-nav {
+      gap: 1.75rem;
+    }
+  }
+  @media (min-width: 640px) {
+    .site-nav {
+      gap: 2rem;
+    }
+  }
+  /* The narrowest screens keep two onward destinations, not three. A page with
+     a trail and three links needs 325px of a 272px row at 320px wide; every
+     other page in the site already offers two, so this is the rule the rest
+     follows rather than an exception for one page. */
+  @media (max-width: 29.9375rem) {
+    /* Scoped through the nav so it outranks `.site-nav-link`'s own display,
+       which is declared later in this file at the same specificity. */
+    .site-nav .site-nav-link--optional {
+      display: none;
+    }
+  }
+
+  /* One link voice for the whole header: the site's mono control type, with
+     the dotted underline the rest of the site uses for a link at rest. */
+  .site-nav-link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
     display: inline-flex;
-    border-radius: var(--r-xs);
-    transition: opacity 150ms var(--ease-out-quint);
+    align-items: center;
+    min-height: 2.5rem;
+    color: rgba(23, 21, 15, 0.7);
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+    text-decoration-color: rgba(23, 21, 15, 0.26);
+    transition:
+      color 150ms ease-in-out,
+      text-decoration-color 150ms ease-in-out;
   }
-  .site-mark-link:hover {
-    opacity: 0.78;
+  .site-nav-link:hover {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-color: rgba(23, 21, 15, 0.6);
   }
-  .site-mark-link:focus-visible {
+  /* Email leaves the site, and says so in the accent the rest of the site
+     reserves for that. */
+  .site-nav-link--out {
+    color: var(--signal);
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+  .site-nav-link--out:hover {
+    color: var(--signal-hover);
+    text-decoration-color: var(--signal-hover);
+  }
+  .site-nav-link:focus-visible {
     outline: 2px solid var(--signal);
     outline-offset: 3px;
+    border-radius: var(--r-xs);
   }
+
+  /* The page you are on is named, not linked, and carries no underline to
+     offer. */
+  .site-nav-here {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    color: rgba(23, 21, 15, 0.875);
+  }
+
+  .site-trail ol {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-trail li {
+    display: flex;
+    align-items: center;
+  }
+  /* A separator, not a control: quiet, and never announced. */
+  .site-trail-mark {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgba(23, 21, 15, 0.32);
+    padding-inline: 0.625rem;
+  }
+
+  /* Narrow and wide swap which of the two left-hand navs is rendered, so only
+     one is ever in the page or in the accessibility tree. */
+  .site-trail {
+    display: none;
+  }
+  .site-back {
+    display: block;
+  }
+  @media (min-width: 40rem) {
+    .site-trail {
+      display: block;
+    }
+    .site-back {
+      display: none;
+    }
+  }
+  .site-back-link {
+    gap: 0.5rem;
+  }
+
 
   /* The way back. Nothing here moves on hover: the arrow is permanent and the
      label does not slide over to make room for it. */

@@ -30,7 +30,7 @@ export default async function Page() {
       <JsonLd data={personJsonLd()} />
       <StoryExploration
         {...(await storyProps())}
-        header={<SiteHeader current="home" />}
+        header={<SiteHeader page="home" />}
         switcher={false}
       />
     </>

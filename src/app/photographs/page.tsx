@@ -42,7 +42,7 @@ export default function PhotographsPage() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader page="photographs" />
 
       <main className="mx-auto w-full max-w-[58rem] px-6 pb-24 sm:px-10">
         <header className="pb-10 pt-16 sm:pb-12 sm:pt-20">

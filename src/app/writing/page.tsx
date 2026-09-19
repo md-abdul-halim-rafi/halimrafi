@@ -35,7 +35,7 @@ export default async function WritingArchive() {
 
   return (
     <>
-      <SiteHeader current="writing" />
+      <SiteHeader page="writing" />
       <JsonLd data={collectionJsonLd(articles)} />
 
       <main className="mx-auto w-full max-w-[58rem] px-6 pb-24 sm:px-10">

@@ -17,5 +17,5 @@ export const metadata: Metadata = {
  * keeps the exploration switcher.
  */
 export default async function StoryPage() {
-  return <StoryExploration {...(await storyProps())} header={<SiteHeader current="home" />} />
+  return <StoryExploration {...(await storyProps())} header={<SiteHeader page="home" />} />
 }

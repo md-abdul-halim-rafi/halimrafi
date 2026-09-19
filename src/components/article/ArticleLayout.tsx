@@ -57,7 +57,7 @@ export function ArticleLayout({
 }) {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader page="article" />
       <HashScroll />
 
       <JsonLd
