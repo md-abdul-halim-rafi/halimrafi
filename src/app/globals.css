@@ -903,6 +903,49 @@
 
   /* --- The header-motion bench. Explorations only; nothing live uses these. */
 
+  /* The stable arrangement under test: three tracks, the outer two equal, so
+     the middle one is centred on the page whether or not anything sits beside
+     it. Home appearing in the left track therefore moves nothing — which is
+     the whole point of the arrangement, and the reason this is a grid rather
+     than a flex row with a spacer. */
+  /* Scoped through the base class on purpose. `.site-header-inner` is declared
+     later in this file, so at equal specificity its `display: flex` and its
+     dotted underline win over a modifier written above them — which is exactly
+     how the centred group came to shift by sixteen pixels and the active label
+     stayed dotted. */
+  .site-header-inner.lab-bar-stable {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+  .site-header-inner.lab-bar-stable > :first-child {
+    justify-self: start;
+  }
+  .site-header-inner.lab-bar-stable > :last-child {
+    justify-self: end;
+  }
+
+  /* The section you are in: the same label, a step darker, with the dotted
+     underline made solid. No weight change and no size change, so the row does
+     not reflow when the active one moves. */
+  .site-nav-link.site-nav-link--here {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-style: solid;
+    text-decoration-color: rgba(23, 21, 15, 0.45);
+  }
+
+  /* The way back out of an article, above its title rather than in the bar. */
+  .lab-backline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--signal);
+    text-decoration: underline dotted 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+
   .lab-chip {
     font-family: var(--font-mono);
     font-size: 0.75rem;
@@ -1779,6 +1822,16 @@ html[data-motion='recommended'][data-scheme='slot']::view-transition-new(*) {
    place and no label travels. Its box is identical on both sides, so nothing
    moves or resizes. */
 html[data-motion='fade']::view-transition-group(lab-bar) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Stable arrangement: no label changes position, so every group animation is
+   a translation of zero. What is left is Home fading in and the active label
+   changing colour, which is the entire gesture. */
+html[data-motion][data-arrangement='stable']::view-transition-group(*),
+html[data-motion][data-arrangement='stable']::view-transition-old(*),
+html[data-motion][data-arrangement='stable']::view-transition-new(*) {
   animation-duration: var(--lab-ms, 220ms);
   animation-timing-function: var(--lab-ease);
 }
