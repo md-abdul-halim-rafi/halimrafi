@@ -901,6 +901,35 @@
     transform: rotate(90deg);
   }
 
+  /* --- The header-motion bench. Explorations only; nothing live uses these. */
+
+  .lab-chip {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 2.5rem;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    color: var(--ink-10);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out-quint), color 150ms var(--ease-out-quint);
+  }
+  .lab-chip:hover {
+    border-color: var(--hairline-strong);
+    color: var(--ink-12);
+  }
+  .lab-chip[aria-pressed='true'] {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+  .lab-chip:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
   /* The site header.
 
      Sticky from the top, on opaque paper — not a translucent pane, because the
@@ -1681,4 +1710,41 @@
      percentage here would resolve against the container's width instead and
      hand back a box wider than the screen with no way to reach the rest. */
   width: max(900px, min(100%, calc((100dvh - 8rem - 2px) * var(--zoom-ratio, 1.5))));
+}
+
+
+/* ---------------------------------------------------------------------------
+   View transitions — the header-motion bench only, until a mode is chosen
+   ------------------------------------------------------------------------ */
+
+/* The page itself must never sweep. By default the API crossfades the whole
+   document, which is the "animated sweep through the content" the site has
+   been careful to avoid; only the header is allowed to move. */
+html[data-motion]::view-transition-old(root),
+html[data-motion]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Morph: every named label animates from where it was to where it is. The
+   browser pairs them by name and does the arithmetic. */
+html[data-motion='morph-vt']::view-transition-group(*) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--ease-out-quint);
+}
+
+/* Crossfade: the whole bar dissolves instead, so nothing travels. */
+html[data-motion='crossfade']::view-transition-old(root),
+html[data-motion='crossfade']::view-transition-new(root) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--ease-out-quint);
+  animation-name: explore-fade;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion]::view-transition-group(*),
+  html[data-motion]::view-transition-old(*),
+  html[data-motion]::view-transition-new(*) {
+    animation: none !important;
+  }
 }
