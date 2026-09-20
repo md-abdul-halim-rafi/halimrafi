@@ -1714,31 +1714,73 @@
 
 
 /* ---------------------------------------------------------------------------
-   View transitions — the header-motion bench only, until a mode is chosen
+   View transitions — the header-motion exploration only
+
+   Every rule is behind `html[data-motion]`, which only /explorations/
+   header-motion sets, and which it clears the moment the transition finishes.
+   The production header is untouched.
    ------------------------------------------------------------------------ */
 
-/* The page itself must never sweep. By default the API crossfades the whole
-   document, which is the "animated sweep through the content" the site has
-   been careful to avoid; only the header is allowed to move. */
-html[data-motion]::view-transition-old(root),
+/* The page is not part of this.
+
+   Left alone the API crossfades the whole document, which is what made the old
+   heading appear through the new one. The root snapshot is swapped outright
+   instead: the destination's content is simply there, at full opacity, from
+   the first frame, and it does not wait for the bar. */
+html[data-motion]::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  opacity: 0;
+}
 html[data-motion]::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+  opacity: 1;
 }
 
-/* Morph: every named label animates from where it was to where it is. The
-   browser pairs them by name and does the arithmetic. */
-html[data-motion='morph-vt']::view-transition-group(*) {
-  animation-duration: var(--lab-ms, 220ms);
-  animation-timing-function: var(--ease-out-quint);
+/* A gentle deceleration, not the quint the site uses for controls: this is a
+   label finding its place, not something springing open. No overshoot. */
+html[data-motion] {
+  --lab-ease: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-/* Crossfade: the whole bar dissolves instead, so nothing travels. */
-html[data-motion='crossfade']::view-transition-old(root),
-html[data-motion='crossfade']::view-transition-new(root) {
+/* Recommended, between the front page and an inner page: each named label
+   travels from where it was to where it now is. Size and weight are identical
+   on both sides, so the pair is a translation and nothing scales. */
+html[data-motion='recommended']::view-transition-group(*) {
   animation-duration: var(--lab-ms, 220ms);
-  animation-timing-function: var(--ease-out-quint);
+  animation-timing-function: var(--lab-ease);
+}
+html[data-motion='recommended']::view-transition-old(*),
+html[data-motion='recommended']::view-transition-new(*) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Home and the separator have no counterpart to travel from, so they arrive by
+   fading — quietly, and over the same span as the movement behind them rather
+   than on a stagger of their own. */
+html[data-motion='recommended']::view-transition-new(lab-home),
+html[data-motion='recommended']::view-transition-new(lab-slash) {
   animation-name: explore-fade;
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Recommended, between two inner pages: the slots hold still and exchange what
+   they say. Short, because nothing has to cross the bar to get there. */
+html[data-motion='recommended'][data-scheme='slot']::view-transition-group(*),
+html[data-motion='recommended'][data-scheme='slot']::view-transition-old(*),
+html[data-motion='recommended'][data-scheme='slot']::view-transition-new(*) {
+  animation-duration: 120ms;
+}
+
+/* Subtle fade: the bar is captured whole, so its two states cross-dissolve in
+   place and no label travels. Its box is identical on both sides, so nothing
+   moves or resizes. */
+html[data-motion='fade']::view-transition-group(lab-bar) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
 }
 
 @media (prefers-reduced-motion: reduce) {

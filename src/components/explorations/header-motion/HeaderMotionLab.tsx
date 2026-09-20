@@ -1,221 +1,258 @@
 'use client'
 
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { flushSync } from 'react-dom'
 
 /**
- * Four ways the header could answer a navigation, driven by the real markup.
+ * Choosing how the bar answers a navigation.
  *
- * `none` is what the site does today. `crossfade` dissolves the whole bar.
- * `morph-vt` hands the browser the View Transitions API and lets it work out
- * the movement. `morph-flip` measures the labels before and after and animates
- * the difference by hand, which is the same picture without the API.
+ * Three behaviours, driven by the real header markup and the real stylesheet.
+ * Nothing here is imported by the site, and every rule it relies on is scoped
+ * to `html[data-motion]`, which only this page sets.
  *
- * The two morphs are deliberately the same visual. They differ in who computes
- * it and therefore in which browsers show it, which is the decision this bench
- * exists to make — so it also reports whether the browser reading it supports
- * the native one.
+ * The interesting part is that one naming scheme will not do.
+ *
+ * Between the front page and an inner page the labels are the same labels in
+ * different places, so they are named by identity and travel: Writing leaves
+ * the centre for the trail, Photography and Email go to the right edge, Home
+ * and the separator fade in behind them.
+ *
+ * Between two inner pages they would swap sides — Writing from the trail to
+ * the right, Photography from the right to the trail — and named by identity
+ * they would cross each other in the middle, which reads as two labels
+ * fighting rather than one page becoming another. So that navigation names the
+ * *slots* instead: the trail's section and the nav's first item each stay put
+ * and change what they say. Email is named the same on both sides and does not
+ * move at all.
+ *
+ * Between an archive and an article the bar is already correct, so nothing
+ * runs. The cheapest animation is the one that is not played.
  */
 
-type Page = 'home' | 'writing' | 'photographs'
-type Motion = 'none' | 'crossfade' | 'morph-vt' | 'morph-flip'
+type Page = 'home' | 'writing' | 'article' | 'photographs'
+type Mode = 'off' | 'fade' | 'recommended'
+type Scheme = 'identity' | 'slot' | 'bar'
 
-const LABEL: Record<Page, string> = { home: 'Home', writing: 'Writing', photographs: 'Photography' }
-
-const MOTIONS: { id: Motion; name: string; note: string }[] = [
-  { id: 'none', name: 'Off', note: 'what the site does now' },
-  { id: 'crossfade', name: 'Crossfade', note: 'the bar dissolves, nothing travels' },
-  { id: 'morph-vt', name: 'Morph · View Transitions', note: 'the browser moves the shared labels' },
-  { id: 'morph-flip', name: 'Morph · FLIP', note: 'the same movement, measured by hand' },
+const MODES: { id: Mode; name: string; note: string }[] = [
+  { id: 'off', name: 'Off', note: 'the layout changes immediately — what the site does today' },
+  {
+    id: 'fade',
+    name: 'Subtle fade',
+    note: 'the bar alone fades between its two states; no label travels, and the page underneath still changes instantly',
+  },
+  {
+    id: 'recommended',
+    name: 'Recommended',
+    note: 'shared labels travel between the centred and inner arrangements at 220ms; two inner pages exchange their labels in place at 120ms; an article does not replay it',
+  },
 ]
+
+/* Two pages share an arrangement when the bar would render identically. */
+const arrangementOf = (p: Page) =>
+  p === 'home' ? 'centred' : p === 'photographs' ? 'trail-photographs' : 'trail-writing'
+
+function schemeFor(from: Page, to: Page, mode: Mode): Scheme | null {
+  if (arrangementOf(from) === arrangementOf(to)) return null // nothing to show
+  if (mode === 'fade') return 'bar'
+  return from === 'home' || to === 'home' ? 'identity' : 'slot'
+}
 
 const supportsVT = () =>
   typeof document !== 'undefined' && typeof document.startViewTransition === 'function'
 
 export function HeaderMotionLab() {
   const [page, setPage] = useState<Page>('home')
-  const [motion, setMotion] = useState<Motion>('morph-vt')
+  const [mode, setMode] = useState<Mode>('recommended')
   const [ms, setMs] = useState(220)
-
-  const barRef = useRef<HTMLDivElement>(null)
-  // Where each named label sat before the change, for FLIP to animate from.
-  const before = useRef<Map<string, DOMRect>>(new Map())
-  const flipping = useRef(false)
-
-  const measure = useCallback(() => {
-    const map = new Map<string, DOMRect>()
-    barRef.current?.querySelectorAll<HTMLElement>('[data-vt]').forEach((el) => {
-      map.set(el.dataset.vt!, el.getBoundingClientRect())
-    })
-    return map
-  }, [])
+  // The scheme in force for the transition being captured right now. It has to
+  // be painted onto the old DOM before the snapshot is taken, which is why it
+  // is state rather than something computed inside the callback.
+  const [scheme, setScheme] = useState<Scheme | null>(null)
 
   const go = useCallback(
     (next: Page) => {
       if (next === page) return
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const s = schemeFor(page, next, mode)
 
-      if (motion === 'none' || reduced) {
+      if (mode === 'off' || reduced || s === null || !supportsVT()) {
         setPage(next)
         return
       }
 
-      if (motion === 'morph-flip') {
-        before.current = measure()
-        flipping.current = true
-        flushSync(() => setPage(next))
-        return
-      }
+      const root = document.documentElement
+      flushSync(() => setScheme(s)) // name the old DOM, then capture it
+      root.dataset.motion = mode
+      root.dataset.scheme = s
+      root.style.setProperty('--lab-ms', `${ms}ms`)
 
-      // Both View Transition modes go through the browser; the difference is
-      // only which CSS the stylesheet applies to the captured groups.
-      if (supportsVT()) {
-        document.documentElement.dataset.motion = motion
-        document.documentElement.style.setProperty('--lab-ms', `${ms}ms`)
-        const t = document.startViewTransition(() => {
-          flushSync(() => setPage(next))
-        })
-        void t.finished.finally(() => {
-          delete document.documentElement.dataset.motion
-        })
-        return
-      }
-      setPage(next)
+      const t = document.startViewTransition(() => {
+        flushSync(() => setPage(next))
+      })
+      void t.finished.finally(() => {
+        setScheme(null)
+        delete root.dataset.motion
+        delete root.dataset.scheme
+      })
     },
-    [measure, motion, ms, page],
+    [mode, ms, page],
   )
 
-  // FLIP: the labels are already in their new places, so put them back where
-  // they were and let them travel forward.
-  useLayoutEffect(() => {
-    if (!flipping.current) return
-    flipping.current = false
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced) return
-    barRef.current?.querySelectorAll<HTMLElement>('[data-vt]').forEach((el) => {
-      const was = before.current.get(el.dataset.vt!)
-      const now = el.getBoundingClientRect()
-      if (!was) {
-        el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms, easing: 'cubic-bezier(.22,1,.36,1)' })
-        return
-      }
-      const dx = was.left - now.left
-      const dy = was.top - now.top
-      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return
-      el.animate(
-        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
-        { duration: ms, easing: 'cubic-bezier(.22,1,.36,1)' },
-      )
-    })
-  }, [page, ms])
+  /* A name is only attached while a transition is being captured, so the bar
+     carries no transition state at rest. */
+  const vt = (identity: string, slot: string) => {
+    if (!scheme) return undefined
+    if (scheme === 'bar') return undefined
+    return { viewTransitionName: scheme === 'identity' ? identity : slot } as const
+  }
+  const barVt = scheme === 'bar' ? ({ viewTransitionName: 'lab-bar' } as const) : undefined
 
-  const vt = (name: string) =>
-    motion === 'morph-vt' && supportsVT() ? ({ viewTransitionName: name } as const) : undefined
-
-  const link = (target: Page, label: string, name: string, out = false) => (
+  const nav = (target: Page, label: string, style?: React.CSSProperties, out = false) => (
     <button
-      key={name}
       type="button"
-      data-vt={name}
-      style={vt(name)}
       onClick={() => go(target)}
+      style={style}
       className={`site-nav-link${out ? ' site-nav-link--out' : ''}`}
     >
       {label}
     </button>
   )
 
-  const section = page === 'writing' ? 'writing' : page === 'photographs' ? 'photographs' : null
-  const elsewhere: Page[] = (['writing', 'photographs'] as Page[]).filter((p) => p !== page)
+  const onPhotographs = page === 'photographs'
+  const sectionLabel = onPhotographs ? 'Photography' : 'Writing'
+  const otherLabel = onPhotographs ? 'Writing' : 'Photography'
+  const otherTarget: Page = onPhotographs ? 'writing' : 'photographs'
 
   return (
     <div className="min-h-dvh bg-paper">
-      {/* The bar under test, in the site's own markup and styles. */}
-      <div ref={barRef} className="site-header" style={{ position: 'static' }}>
-        <div className={`site-header-inner${page === 'home' ? ' site-header-inner--center' : ''}`}>
+      <div className="site-header" style={{ position: 'static' }}>
+        <div
+          style={barVt}
+          className={`site-header-inner${page === 'home' ? ' site-header-inner--center' : ''}`}
+        >
           {page === 'home' ? (
             <nav aria-label="Site" className="site-nav">
-              {link('writing', 'Writing', 'writing')}
-              {link('photographs', 'Photography', 'photographs')}
-              {link('home', 'Email', 'email', true)}
+              {nav('writing', 'Writing', vt('lab-writing', 'lab-writing'))}
+              {nav('photographs', 'Photography', vt('lab-photographs', 'lab-photographs'))}
+              {nav('home', 'Email', vt('lab-email', 'lab-email'), true)}
             </nav>
           ) : (
             <>
               <nav aria-label="Breadcrumb" className="site-trail">
                 <ol>
-                  <li>{link('home', 'Home', 'home')}</li>
+                  <li>{nav('home', 'Home', vt('lab-home', 'lab-home'))}</li>
                   <li>
-                    <span aria-hidden className="site-trail-mark" data-vt="slash" style={vt('slash')}>
+                    <span
+                      aria-hidden
+                      className="site-trail-mark"
+                      style={vt('lab-slash', 'lab-slash')}
+                    >
                       /
                     </span>
-                    <span className="site-nav-here" data-vt={section!} style={vt(section!)}>
-                      {LABEL[section!]}
+                    <span
+                      className="site-nav-here"
+                      style={vt(
+                        onPhotographs ? 'lab-photographs' : 'lab-writing',
+                        'lab-trail-section',
+                      )}
+                    >
+                      {sectionLabel}
                     </span>
                   </li>
                 </ol>
               </nav>
               <nav aria-label="Site" className="site-nav">
-                {elsewhere.map((p) => link(p, LABEL[p], p))}
-                {link(page, 'Email', 'email', true)}
+                {nav(
+                  otherTarget,
+                  otherLabel,
+                  vt(onPhotographs ? 'lab-writing' : 'lab-photographs', 'lab-nav-slot'),
+                )}
+                {nav(page, 'Email', vt('lab-email', 'lab-email'), true)}
               </nav>
             </>
           )}
         </div>
       </div>
 
-      {/* The page under it, so the bar is judged in context and not alone. */}
       <main className="mx-auto w-full max-w-[58rem] px-6 pb-24 pt-14 sm:px-10">
-        <p className="label">{page === 'home' ? 'Front page' : LABEL[section!]}</p>
+        <p className="label">
+          {page === 'home' ? 'Front page' : page === 'article' ? 'Article' : sectionLabel}
+        </p>
         <h1 className="article-title mt-4">
-          {page === 'home' ? 'I’m Rafi.' : page === 'writing' ? 'Writing' : 'Photographs'}
+          {page === 'home'
+            ? 'I’m Rafi.'
+            : page === 'writing'
+              ? 'Writing'
+              : page === 'article'
+                ? 'Your agent’s knowledge base is not a retrieval problem'
+                : 'Photographs'}
         </h1>
         <p className="article-summary">
-          Press a label in the bar above to navigate. The bar is the real one — same markup, same
-          stylesheet — so what moves here is what would move on the site.
+          The bar above is the real one. Press its labels to navigate, and use Open an article to
+          reach the case the bar should ignore.
+        </p>
+
+        <p className="mt-6 flex flex-wrap gap-2.5">
+          <button type="button" onClick={() => go('writing')} className="lab-chip">
+            Writing
+          </button>
+          <button type="button" onClick={() => go('article')} className="lab-chip">
+            Open an article
+          </button>
+          <button type="button" onClick={() => go('photographs')} className="lab-chip">
+            Photography
+          </button>
+          <button type="button" onClick={() => go('home')} className="lab-chip">
+            Home
+          </button>
         </p>
 
         <div className="mt-12 border-t border-[color:var(--hairline)] pt-7">
-          <p className="label">Motion</p>
+          <p className="label">Behaviour</p>
           <div className="mt-3 flex flex-wrap gap-2.5">
-            {MOTIONS.map((m) => (
+            {MODES.map((m) => (
               <button
                 key={m.id}
                 type="button"
-                onClick={() => setMotion(m.id)}
-                aria-pressed={motion === m.id}
+                onClick={() => setMode(m.id)}
+                aria-pressed={mode === m.id}
                 className="lab-chip"
               >
                 {m.name}
               </button>
             ))}
           </div>
-          <p className="mt-3 text-[0.9375rem] text-muted">
-            {MOTIONS.find((m) => m.id === motion)?.note}
-            {motion === 'morph-vt' && !supportsVT()
-              ? ' — your browser has no View Transitions API, so this falls back to an instant swap. That is the fallback the site would ship.'
-              : ''}
+          <p className="mt-3 max-w-[60ch] text-[0.9375rem] leading-[1.6] text-muted">
+            {MODES.find((m) => m.id === mode)?.note}
           </p>
 
-          <p className="label mt-8">Duration</p>
-          <div className="mt-3 flex flex-wrap gap-2.5">
-            {[160, 220, 300, 420].map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setMs(d)}
-                aria-pressed={ms === d}
-                className="lab-chip"
-              >
-                {d}ms
-              </button>
-            ))}
-          </div>
+          {mode === 'recommended' ? (
+            <>
+              <p className="label mt-8">Duration of the travelling step</p>
+              <div className="mt-3 flex flex-wrap gap-2.5">
+                {[160, 220, 300].map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setMs(d)}
+                    aria-pressed={ms === d}
+                    className="lab-chip"
+                  >
+                    {d}ms
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
 
-          <p className="mt-8 text-[0.9375rem] text-muted">
-            This browser{' '}
+          <p className="mt-8 max-w-[60ch] text-[0.9375rem] leading-[1.6] text-muted">
+            Writing to Photography exchanges the two labels where they stand, at 120ms, so nothing
+            crosses the bar. Writing to an article changes no part of the bar, so nothing runs. The
+            background, the divider and the height never move, and the page beneath changes
+            immediately in every mode. This browser{' '}
             <strong className="text-ink-12">{supportsVT() ? 'supports' : 'does not support'}</strong>{' '}
-            the View Transitions API. Reduced motion is respected in every mode: with it on, every
-            option above behaves as Off.
+            the View Transitions API; without it, and under reduced motion, every mode behaves as
+            Off.
           </p>
         </div>
       </main>
