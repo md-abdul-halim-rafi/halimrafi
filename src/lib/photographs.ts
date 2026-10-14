@@ -105,27 +105,6 @@ function readSize(file: string): { width: number; height: number } | null {
 }
 
 const MANIFEST: Entry[] = [
-  // Filenames describe what each file actually contains. The names originally
-  // supplied had the marina and the riprap the other way round, so the files
-  // were renamed to match their subjects after being opened and checked.
-  //
-  // Labels are literal subject names. Rafi supplied no captions, so nothing
-  // here names a location, a date, a camera setting, or reads as commentary.
-  {
-    file: 'sea-lavender.jpg',
-    alt: 'Clusters of pale purple sea lavender in sharp focus, with a boardwalk and two walkers blurred behind them.',
-    label: 'Sea lavender',
-  },
-  {
-    file: 'marina-breakwater.jpg',
-    alt: 'A marina at dusk: bare masts along a breakwater, port cranes lit on the far shore, and a taped timber pile on the rocks in the foreground.',
-    label: 'Marina',
-  },
-  {
-    file: 'riprap-still-water.jpg',
-    alt: 'Grey and ochre riprap boulders meeting flat, still water at dusk.',
-    label: 'Shoreline',
-  },
   {
     file: 'pier-shed-railings.jpg',
     alt: 'A long pier shed with white railings and weathered timber posts, in warm low light, with an empty concrete plaza in front.',
@@ -135,6 +114,21 @@ const MANIFEST: Entry[] = [
     file: 'half-moon-sky.jpg',
     alt: 'A half moon high in a flat pink and grey sky, with the top of a lamp post at the lower left.',
     label: 'Moon',
+  },
+  {
+    file: 'alley-red-blooms.jpg',
+    alt: 'An urban alley with brick buildings, a parked car, overhead wires, and red flowers spilling over a low brick wall.',
+    label: 'Red blooms over a brick wall',
+  },
+  {
+    file: 'leafy-sidewalk.jpg',
+    alt: 'A sunlit sidewalk shaded by dense street trees, with two distant pedestrians and parked cars down the block.',
+    label: 'A walk beneath the street trees',
+  },
+  {
+    file: 'glass-and-sky.jpg',
+    alt: 'The upper stories of a glass-and-concrete building rising into a broad blue sky, with a small cloud at the edge.',
+    label: 'Glass against a blue sky',
   },
 ]
 
