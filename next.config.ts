@@ -3,6 +3,9 @@ import createMDX from '@next/mdx'
 
 const nextConfig: NextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
+  images: {
+    qualities: [75, 90],
+  },
   /* The Markdown route reads the MDX off disk at request time, so the content
      has to travel with the build rather than only into the compiled bundle. */
   outputFileTracingIncludes: {
