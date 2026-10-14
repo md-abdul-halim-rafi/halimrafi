@@ -19,18 +19,19 @@ export const meta = {
   ],
 }
 
-<Lede>Ask an AI agent how many API endpoints your product has.</Lede>
+<Lede>We asked our AI agent how many API endpoints our product had.</Lede>
 
 ## The confidently wrong answer
 
-If no single page in your documentation lists them all, you will still get a
-number. It will be wrong. It will also be *sourced*: the agent will have found
-real pages, quoted them accurately, and added them up.
+It found two overview pages, counted the endpoints on each, and added them
+together. The citations were real. The total wasn’t supported by either source.
 
-That is where we started. Our agent found the two overview pages that exist,
-counted what each listed, and reported the sum. Every individual fact it used
-was correct. The total was invented. The complete enumeration lived in exactly
-one machine-readable file it had no way to reach.
+The complete list lived in a machine-readable file the agent couldn’t reach.
+Instead of saying it didn’t have the full picture, it gave us a confident
+answer.
+
+Retrieval was working. Knowing when the evidence wasn’t enough was the harder
+problem.
 
 What makes this interesting rather than just a bug: the agent did nothing wrong
 by its own lights. It retrieved. It cited. It summarised. And the answer was

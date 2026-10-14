@@ -162,7 +162,7 @@ export const STORY = {
    *  scope of his responsibility. Nothing that implies he built the features. */
   workHeading: 'Octolane',
   workProduct:
-    'Octolane brings together email, meetings, and account records so people can ask what changed.',
+    'At Octolane, we’re building agents that help revenue teams decide what to do next on each account, act with their approval, and learn from the outcome.',
   workRole: 'As co-founder and CTO, I lead the engineering team and technical direction.',
 
   /**
