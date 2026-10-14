@@ -44,3 +44,9 @@ next-env.d.ts
 /.agents/
 /.claude/skills/
 /.claude/settings.local.json
+
+# working notes and briefs
+# Kept out of the repository because it is public: these hold research notes
+# about a private codebase, internal identifiers and per-person contribution
+# analysis, none of which the site needs to build.
+/docs/
