@@ -2,6 +2,12 @@ import type { StudioAsset } from '@/components/explorations/studio/StudioLightbo
 import { availablePhotographs } from './photographs'
 import { PHOTO_CREDIT } from './photoCredit'
 
+const modalSources: Record<string, string> = {
+  'alley-red-blooms.jpg': '/photographs/alley-red-blooms-modal.jpg',
+  'leafy-sidewalk.jpg': '/photographs/leafy-sidewalk-modal.jpg',
+  'glass-and-sky.jpg': '/photographs/glass-and-sky-modal.jpg',
+}
+
 /**
  * The photographs as viewer assets, in manifest order.
  *
@@ -18,6 +24,7 @@ export function photographAssets(): StudioAsset[] {
     id: photo.file,
     kind: 'photograph',
     src: `/photographs/${photo.file}`,
+    modalSrc: modalSources[photo.file],
     alt: photo.alt,
     width: photo.width,
     height: photo.height,

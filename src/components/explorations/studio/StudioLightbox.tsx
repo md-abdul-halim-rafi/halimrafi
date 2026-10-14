@@ -19,6 +19,8 @@ export type StudioAsset = {
   id: string
   kind: 'product' | 'photograph'
   src: string
+  /** Higher-quality source used in the expanded viewer; the grid keeps `src`. */
+  modalSrc?: string
   alt: string
   width: number
   height: number
@@ -28,6 +30,8 @@ export type StudioAsset = {
   /** Only for the product: a short factual note, no inferred ownership. */
   note?: string
 }
+
+const sourceFor = (asset: StudioAsset) => asset.modalSrc ?? asset.src
 
 /**
  * Opening, stepping through, and closing an artifact.
@@ -156,7 +160,7 @@ export function StudioLightbox({
     lands, rather than blanking to dark and back. Nothing is synchronised in an
     effect: this is derived, so it cannot lag a render behind.
   */
-  const cached = hasLoaded(assets[index]?.src)
+  const cached = hasLoaded(assets[index] ? sourceFor(assets[index]) : undefined)
   const painted = cached ? index : (shown ?? index)
   const asset = assets[painted]
   const requested = assets[index]
@@ -172,7 +176,7 @@ export function StudioLightbox({
   const settle = useCallback(
     (i: number) => {
       if (wanted.current !== i) return // a later press already won
-      remember(assets[i]?.src)
+      remember(assets[i] ? sourceFor(assets[i]) : undefined)
       setShown(i)
       setFailed(null)
     },
@@ -379,8 +383,8 @@ export function StudioLightbox({
             />
           ) : (
             <Image
-              key={asset.src}
-              src={asset.src}
+              key={sourceFor(asset)}
+              src={sourceFor(asset)}
               alt={asset.alt}
               width={asset.width}
               height={asset.height}
@@ -394,10 +398,11 @@ export function StudioLightbox({
                 legibility this control exists for.
               */
               sizes={product ? '(max-width: 1200px) 900px, 92vw' : '92vw'}
+              quality={asset.modalSrc ? 90 : undefined}
               // No sizing utilities on the product branch: the width is one
               // expression in `.studio-zoom-pan`, and utilities in a later
               // layer would win over it whatever its specificity.
-              className={product ? 'studio-zoom-pan mx-auto block' : 'block max-h-full w-auto max-w-full object-contain'}
+              className={product ? 'studio-zoom-pan mx-auto block' : 'block h-full w-auto max-w-[92vw] object-contain'}
               style={product ? { ['--zoom-ratio' as string]: String(asset.width / asset.height) } : undefined}
               onLoad={() => settle(painted)}
               priority
@@ -413,11 +418,12 @@ export function StudioLightbox({
           {arriving && failed !== index ? (
             <Image
               key={`load-${index}-${attempt}`}
-              src={requested.src}
+              src={sourceFor(requested)}
               alt=""
               aria-hidden
               width={requested.width}
               height={requested.height}
+              quality={requested.modalSrc ? 90 : undefined}
               sizes={product ? '(max-width: 1200px) 900px, 92vw' : '92vw'}
               className="pointer-events-none absolute h-px w-px opacity-0"
               onLoad={() => settle(index)}
@@ -448,18 +454,19 @@ export function StudioLightbox({
           {shown !== null && many
             ? [-1, 1]
                 .map((d) => assets[(shown + d + assets.length) % assets.length])
-                .filter((a, i, all) => a && a.src !== asset.src && all.indexOf(a) === i)
+                .filter((a, i, all) => a && sourceFor(a) !== sourceFor(asset) && all.indexOf(a) === i)
                 .map((a) => (
                   <Image
-                    key={`pre-${a.src}`}
-                    src={a.src}
+                    key={`pre-${sourceFor(a)}`}
+                    src={sourceFor(a)}
                     alt=""
                     aria-hidden
                     width={a.width}
                     height={a.height}
                     sizes={'92vw'}
+                    quality={a.modalSrc ? 90 : undefined}
                     className="pointer-events-none absolute h-px w-px opacity-0"
-                    onLoad={() => remember(a.src)}
+                    onLoad={() => remember(sourceFor(a))}
                   />
                 ))
             : null}
