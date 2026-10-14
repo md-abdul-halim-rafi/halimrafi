@@ -1,0 +1,157 @@
+export const meta = {
+  slug: 'making-a-response-readable',
+  title: 'Making a response readable',
+  summary:
+    'A streamed answer arrives in pieces. Choosing when to show each piece is a product decision.',
+  date: '2026-09-06',
+  status: 'published',
+  role: 'Prototype designed and built for this site',
+  collaborators: [],
+  artifact: { kind: 'simulated-demo', label: 'Interactive prototype using simulated data' },
+  // Kept out of the Writing lists: the piece is about a simulated artifact and
+  // is not what the site should offer a reader first. The URL still works.
+  listed: false,
+  sections: ['The problem', 'The decision', 'The tradeoff'],
+}
+
+<Lede>An answer that arrives all at once is easy to read. An answer that arrives in pieces has to be readable at every point in between.</Lede>
+
+## The problem
+
+The prototype below has a Raw arrival mode that draws each piece the moment it
+lands. That is the simplest thing a client can do, and it is what this prototype
+does on that side. Switch to it and three failures show up.
+
+- A sentence assembles a fragment at a time, so the reader is chasing a moving
+  target instead of reading.
+- Formatting crosses chunk boundaries. The stream sends `including their **`
+  while the closing marker is still on its way, and the reader sees the syntax.
+- A tool result has nowhere to go until it arrives. When it lands it inserts
+  itself and pushes everything after it down the page, usually just as the reader
+  reaches the line below.
+
+The third one is the worst, because it punishes the reader for reading.
+
+<Demo />
+
+## The decision
+
+Show text at the size of a readable unit, and hold space for anything that has
+been asked for but has not come back yet. That is three rules, all of them
+visible in Considered reveal.
+
+1. A paragraph appears once it is closed, and a list item once its line lands.
+   The reader gets whole thoughts instead of a growing edge of text.
+2. Markup that has opened and not closed is withheld along with the text after
+   it, so the syntax never reaches the screen.
+3. The record's slot is created when the tool is called rather than when it
+   answers, and it is sized by the record it is waiting for, so the arrival moves
+   nothing below it.
+
+This is a decision rather than a detail because of what is and is not ours to
+choose. We do not choose when the pieces arrive: the model sets its own pace and
+the tool takes as long as it takes. The only thing we choose is when to show what
+has already arrived.
+
+The cheaper middle ground is word-level reveal: hold each word until it is
+complete, then show it. It fixes half the problem, so it deserves a real answer.
+Holding a word until it is whole removes half-words at almost no cost in wait,
+but it does nothing about formatting, because buffering and markup are separate
+concerns. A bold span can open in one word and close several words later, so a
+reveal that waits for whole words still shows a complete, unclosed `**`. And a
+line that grows word by word keeps moving its own right edge, so the eye
+re-anchors on every arrival. That suits someone waiting to see whether anything
+is happening. It works against someone trying to take in an answer.
+
+<Disclosure summary="Implementation detail">
+
+Three choices carry most of the weight.
+
+**The view is derived from elapsed time.** Rather than appending to a buffer as
+events arrive, the renderer takes the event list, an elapsed value and a mode,
+and computes the entire visible state from them. Playback is then moving a
+number. Pause stops moving it, replaying sets it back to zero, and switching
+modes recomputes from the same events, so the two sides of a comparison cannot
+drift apart or mix runs. The same elapsed value always produces the same output.
+The tests sample the timeline out of order and after a rewind and check that no
+text repeats, which covers the cases that would show duplication in use. That is
+evidence under those samples, not a proof about every input.
+
+**Markup is tracked separately from buffering.** A small pass over the
+accumulated text finds delimiters that have opened and not closed, and withholds
+from the opening marker onward. It handles `**` and backticks, which is what this
+fixture contains. It is not a general parser and does not attempt nesting, links
+or code fences.
+
+**The waiting slot is sized by the thing it is waiting for.** The placeholder
+does not take its height from its own text. The finished record is rendered
+underneath it and made invisible, so the space held is the space the record will
+need. That is exact here only because the fixture is scripted and the finished
+record can be measured in advance. A real result of unknown size would need a
+fixed slot height or a different treatment.
+
+The 2.4 second point at which the slot admits it is late is a setting in this
+demo, chosen so the behaviour is visible in a short demonstration.
+
+</Disclosure>
+
+## The tradeoff
+
+Considered reveal is slower to first visible text, and that is the price of the
+whole approach. In this simulated example it is **520 milliseconds to first
+visible text**, measured from the start of playback, against zero for raw
+arrival. That figure is read from the fixture and describes the fixture. It is
+small only because this fixture's first paragraph is short, and the cost scales
+with the length of the unit being held.
+
+The argument for paying it is that a finished sentence is easier to follow than a
+growing one. That is a design hypothesis. Nothing here evaluates it, and it will
+not hold equally for every reader, connection or kind of content.
+
+Where the approach stops being the right call:
+
+- **Long paragraphs.** Holding a six-sentence paragraph could mean seconds of
+  nothing on screen, and a long enough pause reads as a failure rather than as
+  care. Grouping at sentence boundaries inside long paragraphs would help. This
+  prototype does not do it.
+- **Short lookups.** When someone asks a question with a one-line answer, they
+  want to see it start. The grouping is just delay.
+- **Code and tables.** Neither approach works. Partially rendered code reads as
+  complete and is wrong, so those blocks want all or nothing.
+- **Bursty connections.** When chunks arrive in clumps, the clump boundary and
+  the paragraph boundary tend to coincide and the distinction stops earning its
+  complexity.
+
+So this is a reasonable default for answers that are mostly prose and a few
+sentences long, which is what this product produces. It is not a rule about
+streaming interfaces in general, and I would not apply it to a terminal or a code
+assistant.
+
+What is on this page is a prototype rather than shipped software: a fixed local
+script, no model behind it, and no production measurements in it.
+
+<Disclosure summary="How this prototype was checked">
+
+Automated, with `pnpm test`:
+
+- Both scenarios keep their events in chronological order, and the delayed
+  scenario differs from the normal one by exactly one value.
+- Raw arrival exposes the unclosed bold span while it is open. Considered reveal
+  does not.
+- A paragraph is withheld until it closes, and released once the stream settles.
+- The projection is a pure function of elapsed time, and sampling out of order
+  never duplicates text.
+- A late result does not hold back the prose or the provenance line around it,
+  and it resolves into its original position.
+- Both modes finish at the same answer.
+- At rest, before any playback, both sides show the finished answer.
+- The control label follows the clock: Pause while running, Resume while paused,
+  Replay comparison otherwise.
+- The 520ms figure quoted above is read from the fixture, so the prose cannot
+  drift from the prototype.
+
+By hand in a browser: play, pause, resume, replay after completion, reset,
+switching modes and scenarios mid-run, keyboard traversal of every control, and
+the completed transcript with JavaScript turned off.
+
+</Disclosure>

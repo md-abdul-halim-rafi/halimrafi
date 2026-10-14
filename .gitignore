@@ -3,7 +3,12 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.js
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # testing
 /coverage
@@ -25,8 +30,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
-.env*.local
+# env files (can opt-in for committing if needed)
+.env*
 
 # vercel
 .vercel
@@ -34,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent tooling (restore with skills-lock.json, which stays tracked)
+/.agents/
+/.claude/skills/
+/.claude/settings.local.json
+
+# working notes and briefs
+# Kept out of the repository because it is public: these hold research notes
+# about a private codebase, internal identifiers and per-person contribution
+# analysis, none of which the site needs to build.
+/docs/

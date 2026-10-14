@@ -1,0 +1,159 @@
+export const meta = {
+  slug: 'helping-an-agent-finish-longer-tasks',
+  title: 'Helping an agent finish longer tasks',
+  summary:
+    'Some requests need several rounds of work. I designed and built the execution path that lets the agent delegate tasks, save its progress, and resume with the results.',
+  date: '2026-09-16',
+  status: 'published',
+  role: 'Wrote the design and authored the changes that landed the execution path',
+  collaborators: ['One Chowdhury', 'Yash Sehgal', 'Raonak', 'Tariqul Islam'],
+  artifact: { kind: 'none' },
+  sections: [
+    'The request that failed',
+    'What I did',
+    'Delegating, saving progress, resuming',
+    'One decision, and what it costs',
+    'Where this stands',
+  ],
+}
+
+<Lede>A model call has a fixed amount of context. A request does not. When the work needs more than one call, the agent has to be able to save its progress and pick the work up again.</Lede>
+
+## The request that failed
+
+Someone uploaded a spreadsheet of company rows and asked the agent to create a
+deal for each one. Splitting the file across helpers was the right move, and it
+was the part that broke.
+
+Each helper could be handed only a small amount of text, and only a few could
+be started in one turn, so the total that could be handed out was a fraction of
+the file. Every attempt was rejected for exceeding that limit. The agent fell
+back to working through the file in the same conversation, and our record ends
+there: it notes the fallback beginning, not whether it finished the job.
+
+The file's size was not the problem in itself: the limit on handing work out
+was far smaller than the work, and everything already done stayed in context
+and kept growing. Raising either limit moves the ceiling.
+
+## What I did
+
+I wrote the design before the code, as an internal proposal opening with that
+failure, then authored the changes that landed it: a durable record of a run,
+the handing out of work, the machinery that resumes a run with results in hand,
+and the check that decides whether a run is finished.
+
+My co-founder One Chowdhury reviewed and approved each of those changes. On the
+front end I introduced the panel that shows a run working, and Yash Sehgal
+worked on it alongside me. Raonak and Tariqul Islam contributed to
+the module alongside their own work. The product is the team's.
+
+## Delegating, saving progress, resuming
+
+When the agent hands work out, it writes down what it is doing and stops, so
+its turn ends instead of growing while it waits. The helpers run on their own,
+and what comes back is their results, not everything they did to get there.
+
+Resuming starts a new model call rather than continuing an open one, and the
+conversation so far is replayed into it with those results in place. The new
+call is not a blank slate: it carries the history. What it does not carry is
+the helpers' intermediate work, which is the part that used to accumulate.
+
+The helpers are deliberately read only. They gather and report.
+
+<Disclosure summary="What is saved, what is replayed, what is shortened">
+Saved between calls: the run itself, as a durable record of what it is doing
+and which helpers are outstanding; each helper's returned result; and an index
+of the load-bearing facts from each round, meaning the identifiers and outcomes
+a later round might need. The index is written today and not yet read back.
+
+Replayed into the next call: the conversation up to and including the message
+that handed the work out, rebuilt as messages, with the helpers' results in
+place. Each round writes a new message linked to the run, so persistence and
+replay logic stays per message while the reader still sees one continuous
+answer.
+
+Shortened: older tool results, and only those. Past a character budget they are
+replaced with a stub that names the tool and the call it belongs to, records
+how large the output was, and tells the model plainly that the data is gone and
+must not be reconstructed from memory. Where a tool saved its output under a
+handle, the stub keeps that handle and says how to fetch it again, so the drop
+is recoverable rather than a dead end. Reasoning and written text are never
+stubbed. The stub is a function of the part alone, so re-running the trimmer
+produces the same bytes and the prompt prefix stays stable.
+
+Before a run is allowed to finish, a check scores it on two things: whether it
+is converging on the goal rather than looping, and whether its answer is
+grounded in what the helpers actually returned. A run that is going nowhere is
+stopped and says so, rather than spending the remaining budget. Dead helpers,
+stuck resumes and runaway loops each have a reaper or a cap.
+</Disclosure>
+
+<Disclosure summary="What the helpers can and cannot do">
+Helpers are resolved from the same tool set the main agent uses, and then every
+tool that changes data is removed before the model sees it. The code calls this
+read only by default and ships it strict, with delegating a write left as a
+future possibility rather than a current one.
+
+The main agent keeps its full tool set in every round, so a long run can still
+end in a change to a record. That change is made by the main agent, not by the
+delegated work. What is described here is how the work gets divided and
+resumed, not a system that edits records on its own.
+</Disclosure>
+
+## One decision, and what it costs
+
+On resume the conversation is replayed rather than summarised.
+
+The intended benefit is that the model keeps its own record of what it did and
+what came back, in the form it first saw it, so a later round reasons from the
+same material rather than a retelling. What a summary drops is decided in
+advance, before anyone knows which detail a later round will need.
+
+The cost is paid on every resume and grows with the run: the replayed history
+is charged again in tokens, and rebuilding it adds to the time before the model
+starts producing. Where the history must shed weight it sheds older tool output
+rather than the reasoning, keeping the account of the run while removing the
+bulk.
+
+That is a tradeoff between cost and the risk of having dropped something that
+mattered. It is not a guarantee of correctness, and I have no evaluation
+measuring how often either choice would have been wrong.
+
+<Disclosure summary="How the shortening is tuned">
+The budget is generous rather than tight, and larger again in the mode that
+keeps the prompt prefix stable for caching. In the deterministic mode, results
+in roughly the most recent thirty messages stay verbatim and only older ones
+rotate out, chosen so a full turn's tool loop plus some prior context survives
+untouched. The comment in the code calls that a tuning knob to validate during
+the rollout, which is a fair description of its status.
+</Disclosure>
+
+## Where this stands
+
+The work is implemented, merged, and deployed. It sits behind rollout gates
+opened per organisation and off by default in the repository, so whether any
+customer is using it is a separate question from whether it is deployed.
+
+<Disclosure summary="How far each of those is established">
+Three separate things.
+
+Implemented and merged: through pull requests reviewed and approved before they
+landed.
+
+Deployed: the service's production deploy workflow ran for a specific revision
+and its deploy step succeeded, publishing an image tagged with that revision,
+and the work is present in it. That is a deployment record identifying the
+code, not an inference from a branch name. What it does not show is the running
+system, which I cannot observe from here.
+
+Enabled for customers: not established. Two switches stand in front of the
+path. Both default to off in the repository, and a repository default is not a
+production value: the file that carries them is an example configuration, and
+the real one lives in an environment I cannot read from here. So I know the
+gates exist and I do not know their production setting.
+
+There are also no production measurements: no latency, reliability or adoption
+figures. The request described above is one documented incident, written down
+as the reason to start. It is not a benchmark, and there is no before and after
+attached to it, so nothing here claims an improvement it can show.
+</Disclosure>

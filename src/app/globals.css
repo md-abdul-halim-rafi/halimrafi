@@ -1,0 +1,1845 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   halimrafi.com
+
+   The identity is an instrument surface: a cool graphite stage, hairline
+   geometry, and technical annotations set in mono. Warm editorial paper was
+   the previous direction; this one suits a site whose whole argument is that
+   decisions can be inspected.
+
+   Everything below is a token. Nothing in a component should invent its own
+   duration, radius, shadow or grey.
+   ========================================================================= */
+
+:root {
+  /* Ink ramp, cool graphite. Low numbers are light. */
+  --ink-1: #fbfaf8;
+  --ink-2: #f2efea;
+  --ink-3: #ebe7e0;
+  --ink-4: #e3ded7;
+  --ink-6: #cac4ba;
+  --ink-8: #9d968d;
+  --ink-9: #6a655d;
+  --ink-10: #524e46;
+  --ink-11: #302d26;
+  --ink-12: #17150f;
+
+  --paper: #f6f4f1;
+  --surface: #fffefc;
+  --sunk: #eeebe6;
+
+  /* One signal colour. Used for state, never for decoration. */
+  --signal: #7a3f22;
+  --signal-hover: #63311a;
+  --signal-ink: #ffffff;
+  --signal-wash: #f0e4dc;
+
+  --text: var(--ink-12);
+  /* Step 9 is the quiet-text step, and it has to clear 4.5:1 at 11px. Each
+     palette sets its own; see the note beside those values. */
+  --text-muted: var(--ink-9);
+  --text-soft: var(--ink-10);
+
+  --hairline: rgba(23, 21, 15, 0.1);
+  --hairline-strong: rgba(23, 21, 15, 0.2);
+
+  /* The stage gradient behind the opening. Cool at the top, settling to paper. */
+  --stage-top: #e7eaee;
+  --stage-mid: #eff1f4;
+  --stage-bot: var(--paper);
+
+  /* Motion. Quint for arrivals, spring for things that should feel physical,
+     a longer centred curve for departures that would otherwise snap. */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.35, 1.55, 0.65, 1);
+  --ease-in-out-quad: cubic-bezier(0.45, 0, 0.55, 1);
+
+  --dur-press: 130ms;
+  --dur-icon: 220ms;
+  --dur-col: 300ms;
+  --dur-spring: 400ms;
+  --dur-shadow-out: 700ms;
+  --delay-icon: 130ms;
+
+  /* Shape.
+
+     Two layers, which is how the app does it and why nothing here invents a
+     value. The ladder is the scale: absolute rungs, the same numbers and the
+     same names as `--radius-*` in the product's own variables, so a corner
+     described in one repository means the same thing in the other. The four
+     names under it are semantic: a component asks for `--r-md`, not for six
+     pixels, and a palette can point that name at a different rung without the
+     component knowing. The workbench palette does exactly that below.
+
+     Nothing should set a raw pixel radius. An arbitrary `rounded-[3px]` is how
+     two different corners on the same element ended up 2px and 3px, and an
+     arbitrary `rounded-[var(--radius)]` is how three elements ended up square
+     against a variable that never existed: an unknown custom property inside
+     `var()` makes the declaration invalid and the radius falls back to zero,
+     silently. Utilities generated from the ladder fail visibly instead. */
+  --radius-1: 0px;
+  --radius-2: 1px;
+  --radius-3: 2px;
+  --radius-4: 3px;
+  --radius-5: 4px;
+  --radius-6: 5px;
+  --radius-7: 6px;
+  --radius-8: 8px;
+  --radius-9: 10px;
+  --radius-10: 12px;
+  --radius-11: 14px;
+  --radius-12: 16px;
+  --radius-13: 18px;
+  --radius-14: 20px;
+  --radius-16: 24px;
+  --radius-18: 32px;
+  --radius-full: 9999px;
+
+  --r-xs: var(--radius-4);
+  --r-sm: var(--radius-5);
+  --r-md: var(--radius-8);
+  --r-lg: var(--radius-11);
+  --r-pill: var(--radius-full);
+
+  /* Elevation. The rest state is the same geometry at zero alpha so the
+     shadow animates in and out instead of appearing. */
+  --lift-rest: 0 6px 16px -10px rgba(10, 12, 15, 0);
+  --lift-hover: 0 14px 30px -12px rgba(10, 12, 15, 0.28);
+  --ring-hairline: 0 0 0 0.5px rgba(18, 22, 27, 0.1);
+  --card-shadow: 0 1px 2px rgba(18, 22, 27, 0.04), 0 8px 24px -16px rgba(18, 22, 27, 0.16);
+
+  /* Type */
+
+  /* The article column: what the title and the headings may use. Wider than
+     the prose, so a title wraps to fewer lines without the body running past a
+     comfortable line length. */
+  /* The sticky header's height, including its hairline. Anything that has to
+     clear it — anchor landings, the contents rail, focus scrolling — derives
+     its offset from this rather than repeating the number. */
+  --header-h: 3.8125rem;
+  --measure-article: 42rem;
+  /* The live site's own value; each exploration palette overrides it. */
+  --demo-caption: var(--text-muted);
+
+  /* The prose measure. 38.5rem at 19px lands at roughly 67 characters a line,
+     inside the 65–70 that reads comfortably for a long piece. Measured, not
+     assumed: 40rem came out at 70, right on the edge. */
+  --measure-read: 38.5rem;
+  /* What a table or figure widens to when it steps out of the reading column.
+     It widens about the same centre line, so the column stays where it is, and
+     it stops exactly where the site header's rule does — 58rem less that
+     header's own 2.5rem padding — so a wide table and the rule above it share
+     an edge instead of missing each other by 80px. */
+  --measure-wide: 53rem;
+  --read-size: 1.25rem;
+  --read-leading: 1.65;
+  --rail-w: 11.5rem;
+  /* The clear space between the article column and the contents rail. It is
+     wide enough to be the gutter a breakout stops at: a wide table can use the
+     room between the column and the rail, but never the rail's own. */
+  --rail-gap: 7rem;
+}
+
+@media (max-width: 767px) {
+  :root {
+    /* A phone holds fewer characters a line at any size, so the body steps
+       down one notch rather than running to forty-something characters. */
+    --read-size: 1.1875rem;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-soft: var(--text-soft);
+  --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
+  --color-signal-wash: var(--signal-wash);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-6: var(--ink-6);
+  --color-ink-8: var(--ink-8);
+  --color-ink-9: var(--ink-9);
+  --color-ink-10: var(--ink-10);
+  --color-ink-11: var(--ink-11);
+  --color-ink-12: var(--ink-12);
+
+  /* The caption beside a demo's control. Defined per palette, because the ink
+     that reads as a quiet caption on one paper is invisible on another. */
+  --color-demo-caption: var(--demo-caption);
+
+  --font-display: var(--font-serif);
+  /* The article's reading face. Georgia is the fallback because it is the one
+     serif that is actually installed everywhere and its proportions are close
+     enough that a swap does not reflow the page into a different shape. */
+  --font-read: var(--font-reading), Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* The semantic names, as utilities: `rounded-sm`, `rounded-md`, `rounded-lg`,
+     `rounded-pill`. The ladder's own `--radius-*` are already in scope, so
+     Only the named ones become utilities. The ladder stays variables: a
+     component should ask for a meaning, and twenty numeric utilities would
+     just be the arbitrary values again with a tidier syntax. */
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-pill: var(--r-pill);
+}
+
+@layer base {
+  html {
+    /* The site has one palette and no dark mode. Saying so keeps a dark-mode
+       browser from painting its own scrollbars, form controls and spellcheck
+       underlines against this paper. */
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    /* Deliberately not `smooth`. On the root it applied to every scroll the
+       page performs, including the router's reset on navigation, so opening an
+       article rendered it at the previous page's offset and glided to the top
+       over half a second — the reader saw the middle of a page they had not
+       opened yet. Smooth scrolling now belongs to the contents links that
+       actually want it, which ask for it per call. */
+    scroll-behavior: auto;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* The horizontal guard lives on the root only. Body does not need it: the
+     root already clips, and one clip container is enough. */
+  html {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  body {
+    max-width: 100%;
+  }
+
+  ::selection {
+    background: var(--signal-wash);
+    color: var(--ink-12);
+  }
+
+  /* :focus-visible already excludes pointer clicks; this keeps the ring off
+     anything that takes focus programmatically too. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+    border-radius: var(--r-xs);
+  }
+  /* Anchors and keyboard focus clear the sticky header instead of landing
+     underneath it. scroll-padding on the scrolling element covers focus moves
+     the browser performs itself, which scroll-margin alone does not. */
+  /* The header sits over the page now, so anchors, fragment loads and focus
+     moves the browser performs itself all have to clear it. scroll-padding on
+     the scrolling element covers all three; scroll-margin alone does not. */
+  html {
+    scroll-padding-top: calc(var(--header-h) + 1.5rem);
+  }
+  :target {
+    scroll-margin-top: calc(var(--header-h) + 1.5rem);
+  }
+
+  .on-signal:focus-visible {
+    outline-color: var(--signal-ink);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-6) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--ink-6);
+    border-radius: var(--r-pill);
+  }
+}
+
+@layer utilities {
+  /* Large titles only. Below roughly 28px this face reads narrow, so smaller
+     headings use the grotesque instead. */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  /* Every heading under display size. Inter, tightened, never the serif. */
+  .heading {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.021em;
+    color: var(--ink-12);
+  }
+
+  /* Kills the half-leading above and below a line so flex centring lands on
+     the glyphs' true optical centre. Labels sit centred by ink, not by box. */
+  .trim-cap {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .measure {
+    max-width: var(--measure-read);
+  }
+  /* Technical annotation. Mono, uppercase, tracked, quiet. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .stage {
+    background: linear-gradient(
+      180deg,
+      var(--stage-top) 0%,
+      var(--stage-mid) 46%,
+      var(--stage-bot) 100%
+    );
+  }
+
+  /* A hairline that fades out at both ends, so rules never collide with the
+     page edge. Used to separate sections without boxing them. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--hairline-strong) 12%,
+      var(--hairline-strong) 88%,
+      transparent
+    );
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Controls
+
+   One interaction grammar for every control on the site. The icon column
+   opens first, then the icon focuses into the room it made. Neighbours step
+   aside so nothing collides.
+   ------------------------------------------------------------------------ */
+@layer components {
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 38px;
+    padding-inline: 0.875rem;
+    border-radius: var(--r-pill);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: var(--lift-rest);
+    /* The exit ride is longer and centred: quint's front-loaded start made a
+       departing shadow collapse in the first 100ms, which reads as a glitch. */
+    transition:
+      scale var(--dur-spring) var(--ease-spring),
+      translate var(--dur-spring) var(--ease-spring),
+      background-color var(--dur-icon) var(--ease-out-quint),
+      color var(--dur-icon) var(--ease-out-quint),
+      box-shadow var(--dur-shadow-out) var(--ease-in-out-quad);
+  }
+
+  .ctl:hover,
+  .ctl:focus-visible {
+    scale: 1.04;
+    box-shadow: var(--lift-hover);
+    transition:
+      scale var(--dur-spring) var(--ease-spring),
+      translate var(--dur-spring) var(--ease-spring),
+      background-color var(--dur-icon) var(--ease-out-quint),
+      color var(--dur-icon) var(--ease-out-quint),
+      box-shadow 450ms var(--ease-out-quint);
+  }
+
+  .ctl:active {
+    scale: 0.985;
+    transition-duration: var(--dur-press);
+  }
+
+  /* Touch needs a larger target than a mouse. The label and icon stay put; only
+     the hit area grows. */
+  @media (pointer: coarse) {
+    .ctl {
+      height: 44px;
+      padding-inline: 1rem;
+    }
+  }
+
+  .ctl:disabled {
+    scale: 1;
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+  }
+
+  .ctl-primary {
+    background: var(--ink-12);
+    color: var(--ink-1);
+  }
+  .ctl-primary:hover {
+    background: var(--ink-11);
+  }
+
+  .ctl-signal {
+    background: var(--signal);
+    color: var(--signal-ink);
+  }
+  .ctl-signal:hover {
+    background: var(--signal-hover);
+  }
+
+  .ctl-quiet {
+    background: var(--surface);
+    color: var(--ink-11);
+    box-shadow: var(--ring-hairline), var(--lift-rest);
+  }
+  .ctl-quiet:hover,
+  .ctl-quiet:focus-visible {
+    box-shadow: var(--ring-hairline), var(--lift-hover);
+  }
+
+  /* Make room: when one control expands its neighbours step aside on the same
+     spring, so the row reads as one physical system. */
+  .ctl-row:has(.ctl:nth-child(1):hover) .ctl:nth-child(2) {
+    translate: 6px 0;
+  }
+  .ctl-row:has(.ctl:nth-child(2):hover) .ctl:nth-child(1) {
+    translate: -6px 0;
+  }
+
+  /* The icon's column opens, then the icon arrives into the space. The
+     control keeps its tight resting shape, because a permanently reserved
+     slot reads as a button stuck open around a gap. */
+  .icon-slot {
+    display: grid;
+    grid-template-columns: 0fr;
+    transition: grid-template-columns var(--dur-col) var(--ease-out-quint);
+    pointer-events: none;
+  }
+  .icon-slot > span {
+    display: flex;
+    /* max-content, not auto: with `min-width: 0` alone the grid's intrinsic
+       contribution collapses to zero, so the 1fr track resolves against a
+       zero-width container and the icon never gets its room. The track still
+       collapses at rest because it is sized 0fr; the span simply overflows it
+       and is clipped. */
+    width: max-content;
+    min-width: 0;
+    align-items: center;
+    /* The track still clips, which is what lets it collapse to zero, but the
+       clip box is inflated past the glyph so a half-open column never crops
+       the icon. It hides by going transparent, not by being cut. */
+    overflow: clip;
+    overflow-clip-margin: 14px;
+    margin-left: 0;
+    transition: margin-left var(--dur-col) var(--ease-out-quint);
+  }
+  .icon-slot svg {
+    flex: none;
+    opacity: 0;
+    filter: blur(2px);
+    transform: translateY(3px);
+    transition:
+      opacity var(--dur-icon) var(--ease-out-quint),
+      filter var(--dur-icon) var(--ease-out-quint),
+      transform var(--dur-icon) var(--ease-out-quint);
+  }
+  :is(a, button):is(:hover, :focus-visible) .icon-slot {
+    grid-template-columns: 1fr;
+  }
+  :is(a, button):is(:hover, :focus-visible) .icon-slot > span {
+    margin-left: 5px;
+  }
+  /* The delay lets the track make space first. It lives on the hover state
+     only, so leaving clears the icon immediately instead of smearing it
+     across the label sliding back. */
+  :is(a, button):is(:hover, :focus-visible) .icon-slot svg {
+    opacity: 1;
+    /* `none`, not `blur(0)`: the minifier reduces blur(0) to the invalid
+       `blur()`, which the browser then drops. `none` interpolates from
+       blur(2px) the same way and survives minification. */
+    filter: none;
+    transform: translateY(0);
+    transition-delay: var(--delay-icon);
+  }
+
+
+  .link-underline {
+    color: var(--signal);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 35%, transparent);
+    transition: text-decoration-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .link-underline:hover {
+    text-decoration-color: var(--signal);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Article
+   ------------------------------------------------------------------------ */
+@layer components {
+  .article-body {
+    font-size: var(--read-size);
+    line-height: var(--read-leading);
+    color: var(--ink-11);
+  }
+
+  /* The article's layout, as columns rather than a container with a max width.
+     The reading column is centred in the viewport; a table or figure marked
+     `.breakout` widens about that same centre line instead of pushing the
+     column off it, which is what made the old layout read as left-aligned text
+     with a large dead gutter on the right.
+
+     Every child takes the reading column by default, so a new element in an
+     MDX file needs no class to be placed correctly. */
+  .article-grid {
+    --page-gutter: 1.5rem;
+    display: grid;
+    justify-content: center;
+    padding-inline: var(--page-gutter);
+    /* The page margin is padding, not a pair of 1fr tracks. With tracks, the
+       reading column's `min(…, 100%)` resolved against the whole container and
+       the gutters were then added outside it, so a phone got a grid wider than
+       its own viewport and the page scrolled sideways. Padding takes the
+       margin out of `100%` before the column is sized. */
+    grid-template-columns:
+      [wide-start] minmax(0, calc((var(--measure-wide) - var(--measure-article)) / 2))
+      [read-start] min(var(--measure-article), 100%)
+      [read-end] minmax(0, calc((var(--measure-wide) - var(--measure-article)) / 2))
+      [wide-end];
+  }
+  @media (min-width: 640px) {
+    .article-grid {
+      --page-gutter: 2.5rem;
+    }
+  }
+  .article-grid > * {
+    grid-column: read;
+    min-width: 0;
+  }
+  .article-grid > .breakout {
+    grid-column: wide;
+    /* Anything wide scrolls inside itself rather than pushing the page. A long
+       URL or an unbreakable technical term in a cell cannot make the grid
+       wider than its column, which is what `min-width: 0` above guarantees. */
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .article-grid > .breakout:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 4px;
+  }
+
+  /* The article is set in the reading serif; everything that is interface
+     stays in the interface face. Scoped here so the front page, the archive
+     and the embedded demo are untouched. */
+  .article-grid {
+    font-family: var(--font-read);
+  }
+  .article-grid :is(.label, .article-summary, .article-meta, .article-details, table, .contents-disclosure, .contents-rail, .back-link, .breakout-demo, button, input, select, textarea) {
+    font-family: var(--font-sans);
+  }
+  .article-grid :is(code, kbd, samp, pre) {
+    font-family: var(--font-mono);
+  }
+
+  /* The studio exploration renders the same MDX inside its own two-column
+     composition rather than this grid, so it caps its children itself. It
+     shares the rhythm below, which is why that is written against both. */
+  .prose-column > * {
+    max-width: var(--measure-read);
+    margin-inline: 0;
+  }
+  .prose-column > .breakout {
+    max-width: var(--measure-wide);
+    width: 100%;
+  }
+
+  /* Prose holds the narrower measure inside the article column; headings and
+     the title get the column's full width. They share a left edge, so the
+     difference reads as a heading running longer rather than as two
+     alignments. */
+  .article-grid > :is(p, ul, ol, blockquote, details) {
+    max-width: var(--measure-read);
+  }
+
+  /* Prose is set at its natural spacing. The tracking on `.heading` is for a
+     grotesque at interface sizes and has no business in a serif paragraph. */
+  .article-grid > :is(p, ul, ol, li, blockquote) {
+    letter-spacing: normal;
+  }
+
+  /* Headings are the reading face too, so a section title belongs to the piece
+     it opens rather than to the interface around it.
+
+     Set here rather than through the `.heading` utility the prose components
+     used to carry: that class is in the utilities layer, which wins over this
+     one no matter how specific a rule here is, so every attempt to give an
+     article heading its own face lost silently. */
+  :is(.article-grid, .prose-column) > :is(h2, h3) {
+    font-family: var(--font-read);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--ink-12);
+    text-wrap: pretty;
+    /* Small on purpose. `scrollIntoView` counts the element's own top margin,
+       which is now 2.2em for a section heading, so the 2rem this used to carry
+       landed the heading 95px down the screen with nothing above it. The
+       heading's own margin is the clearance; this is the last few pixels. */
+    scroll-margin-top: 0.5rem;
+  }
+  :is(.article-grid, .prose-column) > h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+  :is(.article-grid, .prose-column) > h3 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+  @media (min-width: 640px) {
+    :is(.article-grid, .prose-column) > h2 {
+      font-size: 1.75rem;
+    }
+    :is(.article-grid, .prose-column) > h3 {
+      font-size: 1.375rem;
+    }
+  }
+
+  /* The opening. The title was capped at 15ch — narrower than the body it sat
+     above — which is what wrapped a long one onto four tall lines. It gets the
+     column now, at a size that wraps to two or three. */
+  .article-title {
+    font-family: var(--font-read);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    /* 30px on a phone, 36px on a tablet, 46px from about 1440 up. The middle
+       term ramps rather than sitting flat under the cap, so there is no step
+       where a breakpoint happens to fall — the title just gets smaller as the
+       column does. Nothing is hard-wrapped: it finds its own break at every
+       width. */
+    font-size: clamp(1.875rem, 1.52vw + 1.5rem, 2.875rem);
+    line-height: 1.15;
+    color: var(--ink-12);
+    text-wrap: pretty;
+  }
+  /* Below about 390px the column loses width faster than the ramp above gives
+     size back, and the long title went to four lines again. Measured on a
+     320px screen, whose column is 272px: it takes three lines at 26px and four
+     at 27px, so the ramp here is steeper and lands on 26.
+
+     The two formulas meet at 30px at 390px, so there is no step between them,
+     and the floor keeps a title legible on a 280px screen rather than letting
+     it chase the column down indefinitely. */
+  @media (max-width: 24.4375rem) {
+    .article-title {
+      font-size: clamp(1.5rem, 5.71vw + 0.48rem, 1.875rem);
+    }
+  }
+
+  .article-summary {
+    margin-top: 1.25rem;
+    max-width: var(--measure-read);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
+  /* Close to the summary, not floated between it and the article: the gap
+     under the metadata was doing the work of a section break. */
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1.5rem;
+    margin-top: 1.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--ink-11);
+  }
+  /* Case-study extras. A quiet row under the metadata, not the bordered block
+     that used to open the page ahead of the writing. */
+  .article-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin-top: 1.125rem;
+  }
+  .article-details dd {
+    margin-top: 0.4rem;
+    max-width: 34ch;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--ink-11);
+  }
+
+  /* The not-found heading. The article serif, because it is a sentence
+     addressed to a reader rather than a piece of interface, at a size that
+     states the problem without announcing it: 32px on a phone, 42px from about
+     1440 up, ramping between so nothing steps at a breakpoint. */
+  .not-found-title {
+    font-family: var(--font-read);
+    font-weight: 500;
+    font-size: clamp(1.875rem, 0.95vw + 1.77rem, 2.625rem);
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    color: var(--ink-12);
+    text-wrap: pretty;
+  }
+
+  /* An entry in the Writing list, wherever that list is published.
+
+     The title is the article's own reading serif at close to the size it will
+     have once opened; it was 19px interface type, which made a list of
+     articles read as a list of rows. Under it, interface: the description at
+     reading size in the interface face, and one metadata row.
+
+     Hover and focus move the underline's colour and nothing else — no arrow
+     appears, no text shifts. */
+  .entry-title {
+    font-family: var(--font-read);
+    font-weight: 500;
+    font-size: 1.4375rem;
+    line-height: 1.25;
+    letter-spacing: normal;
+    color: var(--ink-12);
+    text-wrap: pretty;
+  }
+  @media (min-width: 640px) {
+    .entry-title {
+      font-size: 1.75rem;
+    }
+  }
+  .entry-link {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    text-decoration-color: rgba(23, 21, 15, 0.26);
+    transition: text-decoration-color 150ms ease-in-out;
+  }
+  .entry-link:hover {
+    text-decoration-color: var(--signal);
+  }
+  .entry-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: var(--r-xs);
+  }
+  .entry-summary {
+    margin-top: 0.75rem;
+    max-width: 56ch;
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+  }
+  /* One row, one order, every entry: the date, then the kind, then a byline if
+     the piece is not the site owner's. */
+  .entry-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1.25rem;
+    margin-top: 0.875rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* One rhythm, set here rather than on each element.
+
+     Headings carry both of their own gaps, in their own em. That is the fix
+     for a subheading reading as attached to the paragraph above it: the gap
+     was a fixed 2rem while the paragraph rhythm was 1.1em, so a 21px
+     subheading cleared its neighbour by eleven pixels more than an ordinary
+     paragraph did, which is not a separation anyone can see.
+
+     Grid items do not collapse margins, so whatever follows a heading must
+     contribute nothing or the two gaps add up. */
+  :is(.article-grid, .prose-column) > * + * {
+    margin-top: 1em;
+  }
+  :is(.article-grid, .prose-column) > h2 {
+    margin-top: 2.2em;
+    margin-bottom: 0.7em;
+  }
+  :is(.article-grid, .prose-column) > h3 {
+    margin-top: 1.65em;
+    margin-bottom: 0.6em;
+  }
+  :is(.article-grid, .prose-column) > :is(h2, h3) + * {
+    margin-top: 0;
+  }
+  /* A heading straight after a heading keeps only the lower one's own gap,
+     rather than stacking a section break on top of a subsection break. */
+  :is(.article-grid, .prose-column) > :is(h2, h3) + h3 {
+    margin-top: 0.8em;
+  }
+  /* The opening sequence only. A section break between two sections wants the
+     full 2.2em; the break between the opening sentence and the section that
+     explains it does not, because nothing has been said yet for it to be a
+     break from. Scoped to the lede, so the rhythm through the rest of the
+     article is untouched. */
+  .article-grid > .article-lede + h2 {
+    margin-top: 1.35em;
+  }
+
+  /* Set-apart blocks get a little more than a paragraph and no more. */
+  :is(.article-grid, .prose-column) > * + :is(blockquote, details, aside, .breakout, .rule-fade) {
+    margin-top: 1.5em;
+  }
+  :is(.article-grid, .prose-column) > :is(blockquote, details, aside, .breakout, .rule-fade) + * {
+    margin-top: 1.5em;
+  }
+  :is(.article-grid, .prose-column) > :is(h2, h3) + :is(blockquote, details, aside, .breakout) {
+    margin-top: 0;
+  }
+
+  /* Contents, wide.
+
+     The rail hangs beside the centred column: half the column, then the
+     gutter, then the rail, measured from the page's centre line so it stays
+     put as the viewport changes.
+
+     It appears only where it fits without touching anything. Half a viewport
+     has to hold half the column (21rem), the gutter (7rem), the rail (11.5rem)
+     and a page margin (1.5rem) — 41rem, so 82rem of viewport. Below that the
+     reader gets the disclosure instead, which is what "collapse the rail
+     before it collides" means in numbers rather than in a guess. */
+  .contents-rail {
+    display: none;
+  }
+  @media (min-width: 82rem) {
+    .contents-rail {
+      display: block;
+      position: absolute;
+      inset-block: 0;
+      left: 50%;
+      margin-left: calc(-0.5 * var(--measure-article) - var(--rail-gap) - var(--rail-w));
+      width: var(--rail-w);
+      pointer-events: none;
+    }
+    .contents-rail-inner {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      pointer-events: auto;
+    }
+
+    /* And the breakout stops before it.
+
+       This is the table overlap. `--measure-wide` was a flat 53rem centred on
+       the column, worked out from the reading layout alone as though the whole
+       width were the article's to use. With the rail present it is not: at
+       1440 the table ran 296..1144 while the rail sat at 136..320, so eight
+       rows of a comparison were printed over the contents list.
+
+       The breakout may reach from the page centre to the rail's near edge,
+       less a gutter, and no further. Half of that is
+       (0.5 * column + rail gutter - table gutter), so the whole is twice it —
+       50rem here, which is the widest a table can be while a 3rem gutter of
+       clear paper still separates it from the rail. */
+    .article-grid {
+      --measure-wide: calc(var(--measure-article) + 2 * (var(--rail-gap) - 3rem));
+    }
+  }
+
+  /* Contents, narrow. A closed disclosure that costs one line above the
+     article until it is wanted. */
+  .contents-disclosure {
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    padding-block: 0.25rem;
+  }
+  .contents-disclosure summary::-webkit-details-marker {
+    display: none;
+  }
+  .contents-caret {
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 0;
+    transition: transform 200ms var(--ease-out-quint);
+  }
+  .contents-disclosure[open] .contents-caret {
+    transform: rotate(90deg);
+  }
+
+  /* --- The header-motion bench. Explorations only; nothing live uses these. */
+
+  /* The stable arrangement under test: three tracks, the outer two equal, so
+     the middle one is centred on the page whether or not anything sits beside
+     it. Home appearing in the left track therefore moves nothing — which is
+     the whole point of the arrangement, and the reason this is a grid rather
+     than a flex row with a spacer. */
+  /* Scoped through the base class on purpose. `.site-header-inner` is declared
+     later in this file, so at equal specificity its `display: flex` and its
+     dotted underline win over a modifier written above them — which is exactly
+     how the centred group came to shift by sixteen pixels and the active label
+     stayed dotted. */
+  .site-header-inner.lab-bar-stable {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+  .site-header-inner.lab-bar-stable > :first-child {
+    justify-self: start;
+  }
+  .site-header-inner.lab-bar-stable > :last-child {
+    justify-self: end;
+  }
+
+  /* The section you are in: the same label, a step darker, with the dotted
+     underline made solid. No weight change and no size change, so the row does
+     not reflow when the active one moves. */
+  .site-nav-link.site-nav-link--here {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-style: solid;
+    text-decoration-color: rgba(23, 21, 15, 0.45);
+  }
+
+  /* The way back out of an article, above its title rather than in the bar. */
+  .lab-backline {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--signal);
+    text-decoration: underline dotted 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+
+  .lab-chip {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 2.5rem;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-sm);
+    color: var(--ink-10);
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out-quint), color 150ms var(--ease-out-quint);
+  }
+  .lab-chip:hover {
+    border-color: var(--hairline-strong);
+    color: var(--ink-12);
+  }
+  .lab-chip[aria-pressed='true'] {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+  .lab-chip:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The site header.
+
+     Sticky from the top, on opaque paper — not a translucent pane, because the
+     prose that scrolls under it is the thing it must not interfere with, and a
+     blur is a expensive way to half-solve that. One hairline under it and
+     nothing else: no shadow, no shrinking, no hiding on scroll.
+
+     Its height is fixed by the 40px control row inside it, so it is the same
+     on every page and while scrolling. `--header-h` carries that number to
+     everything that has to clear it. */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--paper);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .site-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 58rem;
+    padding-inline: 1.5rem;
+    padding-block: 0.3125rem;
+    min-height: 3.75rem;
+  }
+  .site-header-inner--center {
+    justify-content: center;
+  }
+  @media (min-width: 640px) {
+    .site-header-inner {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.125rem;
+  }
+  @media (min-width: 30rem) {
+    .site-nav {
+      gap: 1.75rem;
+    }
+  }
+  @media (min-width: 640px) {
+    .site-nav {
+      gap: 2rem;
+    }
+  }
+  /* The narrowest screens keep two onward destinations, not three. A page with
+     a trail and three links needs 325px of a 272px row at 320px wide; every
+     other page in the site already offers two, so this is the rule the rest
+     follows rather than an exception for one page. */
+  @media (max-width: 29.9375rem) {
+    /* Scoped through the nav so it outranks `.site-nav-link`'s own display,
+       which is declared later in this file at the same specificity. */
+    .site-nav .site-nav-link--optional {
+      display: none;
+    }
+  }
+
+  /* One link voice for the whole header: the site's mono control type, with
+     the dotted underline the rest of the site uses for a link at rest. */
+  .site-nav-link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    color: rgba(23, 21, 15, 0.7);
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 5px;
+    text-decoration-color: rgba(23, 21, 15, 0.26);
+    transition:
+      color 150ms ease-in-out,
+      text-decoration-color 150ms ease-in-out;
+  }
+  .site-nav-link:hover {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-color: rgba(23, 21, 15, 0.6);
+  }
+  /* Email leaves the site, and says so in the accent the rest of the site
+     reserves for that. */
+  .site-nav-link--out {
+    color: var(--signal);
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+  .site-nav-link--out:hover {
+    color: var(--signal-hover);
+    text-decoration-color: var(--signal-hover);
+  }
+  .site-nav-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: var(--r-xs);
+  }
+
+  /* The page you are on is named, not linked, and carries no underline to
+     offer. */
+  .site-nav-here {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    color: rgba(23, 21, 15, 0.875);
+  }
+
+  .site-trail ol {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-trail li {
+    display: flex;
+    align-items: center;
+  }
+  /* A separator, not a control: quiet, and never announced. */
+  .site-trail-mark {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgba(23, 21, 15, 0.32);
+    padding-inline: 0.625rem;
+  }
+
+  /* Narrow and wide swap which of the two left-hand navs is rendered, so only
+     one is ever in the page or in the accessibility tree. */
+  .site-trail {
+    display: none;
+  }
+  .site-back {
+    display: block;
+  }
+  @media (min-width: 40rem) {
+    .site-trail {
+      display: block;
+    }
+    .site-back {
+      display: none;
+    }
+  }
+  .site-back-link {
+    gap: 0.5rem;
+  }
+
+
+  /* The way back. Nothing here moves on hover: the arrow is permanent and the
+     label does not slide over to make room for it. */
+  .back-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--signal);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+    transition: text-decoration-color 200ms var(--ease-out-quint);
+  }
+  .back-link:is(:hover, :focus-visible) {
+    text-decoration-color: var(--signal);
+  }
+  .back-link-arrow {
+    flex: none;
+  }
+}
+
+
+/* The article's headings carry a 7rem scroll offset for the live route's
+   floating navigation. The Studio preview has no navigation above the content,
+   so an anchor there only needs to clear the page's own top padding. */
+[data-explore='studio'] article :is(h2, h3) {
+  scroll-margin-top: 2.5rem;
+}
+
+
+@layer components {
+  /* Translated from the Octolane frontend, one decision each. Sources are in
+     the implementation report. */
+
+  /* The reading weight. The reference sets its landing and its essays a
+     50-step under regular, 350, scoped by a class on each page root, because
+     Inter is variable there and 350 is a real weight rather than a synthesised
+     one; the display face is static, so it keeps 400. Inter is loaded variable
+     here too. Verified shipping: the served HTML at octolane.com carries
+     `class="site-type-350 relative w-full"`. */
+  .story-type-350 {
+    font-weight: 350;
+  }
+  .story-type-350 .story-display {
+    font-weight: 400;
+  }
+
+  /* The ink ladder. The reference runs three levels inside one lockup rather
+     than two greys (`--core-silver-a12/a11/a9` in
+     src/app/styles/variables.scss). The top and middle steps are its alphas.
+     Its faintest step, 0.447, measures 3.0:1 on this paper, which is too pale
+     to read at 12.5px, so the bottom step here is 0.608 and everything else
+     moves up with it. Measured over #f6f4f1: 11.4:1, 6.3:1, 4.8:1. */
+  .story-ink {
+    color: rgba(23, 21, 15, 0.875);
+  }
+  .story-mid {
+    color: rgba(23, 21, 15, 0.7);
+  }
+  .story-quiet {
+    color: rgba(23, 21, 15, 0.608);
+  }
+
+  /* The display roles. The reference's `.t-display`: the editorial serif at
+     weight 400, tracking -0.015em, leading 1.04. The measure is set in `ch` in
+     the reference too, so it tracks the clamped font size instead of fighting
+     it. */
+  .story-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    line-height: 1.04;
+  }
+
+  /* Small controls and the kicker. The reference's `.t-mono-md`: the mono face
+     at 12.5px, uppercase, tracking 0.08em, leading 1.9, and its hero cue moves
+     from muted to full ink over 300ms on the house curve. */
+  .story-mono {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    line-height: 1.9;
+    text-transform: uppercase;
+  }
+  /* Shape only. The colour and the underline come from the link role, so the
+     header's contact link answers exactly like the address in the closing. */
+  .story-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 40px;
+  }
+  .story-control > [aria-hidden] {
+    transition: transform 300ms var(--ease-out-quint);
+  }
+  .story-control:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .story-control:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+
+  /* Links here follow the app's LinkLine component rather than inventing a
+     second language for the same thing.
+
+     Its rules: the underline is dotted at rest, not only on hover, one pixel
+     thick and four pixels clear of the text; hover changes the two colours and
+     nothing else, so the dots never switch style under the cursor; the pointer
+     is a pointer. Its colour map keeps the underline quieter than the text it
+     belongs to and firms both on hover.
+
+     Two roles, because the two kinds of link do different things. Something
+     that leaves the site carries the accent at rest, so its colour is itself
+     the signal that you are about to go elsewhere. Something that acts inside
+     the page stays in ink and only firms up. Both are dotted, which is what
+     marks them as links at all. */
+  .story-link {
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    transition:
+      color 150ms ease-in-out,
+      text-decoration-color 150ms ease-in-out;
+  }
+  .story-link:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* Leaves the site. */
+  .story-link-out {
+    color: var(--signal);
+    text-decoration-color: color-mix(in srgb, var(--signal) 45%, transparent);
+  }
+  .story-link-out:hover {
+    color: var(--signal-hover);
+    text-decoration-color: var(--signal-hover);
+  }
+
+  /* Acts inside the page. */
+  .story-link-in {
+    color: rgba(23, 21, 15, 0.7);
+    text-decoration-color: rgba(23, 21, 15, 0.26);
+  }
+  .story-link-in:hover {
+    color: rgba(23, 21, 15, 0.875);
+    text-decoration-color: rgba(23, 21, 15, 0.6);
+  }
+
+  /* The way into the case study: an in-page destination, at reading size. */
+  .story-read {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.9375rem;
+  }
+  .story-read > [aria-hidden] {
+    transition: transform 150ms ease-in-out;
+  }
+  .story-read:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .story-read:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+
+  /* The address in the closing, in mono so it can be read and copied. Mail
+     leaves the site, so it takes the outward colour. */
+  .story-address {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+  }
+
+  @media (pointer: coarse) {
+    .story-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+    }
+  }
+
+  /* The section mark. The reference sets a small quiet ornament at 0.32 opacity
+     with 4.4em above it and 1.05em to the heading below, which is what carries
+     the turn from one section to the next. Its ornament is the company's
+     emblem, so this uses the reference's other rule instead: `.rule-dots`, a
+     dotted hairline drawn from a radial gradient on a 3px pitch. */
+  .story-rule {
+    height: 2px;
+    border: none;
+    opacity: 0.32;
+    background-image: radial-gradient(circle, rgba(23, 21, 15, 0.85) 0.55px, transparent 0.7px);
+    background-size: 3px 2px;
+    background-repeat: repeat-x;
+    background-position: left center;
+  }
+}
+
+/* The display line's entrance, word by word.
+   
+   The reference's catalogue entry is a 30px rise clearing a 6px blur over
+   760ms on the house curve, and its hero staggers the words 60ms apart after a
+   0.38s beat. Those numbers are kept.
+   
+   The mechanism is not. The reference holds its entrances at `opacity: 0` in
+   the stylesheet and lets JavaScript add the class that releases them, so a
+   page whose script never runs keeps the text invisible. This inverts it: the
+   words' normal state is visible, and `@starting-style` supplies the state
+   they come FROM. A browser that does not know the at-rule ignores it and
+   renders the words. So does a browser that never gets around to running the
+   transition. Nothing can leave the line hidden.
+   
+   Confirmed the hard way: the preview pane here stalls animations, and an
+   `animation ... both` version of this left the name blank on the page. */
+@layer components {
+  .story-word {
+    display: inline-block;
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition:
+      opacity 760ms var(--ease-out-quint) var(--story-delay, 0s),
+      transform 760ms var(--ease-out-quint) var(--story-delay, 0s),
+      filter 760ms var(--ease-out-quint) var(--story-delay, 0s);
+  }
+
+  @starting-style {
+    .story-word {
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(6px);
+    }
+  }
+
+  /* Arriving at a section rather than at the top: the opening is not what the
+     reader came back for, so it is simply there. The attribute is set in a
+     layout effect, before the first paint, and `:target` covers the case the
+     effect cannot. Both are needed. On a cold load of a URL that already has
+     a fragment, `:target` matches from the first style resolution, before any
+     script runs. On a navigation from inside the site the URL moves through
+     the history API and the browser does not re-evaluate `:target`, so the
+     attribute is what catches it. */
+  [data-explore='story']:has(:target) .story-word,
+  [data-jumped] .story-word {
+    transition: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Exploration palettes
+
+   Each direction gets its own surface and type feel from the same token
+   contract, so the shared components below them need no per-direction code.
+   Scoped to the exploration routes; the live site is untouched.
+--------------------------------------------------------------------------- */
+[data-explore='studio'] {
+  /* Warmer paper and a softer ink: a room rather than an instrument. */
+  --paper: #f7f5f2;
+  --surface: #fffefc;
+  --sunk: #efece7;
+  --ink-12: #1a1714;
+  --ink-11: #33302b;
+  --ink-10: #55504a;
+  --ink-9: #6b665f;
+  --ink-8: #a09a92;
+  --ink-6: #ccc6bd;
+  --ink-4: #e4e0d9;
+  --ink-1: #fbfaf8;
+  --signal: #8a4b2a;
+  --signal-hover: #703c21;
+  --signal-wash: #f2e7df;
+  --hairline: rgba(26, 23, 20, 0.1);
+  --hairline-strong: rgba(26, 23, 20, 0.2);
+}
+
+/* The story palette is the site's palette: the front page is this composition,
+   so its values moved up to `:root` and every page reads as one site. The block
+   is kept so the exploration route stays self-describing and so a future
+   direction can retune it without touching the site. */
+[data-explore='story'] {
+  /* 4.7:1 on this paper, the same step the page's own captions use. */
+  --demo-caption: rgba(23, 21, 15, 0.608);
+  /* The warm stock the site already uses, with one deliberate difference: a
+     deeper, less orange accent, kept for one job only. Anywhere the accent
+     appears on this page it marks a connection. */
+  --paper: #f6f4f1;
+  --surface: #fffefc;
+  --sunk: #eeebe6;
+  --ink-12: #17150f;
+  --ink-11: #302d26;
+  --ink-10: #524e46;
+  --ink-9: #6a655d;
+  --ink-8: #9d968d;
+  --ink-6: #cac4ba;
+  --ink-4: #e3ded7;
+  --ink-1: #fbfaf8;
+  --signal: #7a3f22;
+  --signal-hover: #63311a;
+  --signal-wash: #f0e4dc;
+  --hairline: rgba(23, 21, 15, 0.1);
+  --hairline-strong: rgba(23, 21, 15, 0.2);
+}
+
+[data-explore='workbench'] {
+  /* Cooler and slightly denser: a tool with a chrome of its own. */
+  --paper: #f1f3f5;
+  --surface: #ffffff;
+  --sunk: #e7eaee;
+  --ink-12: #10141a;
+  --ink-11: #262d36;
+  --ink-10: #454e59;
+  --ink-9: #5d6671;
+  --ink-8: #8f98a3;
+  --ink-6: #bcc3cb;
+  --ink-4: #dbe0e6;
+  --ink-1: #f8fafb;
+  --signal: #1d4ed8;
+  --signal-hover: #1740b4;
+  --signal-wash: #e5ecfb;
+  --hairline: rgba(16, 20, 26, 0.1);
+  --hairline-strong: rgba(16, 20, 26, 0.2);
+  /* Squarer corners for this direction, chosen off the ladder. */
+  --r-md: var(--radius-7);
+  --r-lg: var(--radius-8);
+}
+
+[data-explore='editorial'] {
+  /* Print contrast: near-white stock, true black ink, one red accent. */
+  --paper: #fcfcfb;
+  --surface: #ffffff;
+  --sunk: #f2f2f0;
+  --ink-12: #0a0a09;
+  --ink-11: #24241f;
+  --ink-10: #45453e;
+  --ink-9: #6b6b62;
+  --ink-8: #97978d;
+  --ink-6: #c9c9c1;
+  --ink-4: #e6e6e0;
+  --ink-1: #fafaf8;
+  --signal: #a51c1c;
+  --signal-hover: #8a1616;
+  --signal-wash: #f7e8e8;
+  --hairline: rgba(10, 10, 9, 0.11);
+  --hairline-strong: rgba(10, 10, 9, 0.24);
+}
+
+
+@layer components {
+  /* Onward into the article. The arrow steps toward its destination on hover,
+     the mirror of how the way back steps left. */
+  .studio-onward {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    color: var(--ink-12);
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-onward > [aria-hidden] {
+    transition: transform var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-onward:hover {
+    color: var(--signal);
+  }
+  .studio-onward:hover > [aria-hidden] {
+    transform: translateX(3px);
+  }
+  .studio-onward:active > [aria-hidden] {
+    transform: translateX(1px);
+  }
+  .studio-onward:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+
+  /* The switcher's collapsed state: a small round control, quiet enough to
+     ignore and large enough to hit. */
+  .switcher-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: var(--r-pill);
+    font-size: 0.625rem;
+    line-height: 1;
+    color: var(--ink-9);
+    transition:
+      color var(--dur-icon) var(--ease-out-quint),
+      background-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .switcher-toggle:hover {
+    background: var(--sunk);
+    color: var(--ink-12);
+  }
+  .switcher-toggle:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+
+  /* A control that has to sit inside a caption without competing with it. */
+  .studio-quiet {
+    color: var(--ink-9);
+    text-decoration: underline;
+    text-decoration-color: var(--ink-6);
+    text-underline-offset: 3px;
+    transition:
+      color var(--dur-icon) var(--ease-out-quint),
+      text-decoration-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-quiet:hover {
+    color: var(--ink-12);
+    text-decoration-color: var(--ink-9);
+  }
+  .studio-quiet:active {
+    color: var(--ink-10);
+  }
+  .studio-quiet:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  @media (pointer: coarse) {
+    .studio-quiet {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+    }
+  }
+
+
+  /* The way back to Studio, in Studio's link voice: the arrow steps left on
+     hover, matching how the icon controls elsewhere move toward their target. */
+  .studio-back {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    min-height: 40px;
+    font-size: 0.875rem;
+    color: var(--ink-10);
+    transition: color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-back:hover {
+    color: var(--ink-12);
+  }
+  .studio-back:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  .studio-back > [aria-hidden] {
+    transition: transform var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-back:hover > [aria-hidden] {
+    transform: translateX(-3px);
+  }
+
+  /* The width a control reserves for its widest label. Hidden rather than
+     absent, so it takes its space without reaching the accessibility tree or
+     the element's text. */
+  .ctl-reserve::before {
+    content: var(--ctl-reserve, '');
+    visibility: hidden;
+  }
+
+  .studio-photo {
+    transition: opacity var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-photo:hover {
+    opacity: 0.92;
+  }
+  .studio-photo:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 4px;
+  }
+  .studio-photo:active {
+    opacity: 0.86;
+  }
+}
+
+@layer components {
+  /* While the image viewer is open the switcher gets out of the way. Hidden by
+     visibility, so it also leaves the tab order rather than sitting behind the
+     overlay as an invisible focus stop. */
+  body[data-viewer-open] .exploration-switcher {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 120ms var(--ease-out-quint),
+      visibility 120ms;
+  }
+  .exploration-switcher {
+    transition:
+      opacity 160ms var(--ease-out-quint),
+      visibility 160ms;
+  }
+}
+
+@keyframes studio-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.965);
+  }
+}
+
+@layer components {
+  /* The expanded view's close control sits on a dark scrim, so it carries its
+     own light surface rather than inheriting the page's. */
+  .studio-close {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding-inline: 0.875rem;
+    border-radius: var(--r-pill);
+    border: 1px solid color-mix(in srgb, var(--ink-1) 26%, transparent);
+    background: color-mix(in srgb, var(--ink-1) 12%, transparent);
+    color: var(--ink-1);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition:
+      background-color var(--dur-icon) var(--ease-out-quint),
+      border-color var(--dur-icon) var(--ease-out-quint);
+  }
+  .studio-close:hover {
+    background: color-mix(in srgb, var(--ink-1) 22%, transparent);
+    border-color: color-mix(in srgb, var(--ink-1) 44%, transparent);
+  }
+  .studio-close:focus-visible {
+    outline: 2px solid var(--ink-1);
+    outline-offset: 2px;
+  }
+  .studio-close:active {
+    background: color-mix(in srgb, var(--ink-1) 30%, transparent);
+  }
+}
+
+@keyframes explore-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes explore-slide {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion.
+
+   Last in the file on purpose: any animation declared above is overridden
+   here, and nothing later can reintroduce it. Programmatic smooth scrolling
+   is switched off too.
+   ------------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ctl:hover,
+  .ctl:focus-visible,
+  .ctl:active {
+    scale: 1;
+  }
+  .ctl-row:has(.ctl:hover) .ctl {
+    translate: 0;
+  }
+
+}
+
+
+/* A product screenshot inside the image viewer.
+   
+   Photographs are fitted whole. A screenshot cannot always be, because fitting
+   a 4074px interface into the space available can leave it smaller than the
+   figure on the page: 359px on a 390px phone against the figure's 342px, and a
+   145px sliver at 400% zoom. "View larger" would then be a control that does
+   nothing.
+
+   So the width is the larger of a legible floor and the width that fits. Where
+   the fit is already comfortable, on any ordinary desktop, the expression
+   resolves to the fit and this behaves exactly as before, with no scrolling.
+   Where it is not, the image is laid out at the floor and the frame around it
+   scrolls, which is how a wide screenshot is read on a phone. The 2px keeps
+   the fitted case a hair inside its container so it cannot round into a
+   scrollbar, and the ratio comes from the asset rather than being written in
+   here.
+
+   Deliberately outside every layer: Tailwind's utilities are in a later layer
+   and would win over this whatever its specificity. */
+.studio-zoom-pan {
+  height: auto;
+  max-height: none;
+  max-width: none;
+  /* The fitted arm is measured against the height available, which is the
+     viewport less the overlay's padding, the header row and the caption. A
+     percentage here would resolve against the container's width instead and
+     hand back a box wider than the screen with no way to reach the rest. */
+  width: max(900px, min(100%, calc((100dvh - 8rem - 2px) * var(--zoom-ratio, 1.5))));
+}
+
+
+/* ---------------------------------------------------------------------------
+   View transitions — the header-motion exploration only
+
+   Every rule is behind `html[data-motion]`, which only /explorations/
+   header-motion sets, and which it clears the moment the transition finishes.
+   The production header is untouched.
+   ------------------------------------------------------------------------ */
+
+/* The page is not part of this.
+
+   Left alone the API crossfades the whole document, which is what made the old
+   heading appear through the new one. The root snapshot is swapped outright
+   instead: the destination's content is simply there, at full opacity, from
+   the first frame, and it does not wait for the bar. */
+html[data-motion]::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  opacity: 0;
+}
+html[data-motion]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+/* A gentle deceleration, not the quint the site uses for controls: this is a
+   label finding its place, not something springing open. No overshoot. */
+html[data-motion] {
+  --lab-ease: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Recommended, between the front page and an inner page: each named label
+   travels from where it was to where it now is. Size and weight are identical
+   on both sides, so the pair is a translation and nothing scales. */
+html[data-motion='recommended']::view-transition-group(*) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+html[data-motion='recommended']::view-transition-old(*),
+html[data-motion='recommended']::view-transition-new(*) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Home and the separator have no counterpart to travel from, so they arrive by
+   fading — quietly, and over the same span as the movement behind them rather
+   than on a stagger of their own. */
+html[data-motion='recommended']::view-transition-new(lab-home),
+html[data-motion='recommended']::view-transition-new(lab-slash) {
+  animation-name: explore-fade;
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Recommended, between two inner pages: the slots hold still and exchange what
+   they say. Short, because nothing has to cross the bar to get there. */
+html[data-motion='recommended'][data-scheme='slot']::view-transition-group(*),
+html[data-motion='recommended'][data-scheme='slot']::view-transition-old(*),
+html[data-motion='recommended'][data-scheme='slot']::view-transition-new(*) {
+  animation-duration: 120ms;
+}
+
+/* Subtle fade: the bar is captured whole, so its two states cross-dissolve in
+   place and no label travels. Its box is identical on both sides, so nothing
+   moves or resizes. */
+html[data-motion='fade']::view-transition-group(lab-bar) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+/* Stable arrangement: no label changes position, so every group animation is
+   a translation of zero. What is left is Home fading in and the active label
+   changing colour, which is the entire gesture. */
+html[data-motion][data-arrangement='stable']::view-transition-group(*),
+html[data-motion][data-arrangement='stable']::view-transition-old(*),
+html[data-motion][data-arrangement='stable']::view-transition-new(*) {
+  animation-duration: var(--lab-ms, 220ms);
+  animation-timing-function: var(--lab-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion]::view-transition-group(*),
+  html[data-motion]::view-transition-old(*),
+  html[data-motion]::view-transition-new(*) {
+    animation: none !important;
+  }
+}
