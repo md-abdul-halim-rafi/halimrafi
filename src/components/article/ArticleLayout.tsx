@@ -87,11 +87,10 @@ export function ArticleLayout({
             {updated ? (
               <time dateTime={updated}>Updated {formatArticleDate(updated)}</time>
             ) : null}
+            {readingTimeMinutes ? (
+              <span>{readingTimeMinutes} min read</span>
+            ) : null}
           </p>
-
-          {readingTimeMinutes ? (
-            <p className="article-meta">Estimated reading time: {readingTimeMinutes} minutes</p>
-          ) : null}
 
           {details && details.length > 0 ? (
             <dl className="article-details">
