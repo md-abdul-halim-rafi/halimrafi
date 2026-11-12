@@ -37,6 +37,7 @@ export function ArticleLayout({
   date,
   updated,
   byline,
+  readingTimeMinutes,
   sections,
   details,
   url,
@@ -48,6 +49,7 @@ export function ArticleLayout({
   date: string
   updated?: string
   byline?: string
+  readingTimeMinutes?: number
   sections: Section[]
   /** Case-study extras — role, collaborators. Omitted entirely for an essay. */
   details?: ArticleDetail[]
@@ -86,6 +88,10 @@ export function ArticleLayout({
               <time dateTime={updated}>Updated {formatArticleDate(updated)}</time>
             ) : null}
           </p>
+
+          {readingTimeMinutes ? (
+            <p className="article-meta">Estimated reading time: {readingTimeMinutes} minutes</p>
+          ) : null}
 
           {details && details.length > 0 ? (
             <dl className="article-details">

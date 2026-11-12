@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ArticleLayout } from '@/components/article/ArticleLayout'
 import { slugify } from '@/components/story/prose'
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!entry || entry.meta.status !== 'published') return {}
   const { meta } = entry
   const url = `${site.url}/writing/${meta.slug}`
+  const image = meta.image ?? { url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }
   return {
     title: meta.title,
     description: meta.description,
@@ -33,9 +35,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       publishedTime: meta.date,
       ...(meta.updated ? { modifiedTime: meta.updated } : {}),
       authors: [meta.byline ?? site.name],
-      images: [{ url: site.ogImage, width: 1200, height: 630, alt: site.ogImageAlt }],
+      images: [image],
     },
-    twitter: { card: 'summary_large_image', title: meta.title, description: meta.description },
+    twitter: { card: 'summary_large_image', title: meta.title, description: meta.description, images: [image] },
   }
 }
 
@@ -65,9 +67,22 @@ export default async function WritingPage({ params }: Params) {
       date={meta.date}
       updated={meta.updated}
       byline={meta.byline}
+      readingTimeMinutes={meta.readingTimeMinutes}
       url={`${site.url}/writing/${meta.slug}`}
       sections={sections}
     >
+      {meta.image ? (
+        <figure className="breakout mb-8">
+          <Image
+            src={meta.image.url}
+            alt={meta.image.alt}
+            width={meta.image.width}
+            height={meta.image.height}
+            sizes="(max-width: 768px) 100vw, 960px"
+            className="h-auto w-full"
+          />
+        </figure>
+      ) : null}
       <Body />
     </ArticleLayout>
   )

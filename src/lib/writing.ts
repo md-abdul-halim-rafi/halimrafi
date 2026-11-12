@@ -44,6 +44,8 @@ export type WritingMeta = {
    * enough not to need one, and the rail is not rendered at all.
    */
   sections?: string[]
+  readingTimeMinutes?: number
+  image?: { url: string; width: number; height: number; alt: string }
 }
 
 export type WritingModule = {
