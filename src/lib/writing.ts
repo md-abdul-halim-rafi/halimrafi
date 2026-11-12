@@ -59,9 +59,9 @@ export type WritingModule = {
  * on the story page, the archive fills, and the sitemap picks it up.
  */
 const registry: Record<string, () => Promise<WritingModule>> = {
-  'your-agents-knowledge-base-is-not-a-retrieval-problem': () =>
+  'agent-knowledge-and-evidence': () =>
     import(
-      '@/content/writing/your-agents-knowledge-base-is-not-a-retrieval-problem.mdx'
+      '@/content/writing/agent-knowledge-and-evidence.mdx'
     ) as Promise<WritingModule>,
 }
 
