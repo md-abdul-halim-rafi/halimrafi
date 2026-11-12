@@ -1,0 +1,76 @@
+export const meta = {
+  slug: 'agent-knowledge-and-evidence',
+  title: 'Your agent’s knowledge base is not a retrieval problem',
+  description:
+    'We connected our documentation to Octolane’s agent. Retrieval helped. The harder part was deciding whether the pages it found were enough to support its answer.',
+  date: '2026-09-20',
+  updated: '2026-11-11',
+  status: 'published',
+  readingTimeMinutes: 4,
+  image: {
+    url: '/images/writing/citations-and-evidence.png',
+    width: 2048,
+    height: 1075,
+    alt: 'Citations don’t prove completeness. Before: found relevant pages and answered anyway. After: checked the index, then answered.',
+  },
+  sections: [
+    'What we changed',
+    'What the tests missed',
+    'A citation check has a narrow job',
+    'What mattered most',
+  ],
+}
+
+We asked our agent how many API endpoints Octolane has.
+
+It found two overview pages, counted their lists, and added them together. Both citations were real. Neither page contained the complete inventory.
+
+The agent could search our docs. It still couldn’t support the answer it gave.
+
+That question exposed a broader problem. Search results can be enough to explain a feature and still not enough to answer “how many,” “list all,” or “what’s missing.” More retrieval wasn’t enough on its own. We needed to consider what evidence each question required.
+
+## What we changed
+
+Our first version had one tool: search the docs and return the best passages. It worked fast enough to make the feature feel nearly finished. Reading the answers changed that impression.
+
+Sometimes the router treated a product question as a question about the user’s CRM data, so the agent never opened the docs. Sometimes it retrieved a related page and answered a question that page didn’t cover. Other times the answer was useful but left out a limitation the user needed.
+
+We expanded the tools to include full-page retrieval and a page index, and stopped routing documentation tools away from product questions.
+
+For questions that need a complete list or a count, we instructed the agent to consult the index for pages the search results missed and check whether different documentation paths described the same endpoint.
+
+That index lists pages, not endpoints, and the tool can filter or truncate its output. It isn’t a guaranteed endpoint inventory. We also instructed the agent to say when the evidence wasn’t enough to establish an answer.
+
+We separated three outcomes: the docs answered the question, the docs covered only part of it, or the agent couldn’t reach them. An outage shouldn’t look like an undocumented feature. A partial answer shouldn’t read as a complete one.
+
+## What the tests missed
+
+In a later test of a similar endpoint-count question, the headline count was correct, but the answer still showed its internal working. In another run, the breakdown didn’t add up to the headline. The change helped. It didn’t remove the need to read the answers.
+
+Keyword and link checks passed answers that were wrong. An answer can mention the right feature, include a real link, and still answer the wrong question.
+
+I learned more from reading complete answers with the sources beside them. Did the page support the claim? Did the answer address the question? Was it treating a partial list as complete?
+
+One testing mistake became a regression case. We tested how the agent handled irrelevant results, but the model never called the tool. The test passed without exercising what we intended.
+
+We made the tool call an explicit precondition. That lets us test what happens after a tool call. It doesn’t measure how reliably the agent chooses the right tool, which we haven’t measured yet.
+
+## A citation check has a narrow job
+
+We built a check that compared documentation links in an answer with URLs returned by the documentation tools. It caught invented links. It also removed company websites, web-search citations, and email links because our first version applied the rule to every absolute URL.
+
+The fix was scope: a documentation-link check should govern documentation links. We added tests to make sure unrelated links survive.
+
+Another loophole was in what counted as evidence. Tool-call arguments are written by the model. If it puts a URL in its query and the verifier accepts that argument as proof, the model has verified its own invention. We restricted evidence to tool results.
+
+Even then, the check only shows where a link came from. It doesn’t show that the sentence around it is supported. I still had to read the answer against its sources.
+
+## What mattered most
+
+Mintlify made the access layer straightforward. Its documentation endpoint and machine-readable index were a practical starting point.
+
+Most of the work came after: deciding what evidence each question required, keeping partial coverage visible, and making sure our safeguards didn’t break unrelated answers.
+
+This was one documentation corpus and one agent architecture, tested internally. The most useful evaluation I ran was also the simplest: read the whole answer with the sources open.
+
+A citation told me the agent had found something. It didn’t tell me it had found enough.

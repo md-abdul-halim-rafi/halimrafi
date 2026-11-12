@@ -34,7 +34,25 @@ const nextConfig: NextConfig = {
    * saying so.
    */
   async redirects() {
-    return [{ source: '/about', destination: '/', permanent: true }]
+    return [
+      { source: '/about', destination: '/', permanent: true },
+      // Keep previously shared article and Markdown links working.
+      {
+        source: '/writing/your-agents-knowledge-base-is-not-a-retrieval-problem',
+        destination: '/writing/agent-knowledge-and-evidence',
+        permanent: true,
+      },
+      {
+        source: '/writing/your-agents-knowledge-base-is-not-a-retrieval-problem.md',
+        destination: '/writing/agent-knowledge-and-evidence.md',
+        permanent: true,
+      },
+      {
+        source: '/api/md/writing/your-agents-knowledge-base-is-not-a-retrieval-problem',
+        destination: '/api/md/writing/agent-knowledge-and-evidence',
+        permanent: true,
+      },
+    ]
   },
 }
 
